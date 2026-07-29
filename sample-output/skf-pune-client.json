@@ -1,0 +1,4062 @@
+{
+  "assumptions": [],
+  "audience": "client",
+  "buffer": {
+    "internalBufferDays": 0,
+    "max": 15,
+    "min": 0
+  },
+  "calendar": {
+    "holidays": [],
+    "weeklyOffDays": [],
+    "workModeFactor": 1
+  },
+  "confidence": {
+    "basis": "7/9 inputs provided; 3/18 packages unmapped; buffer 8d.",
+    "score": 0.84
+  },
+  "engine": {
+    "name": "DnB Planning Engine",
+    "normsVersion": "norms-v1",
+    "version": "1.0.0"
+  },
+  "external": {
+    "end": "2026-08-22",
+    "milestones": [
+      {
+        "code": "RA1",
+        "date": "2026-06-08",
+        "description": "Project mobilisation (no advance payable)",
+        "percent": 0
+      },
+      {
+        "code": "RA2",
+        "date": "2026-06-28",
+        "description": "Partition marking, frameworks, skinning, civil walls, conduiting, raceways + gypsum/electrical material delivery",
+        "percent": 20
+      },
+      {
+        "code": "RA3",
+        "date": "2026-07-18",
+        "description": "Partition closing, wiring, sprinkler piping, FAS wiring + duct/cable/ply/tile delivery; furniture/carpet/glass orders closed",
+        "percent": 25
+      },
+      {
+        "code": "RA4",
+        "date": "2026-08-02",
+        "description": "Paint base coats, glass channels, duct installation, ceiling framing + carpet/sanitary/doors/DB delivery",
+        "percent": 25
+      },
+      {
+        "code": "RA5",
+        "date": "2026-08-17",
+        "description": "Switches, sanitary fixtures, carpentry, doors, first paint coat, false ceiling; pre-commissioning",
+        "percent": 25
+      },
+      {
+        "code": "RA6",
+        "date": "2026-08-22",
+        "description": "Against 12-month DLP bank guarantee at virtual completion/handover",
+        "percent": 5
+      }
+    ],
+    "start": "2026-06-08"
+  },
+  "ieInvariant": {
+    "bufferCalendarDays": null,
+    "externalEnd": "2026-08-22",
+    "holds": true,
+    "internalEnd": null
+  },
+  "internal": null,
+  "missingInputs": [
+    "3D design",
+    "Sales KT / email thread"
+  ],
+  "modules": {
+    "cashflow": {
+      "margin": null,
+      "rows": [
+        {
+          "cumulativeInflow": 16420080,
+          "cumulativeOutflow": null,
+          "inflow": 16420080,
+          "outflow": null,
+          "period": "2026-06"
+        },
+        {
+          "cumulativeInflow": 36945180,
+          "cumulativeOutflow": null,
+          "inflow": 20525100,
+          "outflow": null,
+          "period": "2026-07"
+        },
+        {
+          "cumulativeInflow": 82100400,
+          "cumulativeOutflow": null,
+          "inflow": 45155220,
+          "outflow": null,
+          "period": "2026-08"
+        }
+      ]
+    },
+    "dependencies": [
+      {
+        "actualDate": null,
+        "area": "Kick Off",
+        "blocks": null,
+        "description": "Site kick-off meeting and pooja",
+        "id": "x1",
+        "planDate": "2026-06-08",
+        "remarks": "Project set-up item.",
+        "responsibility": "Client/FS",
+        "sr": 1,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Commercial",
+        "blocks": null,
+        "description": "Project PO / signed agreement",
+        "id": "x2",
+        "planDate": "2026-06-08",
+        "remarks": "Project set-up item.",
+        "responsibility": "Client",
+        "sr": 2,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Commercial",
+        "blocks": null,
+        "description": "Project advance payment",
+        "id": "x3",
+        "planDate": "2026-06-15",
+        "remarks": "Project set-up item.",
+        "responsibility": "Client",
+        "sr": 3,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "Site Marking & Dilapidation Report",
+        "description": "Layout approval",
+        "id": "x4",
+        "planDate": "2026-05-29",
+        "remarks": "Blocks \"Site Marking & Dilapidation Report\" starting 2026-06-08.",
+        "responsibility": "Client",
+        "sr": 4,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "100mm Partition Framing",
+        "description": "3D approvals",
+        "id": "x5",
+        "planDate": "2026-06-13",
+        "remarks": "Blocks \"100mm Partition Framing\" starting 2026-06-23.",
+        "responsibility": "Client",
+        "sr": 5,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "Vitrified Tile Works",
+        "description": "Material sampling approval",
+        "id": "x6",
+        "planDate": "2026-07-10",
+        "remarks": "Blocks \"Vitrified Tile Works\" starting 2026-07-20.",
+        "responsibility": "Client/FS",
+        "sr": 6,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "Temporary Power",
+        "description": "MEP drawings approval",
+        "id": "x7",
+        "planDate": "2026-05-27",
+        "remarks": "Blocks \"Temporary Power\" starting 2026-06-10.",
+        "responsibility": "Client/PMC",
+        "sr": 7,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "Temporary Power",
+        "description": "Electrical / IT requirement and load confirmation",
+        "id": "x8",
+        "planDate": "2026-05-27",
+        "remarks": "Blocks \"Temporary Power\" starting 2026-06-10.",
+        "responsibility": "Client",
+        "sr": 8,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Site Marking & Dilapidation Report",
+        "description": "Builder permissions and mobilisation clearance",
+        "id": "x9",
+        "planDate": "2026-06-01",
+        "remarks": "Blocks \"Site Marking & Dilapidation Report\" starting 2026-06-08.",
+        "responsibility": "FS/Builder",
+        "sr": 9,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Site Marking & Dilapidation Report",
+        "description": "Mathadi clearance",
+        "id": "x10",
+        "planDate": "2026-06-01",
+        "remarks": "Blocks \"Site Marking & Dilapidation Report\" starting 2026-06-08.",
+        "responsibility": "FS",
+        "sr": 10,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "C-Class Sprinkler Piping (Grooved)",
+        "description": "Fire NOC / CFO approval",
+        "id": "x11",
+        "planDate": "2026-06-13",
+        "remarks": "Blocks \"C-Class Sprinkler Piping (Grooved)\" starting 2026-06-27.",
+        "responsibility": "FS/Builder",
+        "sr": 11,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Blockwork, AAC Blocks & Plastering",
+        "description": "BMC / statutory approval",
+        "id": "x12",
+        "planDate": "2026-06-07",
+        "remarks": "Blocks \"Blockwork, AAC Blocks & Plastering\" starting 2026-06-21.",
+        "responsibility": "FS/Builder",
+        "sr": 12,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Temporary Power",
+        "description": "Temporary power and water availability",
+        "id": "x13",
+        "planDate": "2026-06-05",
+        "remarks": "Blocks \"Temporary Power\" starting 2026-06-10.",
+        "responsibility": "Builder",
+        "sr": 13,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Blockwork, AAC Blocks & Plastering",
+        "description": "Lift availability for material movement",
+        "id": "x14",
+        "planDate": "2026-06-18",
+        "remarks": "Blocks \"Blockwork, AAC Blocks & Plastering\" starting 2026-06-21.",
+        "responsibility": "Builder",
+        "sr": 14,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Site Marking & Dilapidation Report",
+        "description": "Work hours clarity in building",
+        "id": "x15",
+        "planDate": "2026-06-05",
+        "remarks": "Blocks \"Site Marking & Dilapidation Report\" starting 2026-06-08.",
+        "responsibility": "Builder",
+        "sr": 15,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "GI Sheet Ducting Fabrication & Installation",
+        "description": "Heat load approval / CFM availability",
+        "id": "x16",
+        "planDate": "2026-06-20",
+        "remarks": "Blocks \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04.",
+        "responsibility": "Builder",
+        "sr": 16,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Red/Black Armored Cabling (FAS/PA/CCTV)",
+        "description": "Wi-Fi and access point locations",
+        "id": "x17",
+        "planDate": "2026-07-01",
+        "remarks": "Blocks \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11.",
+        "responsibility": "Client",
+        "sr": 17,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Manager/Meeting Room Tables",
+        "description": "Modular vendor closure for site marking",
+        "id": "x18",
+        "planDate": "2026-07-11",
+        "remarks": "Blocks \"Manager/Meeting Room Tables\" starting 2026-07-25.",
+        "responsibility": "Client",
+        "sr": 18,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design/Operation",
+        "blocks": "Red/Black Armored Cabling (FAS/PA/CCTV)",
+        "description": "Client-supplied items (IT / AV) delivery",
+        "id": "x19",
+        "planDate": "2026-07-01",
+        "remarks": "Blocks \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11.",
+        "responsibility": "Client",
+        "sr": 19,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Site Marking & Dilapidation Report",
+        "description": "Store space and debris removal area",
+        "id": "x20",
+        "planDate": "2026-06-05",
+        "remarks": "Blocks \"Site Marking & Dilapidation Report\" starting 2026-06-08.",
+        "responsibility": "Builder",
+        "sr": 20,
+        "status": "Delayed"
+      }
+    ],
+    "design": {
+      "rows": [
+        {
+          "basis": "back-scheduled from \"Blockwork, AAC Blocks & Plastering\" starting 2026-06-21, less 5d approval and 10d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Base Build Layout",
+          "endDateClient": "2026-06-20",
+          "endDateInt": "2026-06-15",
+          "id": "d1",
+          "releases": [
+            "Blockwork, AAC Blocks & Plastering"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-05",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d approval and 14d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Furniture Layout",
+          "endDateClient": "2026-07-24",
+          "endDateInt": "2026-07-17",
+          "id": "d2",
+          "releases": [
+            "Manager/Meeting Room Tables"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-03",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Furniture Dimensions Layout",
+          "endDateClient": "2026-07-24",
+          "endDateInt": "2026-07-19",
+          "id": "d3",
+          "releases": [
+            "Manager/Meeting Room Tables"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-07",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Partition Layout",
+          "endDateClient": "2026-06-22",
+          "endDateInt": "2026-06-17",
+          "id": "d4",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-05",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Flooring Layout",
+          "endDateClient": "2026-07-19",
+          "endDateInt": "2026-07-14",
+          "id": "d5",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-02",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 4d approval and 10d preparation",
+          "category": "GFC",
+          "criticality": "Medium",
+          "drawingName": "Floor Marking Layout",
+          "endDateClient": "2026-07-19",
+          "endDateInt": "2026-07-15",
+          "id": "d6",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-05",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Raised Flooring Layout",
+          "endDateClient": "2026-07-19",
+          "endDateInt": "2026-07-14",
+          "id": "d7",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-02",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Door Schedule Layout",
+          "endDateClient": "2026-07-02",
+          "endDateInt": "2026-06-27",
+          "id": "d8",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-15",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Wall Finishes Layout",
+          "endDateClient": "2026-07-22",
+          "endDateInt": "2026-07-17",
+          "id": "d9",
+          "releases": [
+            "Internal Walls (Putty + Paint)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-05",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d approval and 14d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Modular Layout",
+          "endDateClient": "2026-07-24",
+          "endDateInt": "2026-07-17",
+          "id": "d10",
+          "releases": [
+            "Manager/Meeting Room Tables"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-03",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d approval and 14d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "RCP Layout",
+          "endDateClient": "2026-07-05",
+          "endDateInt": "2026-06-28",
+          "id": "d11",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-14",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Lighting Layout (with dimensions)",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-02",
+          "id": "d12",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-19",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d approval and 10d preparation",
+          "category": "GFC",
+          "criticality": "Low",
+          "drawingName": "Wallpaper & Graphics",
+          "endDateClient": "2026-07-21",
+          "endDateInt": "2026-07-16",
+          "id": "d13",
+          "releases": [
+            "Aluminium Skirting"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-06",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GENERAL"
+        },
+        {
+          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d approval and 8d preparation",
+          "category": "GFC",
+          "criticality": "Medium",
+          "drawingName": "Fire Evacuation Plan",
+          "endDateClient": "2026-07-21",
+          "endDateInt": "2026-07-16",
+          "id": "d14",
+          "releases": [
+            "Aluminium Skirting"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-08",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GENERAL"
+        },
+        {
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 10d approval and 20d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "3D Views — Detailed & Client Approval",
+          "endDateClient": "2026-06-22",
+          "endDateInt": "2026-06-12",
+          "id": "d15",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-23",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "3D"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Electrical DBR",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-04",
+          "id": "d16",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-21",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Electrical SLD Layout",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-02",
+          "id": "d17",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-19",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Electrical Load Calculation",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-02",
+          "id": "d18",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-19",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Power, Data & Switch Board Layout",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-02",
+          "id": "d19",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-19",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Raceway Layout",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-04",
+          "id": "d20",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-23",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "Cable Tray Layout",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-04",
+          "id": "d21",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-23",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "Lighting Looping Layout",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-04",
+          "id": "d22",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-23",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "Panel & DB Position Layout",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-04",
+          "id": "d23",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-23",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "UPS Calculation & Specification",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-02",
+          "id": "d24",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-19",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 5d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "HVAC DBR",
+          "endDateClient": "2026-07-03",
+          "endDateInt": "2026-06-28",
+          "id": "d25",
+          "releases": [
+            "GI Sheet Ducting Fabrication & Installation"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-14",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "HVAC Heat Load",
+          "endDateClient": "2026-07-03",
+          "endDateInt": "2026-06-26",
+          "id": "d26",
+          "releases": [
+            "GI Sheet Ducting Fabrication & Installation"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-12",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "HVAC Layout",
+          "endDateClient": "2026-07-03",
+          "endDateInt": "2026-06-26",
+          "id": "d27",
+          "releases": [
+            "GI Sheet Ducting Fabrication & Installation"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-12",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Plumbing Internal Piping\" starting 2026-06-30, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "PHE DBR & Plumbing Layout",
+          "endDateClient": "2026-06-29",
+          "endDateInt": "2026-06-24",
+          "id": "d28",
+          "releases": [
+            "Plumbing Internal Piping"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-12",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"C-Class Sprinkler Piping (Grooved)\" starting 2026-06-27, less 10d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Fire Sprinkler Layout",
+          "endDateClient": "2026-06-26",
+          "endDateInt": "2026-06-16",
+          "id": "d29",
+          "releases": [
+            "C-Class Sprinkler Piping (Grooved)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-02",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 7d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "FA / PA System Layout",
+          "endDateClient": "2026-07-10",
+          "endDateInt": "2026-07-03",
+          "id": "d30",
+          "releases": [
+            "Red/Black Armored Cabling (FAS/PA/CCTV)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-21",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 7d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "ACS / CCTV / WiFi Layout",
+          "endDateClient": "2026-07-10",
+          "endDateInt": "2026-07-03",
+          "id": "d31",
+          "releases": [
+            "Red/Black Armored Cabling (FAS/PA/CCTV)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-21",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "LV DBR",
+          "endDateClient": "2026-07-10",
+          "endDateInt": "2026-07-05",
+          "id": "d32",
+          "releases": [
+            "Red/Black Armored Cabling (FAS/PA/CCTV)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-23",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Floor and Dado Tiles",
+          "endDateClient": "2026-07-19",
+          "endDateInt": "2026-07-14",
+          "id": "d33",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-04",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades",
+          "endDateClient": "2026-07-02",
+          "endDateInt": "2026-06-27",
+          "id": "d34",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-17",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d approval and 8d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Paint Shades",
+          "endDateClient": "2026-07-22",
+          "endDateInt": "2026-07-17",
+          "id": "d35",
+          "releases": [
+            "Internal Walls (Putty + Paint)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-09",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpet / SPC Flooring",
+          "endDateClient": "2026-07-19",
+          "endDateInt": "2026-07-12",
+          "id": "d36",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-02",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Glass Partition\" starting 2026-07-08, less 7d approval and 12d preparation",
+          "category": "SAMPLING",
+          "criticality": "Very Critical",
+          "drawingName": "Demountable Glass Partition",
+          "endDateClient": "2026-07-07",
+          "endDateInt": "2026-06-30",
+          "id": "d37",
+          "releases": [
+            "Glass Partition"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-18",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Partitions"
+        },
+        {
+          "basis": "back-scheduled from \"Glass Partition\" starting 2026-07-08, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Backpainted Glass",
+          "endDateClient": "2026-07-07",
+          "endDateInt": "2026-07-02",
+          "id": "d38",
+          "releases": [
+            "Glass Partition"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-22",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Partitions"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Grid & Stretch Ceiling",
+          "endDateClient": "2026-07-05",
+          "endDateInt": "2026-06-28",
+          "id": "d39",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-18",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Acoustics / Fluted Panel",
+          "endDateClient": "2026-07-05",
+          "endDateInt": "2026-06-30",
+          "id": "d40",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-20",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 8d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Switch Sockets",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-04",
+          "id": "d41",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-27",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Decorative Lights",
+          "endDateClient": "2026-06-09",
+          "endDateInt": "2026-06-02",
+          "id": "d42",
+          "releases": [
+            "Temporary Power"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-05-23",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Plumbing Internal Piping\" starting 2026-06-30, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Sanitary Fixtures",
+          "endDateClient": "2026-06-29",
+          "endDateInt": "2026-06-24",
+          "id": "d43",
+          "releases": [
+            "Plumbing Internal Piping"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-14",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d approval and 12d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Chairs & Loose Furniture",
+          "endDateClient": "2026-07-24",
+          "endDateInt": "2026-07-17",
+          "id": "d44",
+          "releases": [
+            "Manager/Meeting Room Tables"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-05",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Furniture"
+        },
+        {
+          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Blinds",
+          "endDateClient": "2026-07-21",
+          "endDateInt": "2026-07-16",
+          "id": "d45",
+          "releases": [
+            "Aluminium Skirting"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-06",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 4d approval and 8d preparation",
+          "category": "SAMPLING",
+          "criticality": "Low",
+          "drawingName": "Skirting & T Profile",
+          "endDateClient": "2026-07-21",
+          "endDateInt": "2026-07-17",
+          "id": "d46",
+          "releases": [
+            "Aluminium Skirting"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-09",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes"
+        }
+      ],
+      "summary": {
+        "approved": 0,
+        "drawings": 46,
+        "pending": 46,
+        "percentComplete": 0
+      }
+    },
+    "manpower": {
+      "averageDaily": 0,
+      "days": [],
+      "peak": 0,
+      "peakDate": null,
+      "smoothness": 1,
+      "totalManDays": 0,
+      "trades": [],
+      "warnings": []
+    },
+    "procurement": [
+      {
+        "basis": "",
+        "category": "Civil Works",
+        "criticality": "Low",
+        "deliveryRequired": "2026-06-19",
+        "deliveryStatus": "Not Started",
+        "feeds": "Blockwork, AAC Blocks & Plastering (2026-06-21)",
+        "gatedBy": "Base Build Layout (client approval 2026-06-20)",
+        "id": "p1",
+        "orderBy": "2026-06-12",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Civil consumables",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Interior Works",
+        "criticality": "Low",
+        "deliveryRequired": "2026-06-21",
+        "deliveryStatus": "Not Started",
+        "feeds": "100mm Partition Framing (2026-06-23)",
+        "gatedBy": "Partition Layout (client approval 2026-06-22)",
+        "id": "p2",
+        "orderBy": "2026-06-09",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Interior boards/ply (Gyproc/ply norms)",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Modular Glass Partitions & Doors",
+        "criticality": "Very Critical",
+        "deliveryRequired": "2026-07-06",
+        "deliveryStatus": "Not Started",
+        "feeds": "Glass Partition (2026-07-08)",
+        "gatedBy": "Demountable Glass Partition (client approval 2026-07-07)",
+        "id": "p3",
+        "orderBy": "2026-05-22",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Glass partitions (partition glass norm)",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Signages",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-08-01",
+        "deliveryStatus": "Not Started",
+        "feeds": "Logo Installation (2026-08-03)",
+        "gatedBy": null,
+        "id": "p4",
+        "orderBy": "2026-07-11",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Signages",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Graphics & Films",
+        "criticality": "Very Critical",
+        "deliveryRequired": "2026-07-28",
+        "deliveryStatus": "Not Started",
+        "feeds": "Frosting (2026-07-30)",
+        "gatedBy": null,
+        "id": "p5",
+        "orderBy": "2026-06-08",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Graphics & films (frosting norm)",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Blinds",
+        "criticality": "High",
+        "deliveryRequired": "2026-08-02",
+        "deliveryStatus": "Not Started",
+        "feeds": "Rolling Blinds (2026-08-04)",
+        "gatedBy": null,
+        "id": "p6",
+        "orderBy": "2026-07-03",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Blinds",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Planters",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-07-23",
+        "deliveryStatus": "Not Started",
+        "feeds": "Planter Box / OHU / File Storage (2026-07-25)",
+        "gatedBy": null,
+        "id": "p7",
+        "orderBy": "2026-07-02",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Planters",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Carpet Flooring",
+        "criticality": "High",
+        "deliveryRequired": "2026-07-23",
+        "deliveryStatus": "Not Started",
+        "feeds": "Carpet Installation (2026-07-25)",
+        "gatedBy": null,
+        "id": "p8",
+        "orderBy": "2026-06-13",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Carpet flooring",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Modular Furniture",
+        "criticality": "Very Critical",
+        "deliveryRequired": "2026-07-23",
+        "deliveryStatus": "Not Started",
+        "feeds": "Manager/Meeting Room Tables (2026-07-25)",
+        "gatedBy": "Furniture Layout (client approval 2026-07-24)",
+        "id": "p9",
+        "orderBy": "2026-06-08",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Modular furniture",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Loose Furniture & Chairs",
+        "criticality": "Very Critical",
+        "deliveryRequired": "2026-07-31",
+        "deliveryStatus": "Not Started",
+        "feeds": "WS / Meeting Room Chair Placement (2026-08-02)",
+        "gatedBy": null,
+        "id": "p10",
+        "orderBy": "2026-06-16",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Loose furniture & chairs",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Electrical Works",
+        "criticality": "High",
+        "deliveryRequired": "2026-06-23",
+        "deliveryStatus": "Not Started",
+        "feeds": "Raceway Trunking & Installation (2026-06-25)",
+        "gatedBy": null,
+        "id": "p11",
+        "orderBy": "2026-05-24",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Electrical switchgear/cabling",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Light Fixtures",
+        "criticality": "High",
+        "deliveryRequired": null,
+        "deliveryStatus": "Not Started",
+        "feeds": null,
+        "gatedBy": null,
+        "id": "p12",
+        "orderBy": null,
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Light fixtures",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "UPS",
+        "criticality": "High",
+        "deliveryRequired": null,
+        "deliveryStatus": "Not Started",
+        "feeds": null,
+        "gatedBy": null,
+        "id": "p13",
+        "orderBy": null,
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "UPS",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Plumbing (PHE)",
+        "criticality": "Low",
+        "deliveryRequired": "2026-06-28",
+        "deliveryStatus": "Not Started",
+        "feeds": "Plumbing Internal Piping (2026-06-30)",
+        "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-29)",
+        "id": "p14",
+        "orderBy": "2026-06-14",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Plumbing",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "HVAC (Low Side + VAV + VRF)",
+        "criticality": "High",
+        "deliveryRequired": "2026-07-02",
+        "deliveryStatus": "Not Started",
+        "feeds": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
+        "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+        "id": "p15",
+        "orderBy": "2026-05-28",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "HVAC (ducting, VRF, VAV)",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Passive Networking",
+        "criticality": "Medium",
+        "deliveryRequired": null,
+        "deliveryStatus": "Not Started",
+        "feeds": null,
+        "gatedBy": null,
+        "id": "p16",
+        "orderBy": null,
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Passive networking",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Fire & Security",
+        "criticality": "High",
+        "deliveryRequired": "2026-06-25",
+        "deliveryStatus": "Not Started",
+        "feeds": "C-Class Sprinkler Piping (Grooved) (2026-06-27)",
+        "gatedBy": "Fire Sprinkler Layout (client approval 2026-06-26)",
+        "id": "p17",
+        "orderBy": "2026-05-26",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Fire & security",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "GSS / General Site Services",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-06-06",
+        "deliveryStatus": "Not Started",
+        "feeds": "Site Marking & Dilapidation Report (2026-06-08)",
+        "gatedBy": null,
+        "id": "p18",
+        "orderBy": "2026-05-16",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "GSS / miscellaneous",
+        "vendor": ""
+      }
+    ],
+    "resources": [],
+    "timeline": {
+      "activities": [
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 1 (planned WORK DAYS)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-06-13",
+          "es": 0,
+          "id": "t1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Site Marking & Dilapidation Report",
+          "packageCode": "GSS",
+          "phase": "Site Prep",
+          "startDate": "2026-06-08",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 2 (planned WORK DAYS)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-06-11",
+          "es": 0,
+          "id": "t2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Temporary Power",
+          "packageCode": "GSS",
+          "phase": "Site Prep",
+          "startDate": "2026-06-10",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 3 (planned WORK DAYS)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-06-15",
+          "es": 0,
+          "id": "t3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Furniture Marking",
+          "packageCode": "GSS",
+          "phase": "Site Prep",
+          "startDate": "2026-06-12",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 4 (planned WORK DAYS)",
+            "value": 22
+          },
+          "ef": 0,
+          "endDate": "2026-07-12",
+          "es": 0,
+          "id": "t4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Blockwork, AAC Blocks & Plastering",
+          "packageCode": "A1",
+          "phase": "Civil Work",
+          "startDate": "2026-06-21",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 11 (planned WORK DAYS)",
+            "value": 18
+          },
+          "ef": 0,
+          "endDate": "2026-07-10",
+          "es": 0,
+          "id": "t11",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "100mm Partition Framing",
+          "packageCode": "A2",
+          "phase": "Partition & Paneling",
+          "startDate": "2026-06-23",
+          "totalFloat": 0,
+          "trade": "partition"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 12 (planned WORK DAYS)",
+            "value": 10
+          },
+          "ef": 0,
+          "endDate": "2026-07-11",
+          "es": 0,
+          "id": "t12",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Gypsum Panelling",
+          "packageCode": "A2",
+          "phase": "Partition & Paneling",
+          "startDate": "2026-07-02",
+          "totalFloat": 0,
+          "trade": "partition"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 13 (planned WORK DAYS)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-07-10",
+          "es": 0,
+          "id": "t13",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Gypsum Wall Punning",
+          "packageCode": "A2",
+          "phase": "Partition & Paneling",
+          "startDate": "2026-07-03",
+          "totalFloat": 0,
+          "trade": "partition"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 14 (planned WORK DAYS)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-07-14",
+          "es": 0,
+          "id": "t14",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Column Cladding (Ply/Gypsum)",
+          "packageCode": "A2",
+          "phase": "Partition & Paneling",
+          "startDate": "2026-07-03",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 15 (planned WORK DAYS)",
+            "value": 14
+          },
+          "ef": 0,
+          "endDate": "2026-07-21",
+          "es": 0,
+          "id": "t15",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Glass Partition",
+          "packageCode": "A3",
+          "phase": "Partition & Paneling",
+          "startDate": "2026-07-08",
+          "totalFloat": 0,
+          "trade": "glass"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 20 (planned WORK DAYS)",
+            "value": 21
+          },
+          "ef": 0,
+          "endDate": "2026-07-22",
+          "es": 0,
+          "id": "t20",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "GI Cable Trays, Trunking & MS Supports",
+          "packageCode": "C1",
+          "phase": "Electrical & Networking",
+          "startDate": "2026-07-02",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 21 (planned WORK DAYS)",
+            "value": 20
+          },
+          "ef": 0,
+          "endDate": "2026-07-14",
+          "es": 0,
+          "id": "t21",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Raceway Trunking & Installation",
+          "packageCode": "C1",
+          "phase": "Electrical & Networking",
+          "startDate": "2026-06-25",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 16 (planned WORK DAYS)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-07-13",
+          "es": 0,
+          "id": "t16",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Gypsum False Ceiling",
+          "packageCode": "A2",
+          "phase": "False Ceiling",
+          "startDate": "2026-07-06",
+          "totalFloat": 0,
+          "trade": "ceiling"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 17 (planned WORK DAYS)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-07-17",
+          "es": 0,
+          "id": "t17",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Metal / Fire-rated Ceiling",
+          "packageCode": "A2",
+          "phase": "False Ceiling",
+          "startDate": "2026-07-12",
+          "totalFloat": 0,
+          "trade": "ceiling"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 18 (planned WORK DAYS)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-07-12",
+          "es": 0,
+          "id": "t18",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Designer Ceiling — Laminate Finish",
+          "packageCode": "A2",
+          "phase": "False Ceiling",
+          "startDate": "2026-07-07",
+          "totalFloat": 0,
+          "trade": "ceiling"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 19 (planned WORK DAYS)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-07-19",
+          "es": 0,
+          "id": "t19",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Acoustic Baffle Ceiling",
+          "packageCode": "A2",
+          "phase": "False Ceiling",
+          "startDate": "2026-07-15",
+          "totalFloat": 0,
+          "trade": "ceiling"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 22 (planned WORK DAYS)",
+            "value": 21
+          },
+          "ef": 0,
+          "endDate": "2026-07-29",
+          "es": 0,
+          "id": "t22",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "GI Conduiting & Switch/Point Back-boxes",
+          "packageCode": "C1",
+          "phase": "Electrical & Networking",
+          "startDate": "2026-07-09",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 23 (planned WORK DAYS)",
+            "value": 21
+          },
+          "ef": 0,
+          "endDate": "2026-08-05",
+          "es": 0,
+          "id": "t23",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Point Wiring, Circuits, Mains & DB's",
+          "packageCode": "C1",
+          "phase": "Electrical & Networking",
+          "startDate": "2026-07-16",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 24 (planned WORK DAYS)",
+            "value": 11
+          },
+          "ef": 0,
+          "endDate": "2026-07-31",
+          "es": 0,
+          "id": "t24",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "LT Panel Labeling",
+          "packageCode": "C1",
+          "phase": "Electrical & Networking",
+          "startDate": "2026-07-21",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 25 (planned WORK DAYS)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-08-01",
+          "es": 0,
+          "id": "t25",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Panel Installation — Testing & Commissioning",
+          "packageCode": "C1",
+          "phase": "Electrical & Networking",
+          "startDate": "2026-07-30",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 26 (planned WORK DAYS)",
+            "value": 18
+          },
+          "ef": 0,
+          "endDate": "2026-07-21",
+          "es": 0,
+          "id": "t26",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "GI Sheet Ducting Fabrication & Installation",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-04",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 27 (planned WORK DAYS)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-17",
+          "es": 0,
+          "id": "t27",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Duct Light Testing (Pre-insulation)",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-16",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 28 (planned WORK DAYS)",
+            "value": 9
+          },
+          "ef": 0,
+          "endDate": "2026-07-26",
+          "es": 0,
+          "id": "t28",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Thermal & Acoustic Insulation",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-18",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 29 (planned WORK DAYS)",
+            "value": 9
+          },
+          "ef": 0,
+          "endDate": "2026-07-29",
+          "es": 0,
+          "id": "t29",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Grilles, Diffusers, Fire Dampers & Actuators",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-21",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 30 (planned WORK DAYS)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-07-21",
+          "es": 0,
+          "id": "t30",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Battery Room Ventilation",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-18",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 31 (planned WORK DAYS)",
+            "value": 11
+          },
+          "ef": 0,
+          "endDate": "2026-07-15",
+          "es": 0,
+          "id": "t31",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Refrigerant Piping & Cable Trays",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-05",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 32 (planned WORK DAYS)",
+            "value": 7
+          },
+          "ef": 0,
+          "endDate": "2026-07-27",
+          "es": 0,
+          "id": "t32",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Indoor Units Installation",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-21",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 33 (planned WORK DAYS)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-07-20",
+          "es": 0,
+          "id": "t33",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "VRV Requirements and ODUs",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-16",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 34 (planned WORK DAYS)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-07-30",
+          "es": 0,
+          "id": "t34",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "HVAC Testing & Commissioning",
+          "packageCode": "HVAC",
+          "phase": "HVAC",
+          "startDate": "2026-07-28",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 35 (planned WORK DAYS)",
+            "value": 10
+          },
+          "ef": 0,
+          "endDate": "2026-07-06",
+          "es": 0,
+          "id": "t35",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "C-Class Sprinkler Piping (Grooved)",
+          "packageCode": "FSY",
+          "phase": "Sprinkler Work",
+          "startDate": "2026-06-27",
+          "totalFloat": 0,
+          "trade": "sprinkler"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 36 (planned WORK DAYS)",
+            "value": 10
+          },
+          "ef": 0,
+          "endDate": "2026-08-07",
+          "es": 0,
+          "id": "t36",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Alarm Valve Assembly & Flow Switch",
+          "packageCode": "FSY",
+          "phase": "Sprinkler Work",
+          "startDate": "2026-07-29",
+          "totalFloat": 0,
+          "trade": "sprinkler"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 37 (planned WORK DAYS)",
+            "value": 7
+          },
+          "ef": 0,
+          "endDate": "2026-07-08",
+          "es": 0,
+          "id": "t37",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Pendent/Upright Sprinklers & Flexible Drops",
+          "packageCode": "FSY",
+          "phase": "Sprinkler Work",
+          "startDate": "2026-07-02",
+          "totalFloat": 0,
+          "trade": "sprinkler"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 38 (planned WORK DAYS)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-07-20",
+          "es": 0,
+          "id": "t38",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Sprinkler Testing & Commissioning",
+          "packageCode": "FSY",
+          "phase": "Sprinkler Work",
+          "startDate": "2026-07-18",
+          "totalFloat": 0,
+          "trade": "sprinkler"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 39 (planned WORK DAYS)",
+            "value": 15
+          },
+          "ef": 0,
+          "endDate": "2026-07-25",
+          "es": 0,
+          "id": "t39",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Red/Black Armored Cabling (FAS/PA/CCTV)",
+          "packageCode": "FSY",
+          "phase": "LV Systems",
+          "startDate": "2026-07-11",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 40 (planned WORK DAYS)",
+            "value": 9
+          },
+          "ef": 0,
+          "endDate": "2026-07-28",
+          "es": 0,
+          "id": "t40",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Detectors, Hooters & PAVA Rack Commissioning",
+          "packageCode": "FSY",
+          "phase": "LV Systems",
+          "startDate": "2026-07-20",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 41 (planned WORK DAYS)",
+            "value": 9
+          },
+          "ef": 0,
+          "endDate": "2026-07-26",
+          "es": 0,
+          "id": "t41",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "EM Locks, Biometric Readers & CCTV",
+          "packageCode": "FSY",
+          "phase": "LV Systems",
+          "startDate": "2026-07-18",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 42 (planned WORK DAYS)",
+            "value": 9
+          },
+          "ef": 0,
+          "endDate": "2026-07-30",
+          "es": 0,
+          "id": "t42",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Emergency Exit Signage",
+          "packageCode": "FSY",
+          "phase": "LV Systems",
+          "startDate": "2026-07-22",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 43 (planned WORK DAYS)",
+            "value": 7
+          },
+          "ef": 0,
+          "endDate": "2026-07-28",
+          "es": 0,
+          "id": "t43",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Rodent Repellent System",
+          "packageCode": "FSY",
+          "phase": "LV Systems",
+          "startDate": "2026-07-22",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 44 (planned WORK DAYS)",
+            "value": 7
+          },
+          "ef": 0,
+          "endDate": "2026-07-28",
+          "es": 0,
+          "id": "t44",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Water Leak Detection System",
+          "packageCode": "FSY",
+          "phase": "LV Systems",
+          "startDate": "2026-07-22",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 45 (planned WORK DAYS)",
+            "value": 20
+          },
+          "ef": 0,
+          "endDate": "2026-07-25",
+          "es": 0,
+          "id": "t45",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Reception Table",
+          "packageCode": "A2",
+          "phase": "Doors & Carpentry",
+          "startDate": "2026-07-06",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 46 (planned WORK DAYS)",
+            "value": 10
+          },
+          "ef": 0,
+          "endDate": "2026-07-20",
+          "es": 0,
+          "id": "t46",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Flush Doors",
+          "packageCode": "A2",
+          "phase": "Doors & Carpentry",
+          "startDate": "2026-07-11",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 47 (planned WORK DAYS)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-07-13",
+          "es": 0,
+          "id": "t47",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Glass Doors",
+          "packageCode": "A3",
+          "phase": "Doors & Carpentry",
+          "startDate": "2026-07-08",
+          "totalFloat": 0,
+          "trade": "glass"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 48 (planned WORK DAYS)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-07-31",
+          "es": 0,
+          "id": "t48",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Back Painted Glass",
+          "packageCode": "A3",
+          "phase": "Doors & Carpentry",
+          "startDate": "2026-07-27",
+          "totalFloat": 0,
+          "trade": "glass"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 5 (planned WORK DAYS)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-07-11",
+          "es": 0,
+          "id": "t5",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Plumbing Internal Piping",
+          "packageCode": "PHE",
+          "phase": "Civil Work",
+          "startDate": "2026-06-30",
+          "totalFloat": 0,
+          "trade": "plumbing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 56 (planned WORK DAYS)",
+            "value": 20
+          },
+          "ef": 0,
+          "endDate": "2026-08-11",
+          "es": 0,
+          "id": "t56",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Internal Walls (Putty + Paint)",
+          "packageCode": "A2",
+          "phase": "Finishing",
+          "startDate": "2026-07-23",
+          "totalFloat": 0,
+          "trade": "painting"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 49 (planned WORK DAYS)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-07-27",
+          "es": 0,
+          "id": "t49",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Acoustical Panels",
+          "packageCode": "A2",
+          "phase": "Doors & Carpentry",
+          "startDate": "2026-07-25",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 57 (planned WORK DAYS)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-08-05",
+          "es": 0,
+          "id": "t57",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Ceiling Painting",
+          "packageCode": "A2",
+          "phase": "Finishing",
+          "startDate": "2026-07-25",
+          "totalFloat": 0,
+          "trade": "painting"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 51 (planned WORK DAYS)",
+            "value": 11
+          },
+          "ef": 0,
+          "endDate": "2026-08-04",
+          "es": 0,
+          "id": "t51",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Manager/Meeting Room Tables",
+          "packageCode": "B2",
+          "phase": "Modular Placement",
+          "startDate": "2026-07-25",
+          "totalFloat": 0,
+          "trade": "modular"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 52 (planned WORK DAYS)",
+            "value": 11
+          },
+          "ef": 0,
+          "endDate": "2026-08-04",
+          "es": 0,
+          "id": "t52",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Planter Box / OHU / File Storage",
+          "packageCode": "A7",
+          "phase": "Modular Placement",
+          "startDate": "2026-07-25",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 6 (planned WORK DAYS)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-07-16",
+          "es": 0,
+          "id": "t6",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Waterproofing (Floor + Walls 600mm)",
+          "packageCode": "A1",
+          "phase": "Civil Work",
+          "startDate": "2026-07-11",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 60 (planned WORK DAYS)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-08-01",
+          "es": 0,
+          "id": "t60",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Frosting",
+          "packageCode": "A5",
+          "phase": "Finishing",
+          "startDate": "2026-07-30",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 61 (planned WORK DAYS)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-08-01",
+          "es": 0,
+          "id": "t61",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Vinyl Pasting",
+          "packageCode": "A5",
+          "phase": "Finishing",
+          "startDate": "2026-07-30",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 62 (planned WORK DAYS)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-08-01",
+          "es": 0,
+          "id": "t62",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Wallpaper Pasting",
+          "packageCode": "A5",
+          "phase": "Finishing",
+          "startDate": "2026-07-30",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 63 (planned WORK DAYS)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-08-04",
+          "es": 0,
+          "id": "t63",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Logo Installation",
+          "packageCode": "A4",
+          "phase": "Finishing",
+          "startDate": "2026-08-03",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 64 (planned WORK DAYS)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-08-05",
+          "es": 0,
+          "id": "t64",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Rolling Blinds",
+          "packageCode": "A6",
+          "phase": "Finishing",
+          "startDate": "2026-08-04",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 65 (planned WORK DAYS)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-08-05",
+          "es": 0,
+          "id": "t65",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Planters & Frames",
+          "packageCode": "A4",
+          "phase": "Finishing",
+          "startDate": "2026-08-04",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 66 (planned WORK DAYS)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-08-02",
+          "es": 0,
+          "id": "t66",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Sun Control Film",
+          "packageCode": "A5",
+          "phase": "Finishing",
+          "startDate": "2026-07-30",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 67 (planned WORK DAYS)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-08-09",
+          "es": 0,
+          "id": "t67",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Signage Installation",
+          "packageCode": "A4",
+          "phase": "Finishing",
+          "startDate": "2026-08-06",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 7 (planned WORK DAYS)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-06-27",
+          "es": 0,
+          "id": "t7",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Anti-termite & Pest Control",
+          "packageCode": "A1",
+          "phase": "Civil Work",
+          "startDate": "2026-06-22",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 8 (planned WORK DAYS)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-07-06",
+          "es": 0,
+          "id": "t8",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Self Leveling & Associated Works",
+          "packageCode": "A1",
+          "phase": "Civil Work",
+          "startDate": "2026-07-03",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 9 (planned WORK DAYS)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-07-23",
+          "es": 0,
+          "id": "t9",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Vitrified Tile Works",
+          "packageCode": "A2",
+          "phase": "Civil Work",
+          "startDate": "2026-07-20",
+          "totalFloat": 0,
+          "trade": "flooring"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 10 (planned WORK DAYS)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-07-25",
+          "es": 0,
+          "id": "t10",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "POP on Flooring (Protection)",
+          "packageCode": "A1",
+          "phase": "Civil Work",
+          "startDate": "2026-07-20",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 53 (planned WORK DAYS)",
+            "value": 11
+          },
+          "ef": 0,
+          "endDate": "2026-08-04",
+          "es": 0,
+          "id": "t53",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Raised Flooring",
+          "packageCode": "A2",
+          "phase": "Modular Placement",
+          "startDate": "2026-07-25",
+          "totalFloat": 0,
+          "trade": "flooring"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 50 (planned WORK DAYS)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-08-08",
+          "es": 0,
+          "id": "t50",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Modular Workstations",
+          "packageCode": "B2",
+          "phase": "Modular Placement",
+          "startDate": "2026-07-28",
+          "totalFloat": 0,
+          "trade": "modular"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 54 (planned WORK DAYS)",
+            "value": 10
+          },
+          "ef": 0,
+          "endDate": "2026-08-11",
+          "es": 0,
+          "id": "t54",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "WS / Meeting Room Chair Placement",
+          "packageCode": "B3",
+          "phase": "Modular Placement",
+          "startDate": "2026-08-02",
+          "totalFloat": 0,
+          "trade": "modular"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 55 (planned WORK DAYS)",
+            "value": 7
+          },
+          "ef": 0,
+          "endDate": "2026-08-08",
+          "es": 0,
+          "id": "t55",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Loose Furniture",
+          "packageCode": "B3",
+          "phase": "Modular Placement",
+          "startDate": "2026-08-02",
+          "totalFloat": 0,
+          "trade": "modular"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 58 (planned WORK DAYS)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-07-29",
+          "es": 0,
+          "id": "t58",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Carpet Installation",
+          "packageCode": "B1",
+          "phase": "Finishing",
+          "startDate": "2026-07-25",
+          "totalFloat": 0,
+          "trade": "flooring"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 59 (planned WORK DAYS)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-23",
+          "es": 0,
+          "id": "t59",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Aluminium Skirting",
+          "packageCode": "A2",
+          "phase": "Finishing",
+          "startDate": "2026-07-22",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 68 (planned WORK DAYS)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-08-12",
+          "es": 0,
+          "id": "t68",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Deep Cleaning",
+          "packageCode": "GSS",
+          "phase": "Finishing",
+          "startDate": "2026-08-01",
+          "totalFloat": 0,
+          "trade": "cleaning"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "SKF, Pune Schedule.xlsx · task row 69 (planned WORK DAYS)",
+            "value": 10
+          },
+          "ef": 0,
+          "endDate": "2026-08-14",
+          "es": 0,
+          "id": "t69",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Snag List & Handover",
+          "packageCode": "GSS",
+          "phase": "Handover",
+          "startDate": "2026-08-05",
+          "totalFloat": 0,
+          "trade": "general"
+        }
+      ],
+      "criticalPath": [],
+      "phases": [
+        {
+          "critical": false,
+          "end": "2026-06-15",
+          "name": "Site Prep",
+          "start": "2026-06-08"
+        },
+        {
+          "critical": false,
+          "end": "2026-07-25",
+          "name": "Civil Work",
+          "start": "2026-06-21"
+        },
+        {
+          "critical": false,
+          "end": "2026-07-21",
+          "name": "Partition & Paneling",
+          "start": "2026-06-23"
+        },
+        {
+          "critical": false,
+          "end": "2026-08-05",
+          "name": "Electrical & Networking",
+          "start": "2026-06-25"
+        },
+        {
+          "critical": false,
+          "end": "2026-07-19",
+          "name": "False Ceiling",
+          "start": "2026-07-06"
+        },
+        {
+          "critical": false,
+          "end": "2026-07-30",
+          "name": "HVAC",
+          "start": "2026-07-04"
+        },
+        {
+          "critical": false,
+          "end": "2026-08-07",
+          "name": "Sprinkler Work",
+          "start": "2026-06-27"
+        },
+        {
+          "critical": false,
+          "end": "2026-07-30",
+          "name": "LV Systems",
+          "start": "2026-07-11"
+        },
+        {
+          "critical": false,
+          "end": "2026-07-31",
+          "name": "Doors & Carpentry",
+          "start": "2026-07-06"
+        },
+        {
+          "critical": false,
+          "end": "2026-08-12",
+          "name": "Finishing",
+          "start": "2026-07-22"
+        },
+        {
+          "critical": false,
+          "end": "2026-08-11",
+          "name": "Modular Placement",
+          "start": "2026-07-25"
+        },
+        {
+          "critical": false,
+          "end": "2026-08-14",
+          "name": "Handover",
+          "start": "2026-08-05"
+        }
+      ]
+    },
+    "todos": [
+      {
+        "category": "design",
+        "description": "Issue for approval: Lighting Layout (with dimensions)",
+        "endDate": "2026-06-02",
+        "id": "t58",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-19",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical SLD Layout",
+        "endDate": "2026-06-02",
+        "id": "t63",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-19",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical Load Calculation",
+        "endDate": "2026-06-02",
+        "id": "t64",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-19",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Power, Data & Switch Board Layout",
+        "endDate": "2026-06-02",
+        "id": "t65",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-19",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: UPS Calculation & Specification",
+        "endDate": "2026-06-02",
+        "id": "t70",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-19",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Decorative Lights",
+        "endDate": "2026-06-02",
+        "id": "t88",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-23",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical DBR",
+        "endDate": "2026-06-04",
+        "id": "t62",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-21",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Raceway Layout",
+        "endDate": "2026-06-04",
+        "id": "t66",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-23",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Cable Tray Layout",
+        "endDate": "2026-06-04",
+        "id": "t67",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-23",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Lighting Looping Layout",
+        "endDate": "2026-06-04",
+        "id": "t68",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-23",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Panel & DB Position Layout",
+        "endDate": "2026-06-04",
+        "id": "t69",
+        "notes": "Releases: Temporary Power",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-23",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Switch Sockets",
+        "endDate": "2026-06-04",
+        "id": "t87",
+        "notes": "Releases: Temporary Power",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-27",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: 3D Views — Detailed & Client Approval",
+        "endDate": "2026-06-12",
+        "id": "t61",
+        "notes": "Releases: 100mm Partition Framing",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-05-23",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Base Build Layout",
+        "endDate": "2026-06-15",
+        "id": "t47",
+        "notes": "Releases: Blockwork, AAC Blocks & Plastering",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-05",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Fire Sprinkler Layout",
+        "endDate": "2026-06-16",
+        "id": "t75",
+        "notes": "Releases: C-Class Sprinkler Piping (Grooved)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-02",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Partition Layout",
+        "endDate": "2026-06-17",
+        "id": "t50",
+        "notes": "Releases: 100mm Partition Framing",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-05",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: PHE DBR & Plumbing Layout",
+        "endDate": "2026-06-24",
+        "id": "t74",
+        "notes": "Releases: Plumbing Internal Piping",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-12",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Sanitary Fixtures",
+        "endDate": "2026-06-24",
+        "id": "t89",
+        "notes": "Releases: Plumbing Internal Piping",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-14",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: HVAC Heat Load",
+        "endDate": "2026-06-26",
+        "id": "t72",
+        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-12",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: HVAC Layout",
+        "endDate": "2026-06-26",
+        "id": "t73",
+        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-12",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Door Schedule Layout",
+        "endDate": "2026-06-27",
+        "id": "t54",
+        "notes": "Releases: Column Cladding (Ply/Gypsum)",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-15",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpentry Laminates & Veneer Shades",
+        "endDate": "2026-06-27",
+        "id": "t80",
+        "notes": "Releases: Column Cladding (Ply/Gypsum)",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-17",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: RCP Layout",
+        "endDate": "2026-06-28",
+        "id": "t57",
+        "notes": "Releases: Gypsum False Ceiling",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-14",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: HVAC DBR",
+        "endDate": "2026-06-28",
+        "id": "t71",
+        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-14",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Grid & Stretch Ceiling",
+        "endDate": "2026-06-28",
+        "id": "t85",
+        "notes": "Releases: Gypsum False Ceiling",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-18",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Demountable Glass Partition",
+        "endDate": "2026-06-30",
+        "id": "t83",
+        "notes": "Releases: Glass Partition",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-18",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Acoustics / Fluted Panel",
+        "endDate": "2026-06-30",
+        "id": "t86",
+        "notes": "Releases: Gypsum False Ceiling",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-20",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Backpainted Glass",
+        "endDate": "2026-07-02",
+        "id": "t84",
+        "notes": "Releases: Glass Partition",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-22",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: FA / PA System Layout",
+        "endDate": "2026-07-03",
+        "id": "t76",
+        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-21",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: ACS / CCTV / WiFi Layout",
+        "endDate": "2026-07-03",
+        "id": "t77",
+        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-21",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: LV DBR",
+        "endDate": "2026-07-05",
+        "id": "t78",
+        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-23",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpet / SPC Flooring",
+        "endDate": "2026-07-12",
+        "id": "t82",
+        "notes": "Releases: Vitrified Tile Works",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-02",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Flooring Layout",
+        "endDate": "2026-07-14",
+        "id": "t51",
+        "notes": "Releases: Vitrified Tile Works",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-02",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Raised Flooring Layout",
+        "endDate": "2026-07-14",
+        "id": "t53",
+        "notes": "Releases: Vitrified Tile Works",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-02",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor and Dado Tiles",
+        "endDate": "2026-07-14",
+        "id": "t79",
+        "notes": "Releases: Vitrified Tile Works",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-04",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor Marking Layout",
+        "endDate": "2026-07-15",
+        "id": "t52",
+        "notes": "Releases: Vitrified Tile Works",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-05",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Wallpaper & Graphics",
+        "endDate": "2026-07-16",
+        "id": "t59",
+        "notes": "Releases: Aluminium Skirting",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-06",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Fire Evacuation Plan",
+        "endDate": "2026-07-16",
+        "id": "t60",
+        "notes": "Releases: Aluminium Skirting",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-08",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Blinds",
+        "endDate": "2026-07-16",
+        "id": "t91",
+        "notes": "Releases: Aluminium Skirting",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-06",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Furniture Layout",
+        "endDate": "2026-07-17",
+        "id": "t48",
+        "notes": "Releases: Manager/Meeting Room Tables",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-03",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Wall Finishes Layout",
+        "endDate": "2026-07-17",
+        "id": "t55",
+        "notes": "Releases: Internal Walls (Putty + Paint)",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-05",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Modular Layout",
+        "endDate": "2026-07-17",
+        "id": "t56",
+        "notes": "Releases: Manager/Meeting Room Tables",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-03",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Paint Shades",
+        "endDate": "2026-07-17",
+        "id": "t81",
+        "notes": "Releases: Internal Walls (Putty + Paint)",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-09",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Chairs & Loose Furniture",
+        "endDate": "2026-07-17",
+        "id": "t90",
+        "notes": "Releases: Manager/Meeting Room Tables",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-05",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Skirting & T Profile",
+        "endDate": "2026-07-17",
+        "id": "t92",
+        "notes": "Releases: Aluminium Skirting",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-09",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Furniture Dimensions Layout",
+        "endDate": "2026-07-19",
+        "id": "t49",
+        "notes": "Releases: Manager/Meeting Room Tables",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-07",
+        "status": "Delayed"
+      }
+    ]
+  },
+  "project": {
+    "areaSft": {
+      "provenance": "input",
+      "source": "FS Submission_FINAL_SKF_Phoenix_22.05.2026_R4 BOQ_BCS.xlsx · FINAL SUMMARY · PROJECT AREA (SFT)",
+      "value": 26484
+    },
+    "client": "SKF India (Industrial) Ltd",
+    "contractValue": {
+      "provenance": "input",
+      "source": "FS Submission_FINAL_SKF_Phoenix_22.05.2026_R4 BOQ_BCS.xlsx · FINAL SUMMARY · GRAND TOTAL (EXCL TAXES)",
+      "value": 82100400
+    },
+    "id": "skf-pune",
+    "location": "Units 801–802, 8th Floor, Millennium Tower 3, Wakad, Pune",
+    "name": "SKF, Pune",
+    "status": "planned"
+  }
+}
