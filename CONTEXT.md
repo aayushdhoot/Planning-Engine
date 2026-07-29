@@ -66,6 +66,20 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
   schema rejects a *silent* breach.
 - **Calendar default is a 7-day week** (Sundays working — Flipspaces convention). Toggle in Settings.
 
+## Org: directory, teams, admin
+`src/domain/org.ts` + `src/services/employee-directory.ts` + `src/ui/Admin.tsx`.
+- The directory is **imported at runtime, never checked in**. The master sheet is personal data
+  and this repo is public; `source-documents/org/` is gitignored.
+- `parseEmployeeCsv()` deliberately **drops Mobile NO, DOJ and Grade** and lists what it
+  dropped. `DROPPED_COLUMNS` documents why, so nobody re-adds them casually. A test asserts no
+  phone number survives the import.
+- Teams and project lifecycle live in `localStorage` via `settings-store` — staffing metadata
+  the planner never reads, so it stays inside that file's stated rule.
+- `PROJECT_LIFECYCLE` (Planning / WIP / On hold / Handed over / Closed) is **not**
+  `plan.project.status`. That one answers "do I have the inputs?"; this answers "is it live?".
+- Archiving hides a project from the switcher and leaves its data intact; only user-created
+  projects can be deleted outright.
+
 ## S-curve
 `src/engine/scurve.ts` + `src/ui/SCurve.tsx`, shown as the third mode in the PERT section.
 - Weighted by **man-days** (`duration × crew`), the same quantity manpower levels — never by

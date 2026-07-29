@@ -19,7 +19,7 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 197 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 206 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -52,6 +52,12 @@ change it, so a slip shows up as buffer erosion rather than quietly moving the c
 internal target finish is reported as a variance — the engine never compresses durations to hit
 a date. The Gantt marks today, draws recorded progress, and flags activities past their planned
 finish that nobody has signed off.
+
+**Admin & teams.** Import the employee master CSV once; staff each project's role slots from it
+in Settings. Mobile numbers, joining dates and pay grades are read and discarded — staffing needs
+a name, a role and a work address. Admin manages people and projects, including lifecycle status
+(Planning / WIP / On hold / Handed over / Closed) and archiving. All of it is local to the
+machine: there is no shared server, and the directory is never committed.
 
 **Sections.** Overview · PERT (**PERT network / Gantt / S-curve**) · Manpower · Design ·
 Procurement · To-do · Dependencies · RA Milestones · New project · Settings (resource plan,

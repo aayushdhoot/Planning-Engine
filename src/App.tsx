@@ -19,14 +19,16 @@ import type { PertTree } from './domain/pert';
 import { Intake } from './ui/Intake';
 import { BoqIngestionService, type IngestedBoq } from './services/ingestion';
 import { FilePersistence } from './services/persistence';
-import { readDriveClientId, writeDriveClientId } from './services/settings-store';
+import { readDriveClientId, writeDriveClientId, readOrg, writeOrg } from './services/settings-store';
+import { emptyOrg, employeeByCode, isAssignable, teamFor, PROJECT_ROLES, type OrgState } from './domain/org';
+import { Admin } from './ui/Admin';
 import { renderReport } from './reports/render';
 import { buildDeck } from './reports/deck';
 
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
-const TABS = ['Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'To-do', 'Dependencies', 'RA Milestones', 'New project', 'Settings'] as const;
+const TABS = ['Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'To-do', 'Dependencies', 'RA Milestones', 'New project', 'Admin', 'Settings'] as const;
 type Tab = (typeof TABS)[number];
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -56,6 +58,9 @@ export default function App() {
     setClientIdState(v);
     writeDriveClientId(v);
   };
+  // organisation directory, teams and project lifecycle — local to this machine
+  const [org, setOrgState] = useState<OrgState>(() => readOrg(emptyOrg()));
+  const setOrg = (o: OrgState) => { setOrgState(o); writeOrg(o); };
   // user-added and user-removed to-dos, per project
   const [customTodos, setCustomTodos] = useState<Record<string, TodoRow[]>>({});
   const [deletedTodos, setDeletedTodos] = useState<Record<string, string[]>>({});
@@ -63,8 +68,9 @@ export default function App() {
   const [edits, setEdits] = useState<Record<string, Record<string, Record<string, string>>>>({});
 
   const today = new Date().toISOString().slice(0, 10);
-  const PROJECTS = [...BASE_PROJECTS.map((p) => overrides[p.id] ?? p), ...extraProjects];
-  const project = PROJECTS.find((p) => p.id === projectId) ?? PROJECTS[0];
+  const ALL_PROJECTS = [...BASE_PROJECTS.map((p) => overrides[p.id] ?? p), ...extraProjects];
+  const PROJECTS = ALL_PROJECTS.filter((p) => !org.archived.includes(p.id));
+  const project = PROJECTS.find((p) => p.id === projectId) ?? PROJECTS[0] ?? ALL_PROJECTS[0];
 
   const cfg: EngineConfig = useMemo(() => {
     const calendar: CalendarConfig = {
@@ -185,6 +191,18 @@ export default function App() {
             }}
           />
         )}
+        {tab === 'Admin' && (
+          <Admin
+            org={org}
+            setOrg={setOrg}
+            projects={ALL_PROJECTS.map((p) => ({ id: p.id, name: p.name, client: p.client }))}
+            builtInIds={BASE_PROJECTS.map((p) => p.id)}
+            onDeleteProject={(id) => {
+              setExtraProjects((prev) => prev.filter((p) => p.id !== id));
+              if (projectId === id) setProjectId(BASE_PROJECTS[0].id);
+            }}
+          />
+        )}
         {tab === 'Settings' && (
           <Settings
             sundaysOff={sundaysOff} setSundaysOff={setSundaysOff}
@@ -194,6 +212,7 @@ export default function App() {
             leadOverrides={leadOverrides} setLeadOverrides={setLeadOverrides}
             clientId={clientId} setClientId={setClientId}
             dates={dates} setDates={setDates}
+            org={org} setOrg={setOrg}
             project={project}
             ingestResult={ingestResult}
             onParsed={(boq, file) => {
@@ -984,6 +1003,7 @@ function Settings(p: {
   leadOverrides: Record<string, number>; setLeadOverrides: (v: Record<string, number>) => void;
   clientId: string; setClientId: (v: string) => void;
   dates: ScheduleDates; setDates: (v: ScheduleDates) => void;
+  org: OrgState; setOrg: (v: OrgState) => void;
   plan: Plan;
   project: ProjectInputs;
   ingestResult: { boq: IngestedBoq; file: string } | null;
@@ -1033,7 +1053,69 @@ function Settings(p: {
         </div>
       </div>
 
-      <h2>Actual project dates</h2>
+      <h2>Project team</h2>
+      <p className="muted" style={{ marginTop: -6, maxWidth: 860 }}>
+        Who is on this project. Names come from the directory imported in <strong>Admin</strong>; only current
+        employees are assignable. These names populate the responsibility columns across the trackers.
+      </p>
+      {p.org.employees.length === 0 ? (
+        <div className="banner info" style={{ maxWidth: 900 }}>
+          No employee directory imported yet — go to <strong>Admin</strong> and import the employee master CSV, or add
+          people there one at a time.
+        </div>
+      ) : (
+        <div className="tblwrap" style={{ maxHeight: 'none' }}>
+          <table>
+            <thead><tr><th style={{ width: 240 }}>Role</th><th>Assigned to</th><th>Department</th><th>Location</th><th /></tr></thead>
+            <tbody>
+              {teamFor(p.org, p.project.id).map((m, i) => {
+                const emp = employeeByCode(p.org, m.employeeCode);
+                const update = (code: string | null) => {
+                  const team = teamFor(p.org, p.project.id).map((x, j) => (j === i ? { ...x, employeeCode: code } : x));
+                  p.setOrg({ ...p.org, teams: { ...p.org.teams, [p.project.id]: team } });
+                };
+                return (
+                  <tr key={`${m.role}-${i}`}>
+                    <td><strong>{m.role}</strong></td>
+                    <td>
+                      <select value={m.employeeCode ?? ''} onChange={(e) => update(e.target.value || null)} style={{ minWidth: 280 }}>
+                        <option value="">— unassigned —</option>
+                        {p.org.employees.filter(isAssignable).map((e) => (
+                          <option key={e.code} value={e.code}>{e.name} · {e.designation}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="muted">{emp?.department ?? '—'}</td>
+                    <td className="muted">{emp?.location ?? '—'}</td>
+                    <td>
+                      <button
+                        title="Remove this role from the team"
+                        onClick={() => p.setOrg({ ...p.org, teams: { ...p.org.teams, [p.project.id]: teamFor(p.org, p.project.id).filter((_, j) => j !== i) } })}
+                      >✕</button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {p.org.employees.length > 0 && (
+        <div className="row" style={{ marginTop: 10 }}>
+          <button
+            onClick={() => {
+              const used = new Set(teamFor(p.org, p.project.id).map((m) => m.role));
+              const next = PROJECT_ROLES.find((r) => !used.has(r)) ?? `Additional role ${teamFor(p.org, p.project.id).length + 1}`;
+              p.setOrg({ ...p.org, teams: { ...p.org.teams, [p.project.id]: [...teamFor(p.org, p.project.id), { role: next, employeeCode: null }] } });
+            }}
+          >Add a role</button>
+          <span className="muted" style={{ fontSize: 12 }}>
+            {teamFor(p.org, p.project.id).filter((m) => m.employeeCode).length} of {teamFor(p.org, p.project.id).length} roles filled
+          </span>
+        </div>
+      )}
+
+      <h2 style={{ marginTop: 26 }}>Actual project dates</h2>
       <p className="muted" style={{ marginTop: -6, maxWidth: 860 }}>
         The contract states a commencement date and a duration. Site reality often differs — set the actual dates
         here and the whole plan is recomputed from them. Leave a field blank to use the contract.
