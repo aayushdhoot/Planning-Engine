@@ -69,8 +69,8 @@ export function buildPertFromPlan(plan: Plan, today: string): PertTree {
   const designGroups: PertNode[] = (['GFC', 'MEP', 'SAMPLING'] as const).map((cat) => {
     const rows = plan.modules.design.rows.filter((r) => r.category === cat);
     const kids = rows.map((r) => {
-      const n = node(r.drawingName, 3, 'design', r.startDate, r.endDateClient ?? r.endDateInt);
-      n.actualFinish = r.statusClient === 'Completed' ? r.revisedEndDateClient ?? r.endDateClient : null;
+      const n = node(r.drawingName, 3, 'design', r.readyBy, r.approvalBy ?? r.readyBy);
+      n.actualFinish = r.statusClient === 'Completed' ? r.approvalBy : null;
       return n;
     });
     return summarise(Object.assign(node(cat === 'SAMPLING' ? 'Sampling & Mockup Approvals' : `${cat} Drawings`, 2, 'design', null, null), { children: kids }));

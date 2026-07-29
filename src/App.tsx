@@ -506,31 +506,52 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
             <button key={c} className={cat === c ? 'on' : ''} onClick={() => setCat(c)}>{c === 'all' ? 'All' : c}</button>
           ))}
         </div>
-        <span className="muted" style={{ fontSize: 12 }}>Dates are back-scheduled from the site activity each drawing releases, so design → procurement → execution stay linked.</span>
+        <span className="muted" style={{ fontSize: 12 }}>
+          Two targets only: when the drawing is ready to issue, and when the client must have approved it. Both are
+          back-scheduled from the site activity the drawing releases.
+        </span>
       </div>
+
+      {(() => {
+        const flagged = shown.filter((r) => r.issues.length);
+        return flagged.length ? (
+          <div className="banner" style={{ marginBottom: 12 }}>
+            <strong>{flagged.length} drawing deadline{flagged.length === 1 ? '' : 's'} will not work as scheduled.</strong>
+            <ul style={{ margin: '6px 0 0 18px', padding: 0 }}>
+              {flagged.slice(0, 5).map((r) => <li key={r.id}><strong>{r.drawingName}</strong> — {r.issues[0]}</li>)}
+            </ul>
+            {flagged.length > 5 && <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>+{flagged.length - 5} more, marked in the table.</div>}
+          </div>
+        ) : null;
+      })()}
 
       <div className="tblwrap">
         <table>
           <thead>
             <tr>
-              <th>Category</th><th>Sub Category</th><th>Drawing name</th><th>Criticality</th><th>Rev</th>
-              <th>Start Date</th><th>End Date (INT)</th><th>Revised (INT)</th><th>Status (INT)</th>
-              <th>End Date (Client)</th><th>Revised (Client)</th><th>Status (Client)</th><th>Releases</th>
+              <th>Category</th><th>Sub Category</th><th>Zone</th><th>Drawing name</th><th>Criticality</th><th>Rev</th>
+              <th>Ready by</th><th>Status (INT)</th>
+              <th>Client approval by</th><th>Status (Client)</th><th>Releases</th>
             </tr>
           </thead>
           <tbody>{shown.map((r) => (
             <tr key={r.id}>
               <td><span className={`tag ${r.category === 'MEP' ? 'ext' : r.category === 'SAMPLING' ? 'warn' : 'info'}`}>{r.category}</span></td>
               <td className="muted">{r.subCategory}</td>
-              <td>{r.drawingName}</td>
+              <td className="muted">{r.zone ?? '—'}</td>
+              <td>
+                {r.drawingName}
+                {r.issues.length > 0 && (
+                  <div className="tag crit" style={{ marginTop: 3, whiteSpace: 'normal', display: 'inline-block' }} title={r.issues.join(' ')}>
+                    {r.issues[0]}
+                  </div>
+                )}
+              </td>
               <td><span className={`tag ${r.criticality === 'Very Critical' ? 'crit' : r.criticality === 'High' ? 'warn' : ''}`}>{r.criticality}</span></td>
               <TextCell id={r.id} field="revision" current={r.revision} edit={edit} val={val} />
-              <td className="mono">{r.startDate ?? '—'}</td>
-              <td className="mono">{r.endDateInt ?? '—'}</td>
-              <DateCell id={r.id} field="revInt" current={r.revisedEndDateInt} edit={edit} val={val} />
+              <td className="mono" title={r.basis}>{r.readyBy ?? '—'}</td>
               <StatusCell id={r.id} field="statusInt" current={r.statusInt} edit={edit} val={val} />
-              <td className="mono">{r.endDateClient ?? '—'}</td>
-              <DateCell id={r.id} field="revClient" current={r.revisedEndDateClient} edit={edit} val={val} />
+              <td className="mono" title={r.basis}>{r.approvalBy ?? '—'}</td>
               <StatusCell id={r.id} field="statusClient" current={r.statusClient} edit={edit} val={val} />
               <td className="faint" style={{ maxWidth: 220 }}>{r.releases.slice(0, 2).join(', ') || '—'}</td>
             </tr>

@@ -320,884 +320,1882 @@
     "design": {
       "rows": [
         {
-          "basis": "back-scheduled from \"Blockwork, AAC Blocks & Plastering\" starting 2026-06-21, less 5d approval and 10d preparation",
+          "approvalBy": "2026-06-20",
+          "basis": "back-scheduled from \"Blockwork, AAC Blocks & Plastering\" starting 2026-06-21, less 5d client approval",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Base Build Layout",
-          "endDateClient": "2026-06-20",
-          "endDateInt": "2026-06-15",
           "id": "d1",
+          "issues": [
+            "Readiness target (2026-06-15) has already passed."
+          ],
+          "readyBy": "2026-06-15",
           "releases": [
             "Blockwork, AAC Blocks & Plastering"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-05",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d approval and 14d preparation",
+          "approvalBy": "2026-07-24",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d client approval",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Furniture Layout",
-          "endDateClient": "2026-07-24",
-          "endDateInt": "2026-07-17",
           "id": "d2",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
           "releases": [
             "Manager/Meeting Room Tables"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-03",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 5d approval and 12d preparation",
+          "approvalBy": "2026-07-24",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 5d client approval",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Furniture Dimensions Layout",
-          "endDateClient": "2026-07-24",
-          "endDateInt": "2026-07-19",
           "id": "d3",
+          "issues": [
+            "Readiness target (2026-07-19) has already passed."
+          ],
+          "readyBy": "2026-07-19",
           "releases": [
             "Manager/Meeting Room Tables"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-07",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d approval and 12d preparation",
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Partition Layout",
-          "endDateClient": "2026-06-22",
-          "endDateInt": "2026-06-17",
           "id": "d4",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
           "releases": [
             "100mm Partition Framing"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-05",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d approval and 12d preparation",
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Flooring Layout",
-          "endDateClient": "2026-07-19",
-          "endDateInt": "2026-07-14",
           "id": "d5",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
           "releases": [
             "Vitrified Tile Works"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-02",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 4d approval and 10d preparation",
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 4d client approval",
           "category": "GFC",
           "criticality": "Medium",
           "drawingName": "Floor Marking Layout",
-          "endDateClient": "2026-07-19",
-          "endDateInt": "2026-07-15",
           "id": "d6",
+          "issues": [
+            "Readiness target (2026-07-15) has already passed."
+          ],
+          "readyBy": "2026-07-15",
           "releases": [
             "Vitrified Tile Works"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-05",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d approval and 12d preparation",
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Raised Flooring Layout",
-          "endDateClient": "2026-07-19",
-          "endDateInt": "2026-07-14",
           "id": "d7",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
           "releases": [
             "Vitrified Tile Works"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-02",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d approval and 12d preparation",
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Door Schedule Layout",
-          "endDateClient": "2026-07-02",
-          "endDateInt": "2026-06-27",
           "id": "d8",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
           "releases": [
             "Column Cladding (Ply/Gypsum)"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-15",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d approval and 12d preparation",
+          "approvalBy": "2026-07-22",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Wall Finishes Layout",
-          "endDateClient": "2026-07-22",
-          "endDateInt": "2026-07-17",
           "id": "d9",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
           "releases": [
             "Internal Walls (Putty + Paint)"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-05",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d approval and 14d preparation",
+          "approvalBy": "2026-07-24",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d client approval",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Modular Layout",
-          "endDateClient": "2026-07-24",
-          "endDateInt": "2026-07-17",
           "id": "d10",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
           "releases": [
             "Manager/Meeting Room Tables"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-03",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d approval and 14d preparation",
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "RCP Layout",
-          "endDateClient": "2026-07-05",
-          "endDateInt": "2026-06-28",
           "id": "d11",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
           "releases": [
             "Gypsum False Ceiling"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-14",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Lighting Layout (with dimensions)",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-02",
           "id": "d12",
+          "issues": [
+            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-02) has already passed."
+          ],
+          "readyBy": "2026-06-02",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-19",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GFC"
+          "subCategory": "GFC",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d approval and 10d preparation",
+          "approvalBy": "2026-07-21",
+          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d client approval",
           "category": "GFC",
           "criticality": "Low",
           "drawingName": "Wallpaper & Graphics",
-          "endDateClient": "2026-07-21",
-          "endDateInt": "2026-07-16",
           "id": "d13",
+          "issues": [
+            "Readiness target (2026-07-16) has already passed."
+          ],
+          "readyBy": "2026-07-16",
           "releases": [
             "Aluminium Skirting"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-06",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GENERAL"
+          "subCategory": "GENERAL",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d approval and 8d preparation",
+          "approvalBy": "2026-07-21",
+          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d client approval",
           "category": "GFC",
           "criticality": "Medium",
           "drawingName": "Fire Evacuation Plan",
-          "endDateClient": "2026-07-21",
-          "endDateInt": "2026-07-16",
           "id": "d14",
+          "issues": [
+            "Readiness target (2026-07-16) has already passed."
+          ],
+          "readyBy": "2026-07-16",
           "releases": [
             "Aluminium Skirting"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-08",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "GENERAL"
+          "subCategory": "GENERAL",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 10d approval and 20d preparation",
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 10d client approval",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "3D Views — Detailed & Client Approval",
-          "endDateClient": "2026-06-22",
-          "endDateInt": "2026-06-12",
           "id": "d15",
+          "issues": [
+            "Readiness target (2026-06-12) has already passed."
+          ],
+          "readyBy": "2026-06-12",
           "releases": [
             "100mm Partition Framing"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-23",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "3D"
+          "subCategory": "3D",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 14d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical DBR",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-04",
           "id": "d16",
+          "issues": [
+            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-04) has already passed."
+          ],
+          "readyBy": "2026-06-04",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-21",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical SLD Layout",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-02",
           "id": "d17",
+          "issues": [
+            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-02) has already passed."
+          ],
+          "readyBy": "2026-06-02",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-19",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical Load Calculation",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-02",
           "id": "d18",
+          "issues": [
+            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-02) has already passed."
+          ],
+          "readyBy": "2026-06-02",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-19",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Power, Data & Switch Board Layout",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-02",
           "id": "d19",
+          "issues": [
+            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-02) has already passed."
+          ],
+          "readyBy": "2026-06-02",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-19",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 12d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Raceway Layout",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-04",
           "id": "d20",
+          "issues": [
+            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-04) has already passed."
+          ],
+          "readyBy": "2026-06-04",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-23",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 12d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "Cable Tray Layout",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-04",
           "id": "d21",
+          "issues": [
+            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-04) has already passed."
+          ],
+          "readyBy": "2026-06-04",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-23",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 12d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "Lighting Looping Layout",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-04",
           "id": "d22",
+          "issues": [
+            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-04) has already passed."
+          ],
+          "readyBy": "2026-06-04",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-23",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 12d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "Panel & DB Position Layout",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-04",
           "id": "d23",
+          "issues": [
+            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-04) has already passed."
+          ],
+          "readyBy": "2026-06-04",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-23",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 14d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "UPS Calculation & Specification",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-02",
           "id": "d24",
+          "issues": [
+            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-02) has already passed."
+          ],
+          "readyBy": "2026-06-02",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-19",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 5d approval and 14d preparation",
+          "approvalBy": "2026-07-03",
+          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 5d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "HVAC DBR",
-          "endDateClient": "2026-07-03",
-          "endDateInt": "2026-06-28",
           "id": "d25",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
           "releases": [
             "GI Sheet Ducting Fabrication & Installation"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-14",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 7d approval and 14d preparation",
+          "approvalBy": "2026-07-03",
+          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 7d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "HVAC Heat Load",
-          "endDateClient": "2026-07-03",
-          "endDateInt": "2026-06-26",
           "id": "d26",
+          "issues": [
+            "Readiness target (2026-06-26) has already passed."
+          ],
+          "readyBy": "2026-06-26",
           "releases": [
             "GI Sheet Ducting Fabrication & Installation"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-12",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 7d approval and 14d preparation",
+          "approvalBy": "2026-07-03",
+          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 7d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "HVAC Layout",
-          "endDateClient": "2026-07-03",
-          "endDateInt": "2026-06-26",
           "id": "d27",
+          "issues": [
+            "Readiness target (2026-06-26) has already passed."
+          ],
+          "readyBy": "2026-06-26",
           "releases": [
             "GI Sheet Ducting Fabrication & Installation"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-12",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Plumbing Internal Piping\" starting 2026-06-30, less 5d approval and 12d preparation",
+          "approvalBy": "2026-06-29",
+          "basis": "back-scheduled from \"Plumbing Internal Piping\" starting 2026-06-30, less 5d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "PHE DBR & Plumbing Layout",
-          "endDateClient": "2026-06-29",
-          "endDateInt": "2026-06-24",
           "id": "d28",
+          "issues": [
+            "Readiness target (2026-06-24) has already passed."
+          ],
+          "readyBy": "2026-06-24",
           "releases": [
             "Plumbing Internal Piping"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-12",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"C-Class Sprinkler Piping (Grooved)\" starting 2026-06-27, less 10d approval and 14d preparation",
+          "approvalBy": "2026-06-26",
+          "basis": "back-scheduled from \"C-Class Sprinkler Piping (Grooved)\" starting 2026-06-27, less 10d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Fire Sprinkler Layout",
-          "endDateClient": "2026-06-26",
-          "endDateInt": "2026-06-16",
           "id": "d29",
+          "issues": [
+            "Readiness target (2026-06-16) has already passed."
+          ],
+          "readyBy": "2026-06-16",
           "releases": [
             "C-Class Sprinkler Piping (Grooved)"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-02",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 7d approval and 12d preparation",
+          "approvalBy": "2026-07-10",
+          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 7d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "FA / PA System Layout",
-          "endDateClient": "2026-07-10",
-          "endDateInt": "2026-07-03",
           "id": "d30",
+          "issues": [
+            "Readiness target (2026-07-03) has already passed."
+          ],
+          "readyBy": "2026-07-03",
           "releases": [
             "Red/Black Armored Cabling (FAS/PA/CCTV)"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-21",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 7d approval and 12d preparation",
+          "approvalBy": "2026-07-10",
+          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 7d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "ACS / CCTV / WiFi Layout",
-          "endDateClient": "2026-07-10",
-          "endDateInt": "2026-07-03",
           "id": "d31",
+          "issues": [
+            "Readiness target (2026-07-03) has already passed."
+          ],
+          "readyBy": "2026-07-03",
           "releases": [
             "Red/Black Armored Cabling (FAS/PA/CCTV)"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-21",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 5d approval and 12d preparation",
+          "approvalBy": "2026-07-10",
+          "basis": "back-scheduled from \"Red/Black Armored Cabling (FAS/PA/CCTV)\" starting 2026-07-11, less 5d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "LV DBR",
-          "endDateClient": "2026-07-10",
-          "endDateInt": "2026-07-05",
           "id": "d32",
+          "issues": [
+            "Readiness target (2026-07-05) has already passed."
+          ],
+          "readyBy": "2026-07-05",
           "releases": [
             "Red/Black Armored Cabling (FAS/PA/CCTV)"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-23",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d approval and 10d preparation",
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "High",
-          "drawingName": "Floor and Dado Tiles",
-          "endDateClient": "2026-07-19",
-          "endDateInt": "2026-07-14",
+          "drawingName": "Floor and Dado Tiles — Reception & Lounge",
           "id": "d33",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
           "releases": [
             "Vitrified Tile Works"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-04",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Finishes"
+          "subCategory": "Finishes",
+          "zone": "Reception & Lounge"
         },
         {
-          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d approval and 10d preparation",
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "High",
-          "drawingName": "Carpentry Laminates & Veneer Shades",
-          "endDateClient": "2026-07-02",
-          "endDateInt": "2026-06-27",
+          "drawingName": "Floor and Dado Tiles — Workstations",
           "id": "d34",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Workstations"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Floor and Dado Tiles — Cabins & Meeting Rooms",
+          "id": "d35",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Cabins & Meeting Rooms"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Floor and Dado Tiles — Boardroom",
+          "id": "d36",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Boardroom"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Floor and Dado Tiles — Cafeteria & Pantry",
+          "id": "d37",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Cafeteria & Pantry"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Floor and Dado Tiles — Toilets",
+          "id": "d38",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Toilets"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Floor and Dado Tiles — Support & Server",
+          "id": "d39",
+          "issues": [
+            "Readiness target (2026-07-14) has already passed."
+          ],
+          "readyBy": "2026-07-14",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Support & Server"
+        },
+        {
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades — Reception & Lounge",
+          "id": "d40",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
           "releases": [
             "Column Cladding (Ply/Gypsum)"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-17",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Finishes"
+          "subCategory": "Finishes",
+          "zone": "Reception & Lounge"
         },
         {
-          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d approval and 8d preparation",
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades — Workstations",
+          "id": "d41",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Workstations"
+        },
+        {
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades — Cabins & Meeting Rooms",
+          "id": "d42",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Cabins & Meeting Rooms"
+        },
+        {
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades — Boardroom",
+          "id": "d43",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Boardroom"
+        },
+        {
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades — Cafeteria & Pantry",
+          "id": "d44",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Cafeteria & Pantry"
+        },
+        {
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades — Toilets",
+          "id": "d45",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Toilets"
+        },
+        {
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades — Support & Server",
+          "id": "d46",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Support & Server"
+        },
+        {
+          "approvalBy": "2026-07-22",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "Medium",
-          "drawingName": "Paint Shades",
-          "endDateClient": "2026-07-22",
-          "endDateInt": "2026-07-17",
-          "id": "d35",
+          "drawingName": "Paint Shades — Reception & Lounge",
+          "id": "d47",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
           "releases": [
             "Internal Walls (Putty + Paint)"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-09",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Finishes"
+          "subCategory": "Finishes",
+          "zone": "Reception & Lounge"
         },
         {
-          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d approval and 10d preparation",
+          "approvalBy": "2026-07-22",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Paint Shades — Workstations",
+          "id": "d48",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
+          "releases": [
+            "Internal Walls (Putty + Paint)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Workstations"
+        },
+        {
+          "approvalBy": "2026-07-22",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Paint Shades — Cabins & Meeting Rooms",
+          "id": "d49",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
+          "releases": [
+            "Internal Walls (Putty + Paint)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Cabins & Meeting Rooms"
+        },
+        {
+          "approvalBy": "2026-07-22",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Paint Shades — Boardroom",
+          "id": "d50",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
+          "releases": [
+            "Internal Walls (Putty + Paint)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Boardroom"
+        },
+        {
+          "approvalBy": "2026-07-22",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Paint Shades — Cafeteria & Pantry",
+          "id": "d51",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
+          "releases": [
+            "Internal Walls (Putty + Paint)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Cafeteria & Pantry"
+        },
+        {
+          "approvalBy": "2026-07-22",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Paint Shades — Toilets",
+          "id": "d52",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
+          "releases": [
+            "Internal Walls (Putty + Paint)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Toilets"
+        },
+        {
+          "approvalBy": "2026-07-22",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Paint Shades — Support & Server",
+          "id": "d53",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
+          "releases": [
+            "Internal Walls (Putty + Paint)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Support & Server"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d client approval",
           "category": "SAMPLING",
           "criticality": "High",
-          "drawingName": "Carpet / SPC Flooring",
-          "endDateClient": "2026-07-19",
-          "endDateInt": "2026-07-12",
-          "id": "d36",
+          "drawingName": "Carpet / SPC Flooring — Reception & Lounge",
+          "id": "d54",
+          "issues": [
+            "Readiness target (2026-07-12) has already passed."
+          ],
+          "readyBy": "2026-07-12",
           "releases": [
             "Vitrified Tile Works"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-02",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Finishes"
+          "subCategory": "Finishes",
+          "zone": "Reception & Lounge"
         },
         {
-          "basis": "back-scheduled from \"Glass Partition\" starting 2026-07-08, less 7d approval and 12d preparation",
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpet / SPC Flooring — Workstations",
+          "id": "d55",
+          "issues": [
+            "Readiness target (2026-07-12) has already passed."
+          ],
+          "readyBy": "2026-07-12",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Workstations"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpet / SPC Flooring — Cabins & Meeting Rooms",
+          "id": "d56",
+          "issues": [
+            "Readiness target (2026-07-12) has already passed."
+          ],
+          "readyBy": "2026-07-12",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Cabins & Meeting Rooms"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpet / SPC Flooring — Boardroom",
+          "id": "d57",
+          "issues": [
+            "Readiness target (2026-07-12) has already passed."
+          ],
+          "readyBy": "2026-07-12",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Boardroom"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpet / SPC Flooring — Cafeteria & Pantry",
+          "id": "d58",
+          "issues": [
+            "Readiness target (2026-07-12) has already passed."
+          ],
+          "readyBy": "2026-07-12",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Cafeteria & Pantry"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpet / SPC Flooring — Toilets",
+          "id": "d59",
+          "issues": [
+            "Readiness target (2026-07-12) has already passed."
+          ],
+          "readyBy": "2026-07-12",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Toilets"
+        },
+        {
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpet / SPC Flooring — Support & Server",
+          "id": "d60",
+          "issues": [
+            "Readiness target (2026-07-12) has already passed."
+          ],
+          "readyBy": "2026-07-12",
+          "releases": [
+            "Vitrified Tile Works"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Finishes",
+          "zone": "Support & Server"
+        },
+        {
+          "approvalBy": "2026-07-07",
+          "basis": "back-scheduled from \"Glass Partition\" starting 2026-07-08, less 7d client approval",
           "category": "SAMPLING",
           "criticality": "Very Critical",
           "drawingName": "Demountable Glass Partition",
-          "endDateClient": "2026-07-07",
-          "endDateInt": "2026-06-30",
-          "id": "d37",
+          "id": "d61",
+          "issues": [
+            "Readiness target (2026-06-30) has already passed."
+          ],
+          "readyBy": "2026-06-30",
           "releases": [
             "Glass Partition"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-18",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Partitions"
+          "subCategory": "Partitions",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Glass Partition\" starting 2026-07-08, less 5d approval and 10d preparation",
+          "approvalBy": "2026-07-07",
+          "basis": "back-scheduled from \"Glass Partition\" starting 2026-07-08, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "Medium",
           "drawingName": "Backpainted Glass",
-          "endDateClient": "2026-07-07",
-          "endDateInt": "2026-07-02",
-          "id": "d38",
+          "id": "d62",
+          "issues": [
+            "Readiness target (2026-07-02) has already passed."
+          ],
+          "readyBy": "2026-07-02",
           "releases": [
             "Glass Partition"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-22",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Partitions"
+          "subCategory": "Partitions",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d approval and 10d preparation",
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
           "category": "SAMPLING",
           "criticality": "High",
-          "drawingName": "Grid & Stretch Ceiling",
-          "endDateClient": "2026-07-05",
-          "endDateInt": "2026-06-28",
-          "id": "d39",
+          "drawingName": "Grid & Stretch Ceiling — Reception & Lounge",
+          "id": "d63",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
           "releases": [
             "Gypsum False Ceiling"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-18",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Ceiling"
+          "subCategory": "Ceiling",
+          "zone": "Reception & Lounge"
         },
         {
-          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d approval and 10d preparation",
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Grid & Stretch Ceiling — Workstations",
+          "id": "d64",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Workstations"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Grid & Stretch Ceiling — Cabins & Meeting Rooms",
+          "id": "d65",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Cabins & Meeting Rooms"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Grid & Stretch Ceiling — Boardroom",
+          "id": "d66",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Boardroom"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Grid & Stretch Ceiling — Cafeteria & Pantry",
+          "id": "d67",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Cafeteria & Pantry"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Grid & Stretch Ceiling — Toilets",
+          "id": "d68",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Toilets"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Grid & Stretch Ceiling — Support & Server",
+          "id": "d69",
+          "issues": [
+            "Readiness target (2026-06-28) has already passed."
+          ],
+          "readyBy": "2026-06-28",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Support & Server"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "Medium",
-          "drawingName": "Acoustics / Fluted Panel",
-          "endDateClient": "2026-07-05",
-          "endDateInt": "2026-06-30",
-          "id": "d40",
+          "drawingName": "Acoustics / Fluted Panel — Reception & Lounge",
+          "id": "d70",
+          "issues": [
+            "Readiness target (2026-06-30) has already passed."
+          ],
+          "readyBy": "2026-06-30",
           "releases": [
             "Gypsum False Ceiling"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-20",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Ceiling"
+          "subCategory": "Ceiling",
+          "zone": "Reception & Lounge"
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d approval and 8d preparation",
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Acoustics / Fluted Panel — Workstations",
+          "id": "d71",
+          "issues": [
+            "Readiness target (2026-06-30) has already passed."
+          ],
+          "readyBy": "2026-06-30",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Workstations"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Acoustics / Fluted Panel — Cabins & Meeting Rooms",
+          "id": "d72",
+          "issues": [
+            "Readiness target (2026-06-30) has already passed."
+          ],
+          "readyBy": "2026-06-30",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Cabins & Meeting Rooms"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Acoustics / Fluted Panel — Boardroom",
+          "id": "d73",
+          "issues": [
+            "Readiness target (2026-06-30) has already passed."
+          ],
+          "readyBy": "2026-06-30",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Boardroom"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Acoustics / Fluted Panel — Cafeteria & Pantry",
+          "id": "d74",
+          "issues": [
+            "Readiness target (2026-06-30) has already passed."
+          ],
+          "readyBy": "2026-06-30",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Cafeteria & Pantry"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Acoustics / Fluted Panel — Toilets",
+          "id": "d75",
+          "issues": [
+            "Readiness target (2026-06-30) has already passed."
+          ],
+          "readyBy": "2026-06-30",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Toilets"
+        },
+        {
+          "approvalBy": "2026-07-05",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 5d client approval",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Acoustics / Fluted Panel — Support & Server",
+          "id": "d76",
+          "issues": [
+            "Readiness target (2026-06-30) has already passed."
+          ],
+          "readyBy": "2026-06-30",
+          "releases": [
+            "Gypsum False Ceiling"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Ceiling",
+          "zone": "Support & Server"
+        },
+        {
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "Medium",
           "drawingName": "Switch Sockets",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-04",
-          "id": "d41",
+          "id": "d77",
+          "issues": [
+            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-04) has already passed."
+          ],
+          "readyBy": "2026-06-04",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-27",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d approval and 10d preparation",
+          "approvalBy": "2026-06-09",
+          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
           "category": "SAMPLING",
           "criticality": "High",
           "drawingName": "Decorative Lights",
-          "endDateClient": "2026-06-09",
-          "endDateInt": "2026-06-02",
-          "id": "d42",
+          "id": "d78",
+          "issues": [
+            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+            "Readiness target (2026-06-02) has already passed."
+          ],
+          "readyBy": "2026-06-02",
           "releases": [
             "Temporary Power"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-05-23",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Plumbing Internal Piping\" starting 2026-06-30, less 5d approval and 10d preparation",
+          "approvalBy": "2026-06-29",
+          "basis": "back-scheduled from \"Plumbing Internal Piping\" starting 2026-06-30, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "Medium",
           "drawingName": "Sanitary Fixtures",
-          "endDateClient": "2026-06-29",
-          "endDateInt": "2026-06-24",
-          "id": "d43",
+          "id": "d79",
+          "issues": [
+            "Readiness target (2026-06-24) has already passed."
+          ],
+          "readyBy": "2026-06-24",
           "releases": [
             "Plumbing Internal Piping"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-06-14",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "MEP"
+          "subCategory": "MEP",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d approval and 12d preparation",
+          "approvalBy": "2026-07-24",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d client approval",
           "category": "SAMPLING",
           "criticality": "High",
           "drawingName": "Chairs & Loose Furniture",
-          "endDateClient": "2026-07-24",
-          "endDateInt": "2026-07-17",
-          "id": "d44",
+          "id": "d80",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
           "releases": [
             "Manager/Meeting Room Tables"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-05",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Furniture"
+          "subCategory": "Furniture",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d approval and 10d preparation",
+          "approvalBy": "2026-07-21",
+          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "Medium",
           "drawingName": "Blinds",
-          "endDateClient": "2026-07-21",
-          "endDateInt": "2026-07-16",
-          "id": "d45",
+          "id": "d81",
+          "issues": [
+            "Readiness target (2026-07-16) has already passed."
+          ],
+          "readyBy": "2026-07-16",
           "releases": [
             "Aluminium Skirting"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-06",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Finishes"
+          "subCategory": "Finishes",
+          "zone": null
         },
         {
-          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 4d approval and 8d preparation",
+          "approvalBy": "2026-07-21",
+          "basis": "back-scheduled from \"Aluminium Skirting\" starting 2026-07-22, less 4d client approval",
           "category": "SAMPLING",
           "criticality": "Low",
           "drawingName": "Skirting & T Profile",
-          "endDateClient": "2026-07-21",
-          "endDateInt": "2026-07-17",
-          "id": "d46",
+          "id": "d82",
+          "issues": [
+            "Readiness target (2026-07-17) has already passed."
+          ],
+          "readyBy": "2026-07-17",
           "releases": [
             "Aluminium Skirting"
           ],
-          "revisedEndDateClient": null,
-          "revisedEndDateInt": null,
           "revision": "R0",
-          "startDate": "2026-07-09",
           "statusClient": "Delayed",
           "statusInt": "Delayed",
-          "subCategory": "Finishes"
+          "subCategory": "Finishes",
+          "zone": null
+        },
+        {
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "TD — Interior Works",
+          "id": "d83",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "TD",
+          "zone": null
+        },
+        {
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Column Cladding (Ply/Gypsum)\" starting 2026-07-03, less 5d client approval",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "TD — Planters",
+          "id": "d84",
+          "issues": [
+            "Readiness target (2026-06-27) has already passed."
+          ],
+          "readyBy": "2026-06-27",
+          "releases": [
+            "Column Cladding (Ply/Gypsum)"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "TD",
+          "zone": null
+        },
+        {
+          "approvalBy": "2026-07-24",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 5d client approval",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "TD — Modular Furniture",
+          "id": "d85",
+          "issues": [
+            "Readiness target (2026-07-19) has already passed."
+          ],
+          "readyBy": "2026-07-19",
+          "releases": [
+            "Manager/Meeting Room Tables"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "TD",
+          "zone": null
+        },
+        {
+          "approvalBy": "2026-07-24",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 5d client approval",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "TD — Loose Furniture & Chairs",
+          "id": "d86",
+          "issues": [
+            "Readiness target (2026-07-19) has already passed."
+          ],
+          "readyBy": "2026-07-19",
+          "releases": [
+            "Manager/Meeting Room Tables"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "TD",
+          "zone": null
+        },
+        {
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Elevation — Reception & Lounge",
+          "id": "d87",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Elevations",
+          "zone": "Reception & Lounge"
+        },
+        {
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Elevation — Workstations",
+          "id": "d88",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Elevations",
+          "zone": "Workstations"
+        },
+        {
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Elevation — Cabins & Meeting Rooms",
+          "id": "d89",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Elevations",
+          "zone": "Cabins & Meeting Rooms"
+        },
+        {
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Elevation — Boardroom",
+          "id": "d90",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Elevations",
+          "zone": "Boardroom"
+        },
+        {
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Elevation — Cafeteria & Pantry",
+          "id": "d91",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Elevations",
+          "zone": "Cafeteria & Pantry"
+        },
+        {
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Elevation — Toilets",
+          "id": "d92",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Elevations",
+          "zone": "Toilets"
+        },
+        {
+          "approvalBy": "2026-06-22",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Elevation — Support & Server",
+          "id": "d93",
+          "issues": [
+            "Readiness target (2026-06-17) has already passed."
+          ],
+          "readyBy": "2026-06-17",
+          "releases": [
+            "100mm Partition Framing"
+          ],
+          "revision": "R0",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "Elevations",
+          "zone": "Support & Server"
         }
       ],
       "summary": {
         "approved": 0,
-        "drawings": 46,
-        "pending": 46,
+        "drawings": 93,
+        "pending": 93,
         "percentComplete": 0
       }
     },
@@ -3889,552 +4887,1116 @@
         "category": "design",
         "description": "Issue for approval: Lighting Layout (with dimensions)",
         "endDate": "2026-06-02",
-        "id": "t58",
-        "notes": "Releases: Temporary Power",
+        "id": "t70",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-05-19",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Electrical SLD Layout",
         "endDate": "2026-06-02",
-        "id": "t63",
-        "notes": "Releases: Temporary Power",
+        "id": "t75",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-19",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Electrical Load Calculation",
         "endDate": "2026-06-02",
-        "id": "t64",
-        "notes": "Releases: Temporary Power",
+        "id": "t76",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-19",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Power, Data & Switch Board Layout",
         "endDate": "2026-06-02",
-        "id": "t65",
-        "notes": "Releases: Temporary Power",
+        "id": "t77",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-19",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: UPS Calculation & Specification",
         "endDate": "2026-06-02",
-        "id": "t70",
-        "notes": "Releases: Temporary Power",
+        "id": "t82",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-19",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Decorative Lights",
         "endDate": "2026-06-02",
-        "id": "t88",
-        "notes": "Releases: Temporary Power",
+        "id": "t136",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-05-23",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Electrical DBR",
         "endDate": "2026-06-04",
-        "id": "t62",
-        "notes": "Releases: Temporary Power",
+        "id": "t74",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-21",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Raceway Layout",
         "endDate": "2026-06-04",
-        "id": "t66",
-        "notes": "Releases: Temporary Power",
+        "id": "t78",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-23",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Cable Tray Layout",
         "endDate": "2026-06-04",
-        "id": "t67",
-        "notes": "Releases: Temporary Power",
+        "id": "t79",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-23",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Lighting Looping Layout",
         "endDate": "2026-06-04",
-        "id": "t68",
-        "notes": "Releases: Temporary Power",
+        "id": "t80",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-23",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Panel & DB Position Layout",
         "endDate": "2026-06-04",
-        "id": "t69",
-        "notes": "Releases: Temporary Power",
+        "id": "t81",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-05-23",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Switch Sockets",
         "endDate": "2026-06-04",
-        "id": "t87",
-        "notes": "Releases: Temporary Power",
+        "id": "t135",
+        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-05-27",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: 3D Views — Detailed & Client Approval",
         "endDate": "2026-06-12",
-        "id": "t61",
-        "notes": "Releases: 100mm Partition Framing",
+        "id": "t73",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-12) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-05-23",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Base Build Layout",
         "endDate": "2026-06-15",
-        "id": "t47",
-        "notes": "Releases: Blockwork, AAC Blocks & Plastering",
+        "id": "t59",
+        "notes": "Releases: Blockwork, AAC Blocks & Plastering · Readiness target (2026-06-15) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-05",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Fire Sprinkler Layout",
         "endDate": "2026-06-16",
-        "id": "t75",
-        "notes": "Releases: C-Class Sprinkler Piping (Grooved)",
+        "id": "t87",
+        "notes": "Releases: C-Class Sprinkler Piping (Grooved) · Readiness target (2026-06-16) has already passed.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-06-02",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Partition Layout",
         "endDate": "2026-06-17",
-        "id": "t50",
-        "notes": "Releases: 100mm Partition Framing",
+        "id": "t62",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-05",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: TD — Interior Works",
+        "endDate": "2026-06-17",
+        "id": "t141",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Elevation — Reception & Lounge",
+        "endDate": "2026-06-17",
+        "id": "t145",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Elevation — Workstations",
+        "endDate": "2026-06-17",
+        "id": "t146",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Elevation — Cabins & Meeting Rooms",
+        "endDate": "2026-06-17",
+        "id": "t147",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Elevation — Boardroom",
+        "endDate": "2026-06-17",
+        "id": "t148",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Elevation — Cafeteria & Pantry",
+        "endDate": "2026-06-17",
+        "id": "t149",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Elevation — Toilets",
+        "endDate": "2026-06-17",
+        "id": "t150",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Elevation — Support & Server",
+        "endDate": "2026-06-17",
+        "id": "t151",
+        "notes": "Releases: 100mm Partition Framing · Readiness target (2026-06-17) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: PHE DBR & Plumbing Layout",
         "endDate": "2026-06-24",
-        "id": "t74",
-        "notes": "Releases: Plumbing Internal Piping",
+        "id": "t86",
+        "notes": "Releases: Plumbing Internal Piping · Readiness target (2026-06-24) has already passed.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-06-12",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Sanitary Fixtures",
         "endDate": "2026-06-24",
-        "id": "t89",
-        "notes": "Releases: Plumbing Internal Piping",
+        "id": "t137",
+        "notes": "Releases: Plumbing Internal Piping · Readiness target (2026-06-24) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-14",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: HVAC Heat Load",
         "endDate": "2026-06-26",
-        "id": "t72",
-        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
+        "id": "t84",
+        "notes": "Releases: GI Sheet Ducting Fabrication & Installation · Readiness target (2026-06-26) has already passed.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-06-12",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: HVAC Layout",
         "endDate": "2026-06-26",
-        "id": "t73",
-        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
+        "id": "t85",
+        "notes": "Releases: GI Sheet Ducting Fabrication & Installation · Readiness target (2026-06-26) has already passed.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-06-12",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Door Schedule Layout",
         "endDate": "2026-06-27",
-        "id": "t54",
-        "notes": "Releases: Column Cladding (Ply/Gypsum)",
+        "id": "t66",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-15",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
-        "description": "Issue for approval: Carpentry Laminates & Veneer Shades",
+        "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Reception & Lounge",
         "endDate": "2026-06-27",
-        "id": "t80",
-        "notes": "Releases: Column Cladding (Ply/Gypsum)",
+        "id": "t98",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-17",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Workstations",
+        "endDate": "2026-06-27",
+        "id": "t99",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Cabins & Meeting Rooms",
+        "endDate": "2026-06-27",
+        "id": "t100",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Boardroom",
+        "endDate": "2026-06-27",
+        "id": "t101",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Cafeteria & Pantry",
+        "endDate": "2026-06-27",
+        "id": "t102",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Toilets",
+        "endDate": "2026-06-27",
+        "id": "t103",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Support & Server",
+        "endDate": "2026-06-27",
+        "id": "t104",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: TD — Planters",
+        "endDate": "2026-06-27",
+        "id": "t142",
+        "notes": "Releases: Column Cladding (Ply/Gypsum) · Readiness target (2026-06-27) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: RCP Layout",
         "endDate": "2026-06-28",
-        "id": "t57",
-        "notes": "Releases: Gypsum False Ceiling",
+        "id": "t69",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-28) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-14",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: HVAC DBR",
         "endDate": "2026-06-28",
-        "id": "t71",
-        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
+        "id": "t83",
+        "notes": "Releases: GI Sheet Ducting Fabrication & Installation · Readiness target (2026-06-28) has already passed.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-06-14",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
-        "description": "Issue for approval: Grid & Stretch Ceiling",
+        "description": "Issue for approval: Grid & Stretch Ceiling — Reception & Lounge",
         "endDate": "2026-06-28",
-        "id": "t85",
-        "notes": "Releases: Gypsum False Ceiling",
+        "id": "t121",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-28) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-18",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Grid & Stretch Ceiling — Workstations",
+        "endDate": "2026-06-28",
+        "id": "t122",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-28) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Grid & Stretch Ceiling — Cabins & Meeting Rooms",
+        "endDate": "2026-06-28",
+        "id": "t123",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-28) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Grid & Stretch Ceiling — Boardroom",
+        "endDate": "2026-06-28",
+        "id": "t124",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-28) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Grid & Stretch Ceiling — Cafeteria & Pantry",
+        "endDate": "2026-06-28",
+        "id": "t125",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-28) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Grid & Stretch Ceiling — Toilets",
+        "endDate": "2026-06-28",
+        "id": "t126",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-28) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Grid & Stretch Ceiling — Support & Server",
+        "endDate": "2026-06-28",
+        "id": "t127",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-28) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Demountable Glass Partition",
         "endDate": "2026-06-30",
-        "id": "t83",
-        "notes": "Releases: Glass Partition",
+        "id": "t119",
+        "notes": "Releases: Glass Partition · Readiness target (2026-06-30) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-18",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
-        "description": "Issue for approval: Acoustics / Fluted Panel",
+        "description": "Issue for approval: Acoustics / Fluted Panel — Reception & Lounge",
         "endDate": "2026-06-30",
-        "id": "t86",
-        "notes": "Releases: Gypsum False Ceiling",
+        "id": "t128",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-30) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-20",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Acoustics / Fluted Panel — Workstations",
+        "endDate": "2026-06-30",
+        "id": "t129",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-30) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Acoustics / Fluted Panel — Cabins & Meeting Rooms",
+        "endDate": "2026-06-30",
+        "id": "t130",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-30) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Acoustics / Fluted Panel — Boardroom",
+        "endDate": "2026-06-30",
+        "id": "t131",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-30) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Acoustics / Fluted Panel — Cafeteria & Pantry",
+        "endDate": "2026-06-30",
+        "id": "t132",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-30) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Acoustics / Fluted Panel — Toilets",
+        "endDate": "2026-06-30",
+        "id": "t133",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-30) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Acoustics / Fluted Panel — Support & Server",
+        "endDate": "2026-06-30",
+        "id": "t134",
+        "notes": "Releases: Gypsum False Ceiling · Readiness target (2026-06-30) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Backpainted Glass",
         "endDate": "2026-07-02",
-        "id": "t84",
-        "notes": "Releases: Glass Partition",
+        "id": "t120",
+        "notes": "Releases: Glass Partition · Readiness target (2026-07-02) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-06-22",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: FA / PA System Layout",
         "endDate": "2026-07-03",
-        "id": "t76",
-        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV)",
+        "id": "t88",
+        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV) · Readiness target (2026-07-03) has already passed.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-06-21",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: ACS / CCTV / WiFi Layout",
         "endDate": "2026-07-03",
-        "id": "t77",
-        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV)",
+        "id": "t89",
+        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV) · Readiness target (2026-07-03) has already passed.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-06-21",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: LV DBR",
         "endDate": "2026-07-05",
-        "id": "t78",
-        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV)",
+        "id": "t90",
+        "notes": "Releases: Red/Black Armored Cabling (FAS/PA/CCTV) · Readiness target (2026-07-05) has already passed.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
-        "startDate": "2026-06-23",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
-        "description": "Issue for approval: Carpet / SPC Flooring",
+        "description": "Issue for approval: Carpet / SPC Flooring — Reception & Lounge",
         "endDate": "2026-07-12",
-        "id": "t82",
-        "notes": "Releases: Vitrified Tile Works",
+        "id": "t112",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-12) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-02",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpet / SPC Flooring — Workstations",
+        "endDate": "2026-07-12",
+        "id": "t113",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-12) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpet / SPC Flooring — Cabins & Meeting Rooms",
+        "endDate": "2026-07-12",
+        "id": "t114",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-12) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpet / SPC Flooring — Boardroom",
+        "endDate": "2026-07-12",
+        "id": "t115",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-12) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpet / SPC Flooring — Cafeteria & Pantry",
+        "endDate": "2026-07-12",
+        "id": "t116",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-12) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpet / SPC Flooring — Toilets",
+        "endDate": "2026-07-12",
+        "id": "t117",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-12) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpet / SPC Flooring — Support & Server",
+        "endDate": "2026-07-12",
+        "id": "t118",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-12) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Flooring Layout",
         "endDate": "2026-07-14",
-        "id": "t51",
-        "notes": "Releases: Vitrified Tile Works",
+        "id": "t63",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-02",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Raised Flooring Layout",
         "endDate": "2026-07-14",
-        "id": "t53",
-        "notes": "Releases: Vitrified Tile Works",
+        "id": "t65",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-02",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
-        "description": "Issue for approval: Floor and Dado Tiles",
+        "description": "Issue for approval: Floor and Dado Tiles — Reception & Lounge",
         "endDate": "2026-07-14",
-        "id": "t79",
-        "notes": "Releases: Vitrified Tile Works",
+        "id": "t91",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-04",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor and Dado Tiles — Workstations",
+        "endDate": "2026-07-14",
+        "id": "t92",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor and Dado Tiles — Cabins & Meeting Rooms",
+        "endDate": "2026-07-14",
+        "id": "t93",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor and Dado Tiles — Boardroom",
+        "endDate": "2026-07-14",
+        "id": "t94",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor and Dado Tiles — Cafeteria & Pantry",
+        "endDate": "2026-07-14",
+        "id": "t95",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor and Dado Tiles — Toilets",
+        "endDate": "2026-07-14",
+        "id": "t96",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor and Dado Tiles — Support & Server",
+        "endDate": "2026-07-14",
+        "id": "t97",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-14) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Floor Marking Layout",
         "endDate": "2026-07-15",
-        "id": "t52",
-        "notes": "Releases: Vitrified Tile Works",
+        "id": "t64",
+        "notes": "Releases: Vitrified Tile Works · Readiness target (2026-07-15) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-05",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Wallpaper & Graphics",
         "endDate": "2026-07-16",
-        "id": "t59",
-        "notes": "Releases: Aluminium Skirting",
+        "id": "t71",
+        "notes": "Releases: Aluminium Skirting · Readiness target (2026-07-16) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-06",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Fire Evacuation Plan",
         "endDate": "2026-07-16",
-        "id": "t60",
-        "notes": "Releases: Aluminium Skirting",
+        "id": "t72",
+        "notes": "Releases: Aluminium Skirting · Readiness target (2026-07-16) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-08",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Blinds",
         "endDate": "2026-07-16",
-        "id": "t91",
-        "notes": "Releases: Aluminium Skirting",
+        "id": "t139",
+        "notes": "Releases: Aluminium Skirting · Readiness target (2026-07-16) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-06",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Furniture Layout",
         "endDate": "2026-07-17",
-        "id": "t48",
-        "notes": "Releases: Manager/Meeting Room Tables",
+        "id": "t60",
+        "notes": "Releases: Manager/Meeting Room Tables · Readiness target (2026-07-17) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-03",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Wall Finishes Layout",
         "endDate": "2026-07-17",
-        "id": "t55",
-        "notes": "Releases: Internal Walls (Putty + Paint)",
+        "id": "t67",
+        "notes": "Releases: Internal Walls (Putty + Paint) · Readiness target (2026-07-17) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-05",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Modular Layout",
         "endDate": "2026-07-17",
-        "id": "t56",
-        "notes": "Releases: Manager/Meeting Room Tables",
+        "id": "t68",
+        "notes": "Releases: Manager/Meeting Room Tables · Readiness target (2026-07-17) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-03",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
-        "description": "Issue for approval: Paint Shades",
+        "description": "Issue for approval: Paint Shades — Reception & Lounge",
         "endDate": "2026-07-17",
-        "id": "t81",
-        "notes": "Releases: Internal Walls (Putty + Paint)",
+        "id": "t105",
+        "notes": "Releases: Internal Walls (Putty + Paint) · Readiness target (2026-07-17) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-09",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Paint Shades — Workstations",
+        "endDate": "2026-07-17",
+        "id": "t106",
+        "notes": "Releases: Internal Walls (Putty + Paint) · Readiness target (2026-07-17) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Paint Shades — Cabins & Meeting Rooms",
+        "endDate": "2026-07-17",
+        "id": "t107",
+        "notes": "Releases: Internal Walls (Putty + Paint) · Readiness target (2026-07-17) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Paint Shades — Boardroom",
+        "endDate": "2026-07-17",
+        "id": "t108",
+        "notes": "Releases: Internal Walls (Putty + Paint) · Readiness target (2026-07-17) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Paint Shades — Cafeteria & Pantry",
+        "endDate": "2026-07-17",
+        "id": "t109",
+        "notes": "Releases: Internal Walls (Putty + Paint) · Readiness target (2026-07-17) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Paint Shades — Toilets",
+        "endDate": "2026-07-17",
+        "id": "t110",
+        "notes": "Releases: Internal Walls (Putty + Paint) · Readiness target (2026-07-17) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Paint Shades — Support & Server",
+        "endDate": "2026-07-17",
+        "id": "t111",
+        "notes": "Releases: Internal Walls (Putty + Paint) · Readiness target (2026-07-17) has already passed.",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Chairs & Loose Furniture",
         "endDate": "2026-07-17",
-        "id": "t90",
-        "notes": "Releases: Manager/Meeting Room Tables",
+        "id": "t138",
+        "notes": "Releases: Manager/Meeting Room Tables · Readiness target (2026-07-17) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-05",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Skirting & T Profile",
         "endDate": "2026-07-17",
-        "id": "t92",
-        "notes": "Releases: Aluminium Skirting",
+        "id": "t140",
+        "notes": "Releases: Aluminium Skirting · Readiness target (2026-07-17) has already passed.",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-09",
+        "startDate": null,
         "status": "Delayed"
       },
       {
         "category": "design",
         "description": "Issue for approval: Furniture Dimensions Layout",
         "endDate": "2026-07-19",
-        "id": "t49",
-        "notes": "Releases: Manager/Meeting Room Tables",
+        "id": "t61",
+        "notes": "Releases: Manager/Meeting Room Tables · Readiness target (2026-07-19) has already passed.",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
-        "startDate": "2026-07-07",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: TD — Modular Furniture",
+        "endDate": "2026-07-19",
+        "id": "t143",
+        "notes": "Releases: Manager/Meeting Room Tables · Readiness target (2026-07-19) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: TD — Loose Furniture & Chairs",
+        "endDate": "2026-07-19",
+        "id": "t144",
+        "notes": "Releases: Manager/Meeting Room Tables · Readiness target (2026-07-19) has already passed.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": null,
         "status": "Delayed"
       }
     ]

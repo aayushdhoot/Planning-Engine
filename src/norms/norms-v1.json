@@ -2,114 +2,539 @@
   "version": "norms-v1",
   "description": "Versioned planning norms. Lead times seeded from 'SKF, Pune Schedule.xlsx' Material Lead Time sheet; crew and role norms are Flipspaces fit-out defaults. Data, not code: editable in-app.",
   "materialLeadTimesDays": [
-    { "item": "Partition frame material", "make": "Gyproc", "days": 3, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #1" },
-    { "item": "Gypsum board", "make": "Gyproc", "days": 10, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #2" },
-    { "item": "Glasswool/Rockwool", "make": "Gyproc", "days": 10, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #3" },
-    { "item": "Glass partition frame material", "make": "Dorma", "days": 16, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #4" },
-    { "item": "Hard wood/Matti wood", "make": "Local", "days": 12, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #5" },
-    { "item": "Partition glass (toughened/laminated)", "make": "Local", "days": 45, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #6" },
-    { "item": "Ply 12/18/35mm 710 grade", "make": "Local", "days": 12, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #7" },
-    { "item": "Back painted glass", "make": "Saint Gobain", "days": 52, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #8" },
-    { "item": "Acoustic panel", "make": "Sonedio", "days": 50, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #10" },
-    { "item": "Tensile canopy structure", "make": "Serge Ferrari", "days": 30, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #11" },
-    { "item": "False ceiling material (Rigitone)", "make": "Gyproc", "days": 18, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #12" },
-    { "item": "Wall paint", "make": "Jotun", "days": 35, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #13" },
-    { "item": "Aluminium skirting / T-patti", "make": "Bottom Line", "days": 50, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #14" },
-    { "item": "Frosting", "make": "Local", "days": 50, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #15" },
-    { "item": "SS railing", "make": "Local", "days": 35, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #16" },
-    { "item": "Dust matt", "make": "", "days": 58, "source": "SKF, Pune Schedule.xlsx · Material Lead Time #17" }
+    {
+      "item": "Partition frame material",
+      "make": "Gyproc",
+      "days": 3,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #1"
+    },
+    {
+      "item": "Gypsum board",
+      "make": "Gyproc",
+      "days": 10,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #2"
+    },
+    {
+      "item": "Glasswool/Rockwool",
+      "make": "Gyproc",
+      "days": 10,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #3"
+    },
+    {
+      "item": "Glass partition frame material",
+      "make": "Dorma",
+      "days": 16,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #4"
+    },
+    {
+      "item": "Hard wood/Matti wood",
+      "make": "Local",
+      "days": 12,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #5"
+    },
+    {
+      "item": "Partition glass (toughened/laminated)",
+      "make": "Local",
+      "days": 45,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #6"
+    },
+    {
+      "item": "Ply 12/18/35mm 710 grade",
+      "make": "Local",
+      "days": 12,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #7"
+    },
+    {
+      "item": "Back painted glass",
+      "make": "Saint Gobain",
+      "days": 52,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #8"
+    },
+    {
+      "item": "Acoustic panel",
+      "make": "Sonedio",
+      "days": 50,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #10"
+    },
+    {
+      "item": "Tensile canopy structure",
+      "make": "Serge Ferrari",
+      "days": 30,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #11"
+    },
+    {
+      "item": "False ceiling material (Rigitone)",
+      "make": "Gyproc",
+      "days": 18,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #12"
+    },
+    {
+      "item": "Wall paint",
+      "make": "Jotun",
+      "days": 35,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #13"
+    },
+    {
+      "item": "Aluminium skirting / T-patti",
+      "make": "Bottom Line",
+      "days": 50,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #14"
+    },
+    {
+      "item": "Frosting",
+      "make": "Local",
+      "days": 50,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #15"
+    },
+    {
+      "item": "SS railing",
+      "make": "Local",
+      "days": 35,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #16"
+    },
+    {
+      "item": "Dust matt",
+      "make": "",
+      "days": 58,
+      "source": "SKF, Pune Schedule.xlsx · Material Lead Time #17"
+    }
   ],
   "packageLeadTimes": {
-    "A1": { "days": 7, "longLead": false, "label": "Civil consumables" },
-    "A2": { "days": 12, "longLead": false, "label": "Interior boards/ply (Gyproc/ply norms)" },
-    "A3": { "days": 45, "longLead": true, "label": "Glass partitions (partition glass norm)" },
-    "A4": { "days": 21, "longLead": false, "label": "Signages" },
-    "A5": { "days": 50, "longLead": true, "label": "Graphics & films (frosting norm)" },
-    "A6": { "days": 30, "longLead": true, "label": "Blinds" },
-    "A7": { "days": 21, "longLead": false, "label": "Planters" },
-    "B1": { "days": 40, "longLead": true, "label": "Carpet flooring" },
-    "B2": { "days": 45, "longLead": true, "label": "Modular furniture" },
-    "B3": { "days": 45, "longLead": true, "label": "Loose furniture & chairs" },
-    "C1": { "days": 30, "longLead": true, "label": "Electrical switchgear/cabling" },
-    "C2": { "days": 35, "longLead": true, "label": "Light fixtures" },
-    "C3": { "days": 42, "longLead": true, "label": "UPS" },
-    "PHE": { "days": 14, "longLead": false, "label": "Plumbing" },
-    "HVAC": { "days": 35, "longLead": true, "label": "HVAC (ducting, VRF, VAV)" },
-    "PN": { "days": 28, "longLead": false, "label": "Passive networking" },
-    "FSY": { "days": 30, "longLead": true, "label": "Fire & security" },
-    "GSS": { "days": 21, "longLead": false, "label": "GSS / miscellaneous" }
+    "A1": {
+      "days": 7,
+      "longLead": false,
+      "label": "Civil consumables"
+    },
+    "A2": {
+      "days": 12,
+      "longLead": false,
+      "label": "Interior boards/ply (Gyproc/ply norms)"
+    },
+    "A3": {
+      "days": 45,
+      "longLead": true,
+      "label": "Glass partitions (partition glass norm)"
+    },
+    "A4": {
+      "days": 21,
+      "longLead": false,
+      "label": "Signages"
+    },
+    "A5": {
+      "days": 50,
+      "longLead": true,
+      "label": "Graphics & films (frosting norm)"
+    },
+    "A6": {
+      "days": 30,
+      "longLead": true,
+      "label": "Blinds"
+    },
+    "A7": {
+      "days": 21,
+      "longLead": false,
+      "label": "Planters"
+    },
+    "B1": {
+      "days": 40,
+      "longLead": true,
+      "label": "Carpet flooring"
+    },
+    "B2": {
+      "days": 45,
+      "longLead": true,
+      "label": "Modular furniture"
+    },
+    "B3": {
+      "days": 45,
+      "longLead": true,
+      "label": "Loose furniture & chairs"
+    },
+    "C1": {
+      "days": 30,
+      "longLead": true,
+      "label": "Electrical switchgear/cabling"
+    },
+    "C2": {
+      "days": 35,
+      "longLead": true,
+      "label": "Light fixtures"
+    },
+    "C3": {
+      "days": 42,
+      "longLead": true,
+      "label": "UPS"
+    },
+    "PHE": {
+      "days": 14,
+      "longLead": false,
+      "label": "Plumbing"
+    },
+    "HVAC": {
+      "days": 35,
+      "longLead": true,
+      "label": "HVAC (ducting, VRF, VAV)"
+    },
+    "PN": {
+      "days": 28,
+      "longLead": false,
+      "label": "Passive networking"
+    },
+    "FSY": {
+      "days": 30,
+      "longLead": true,
+      "label": "Fire & security"
+    },
+    "GSS": {
+      "days": 21,
+      "longLead": false,
+      "label": "GSS / miscellaneous"
+    }
   },
   "productivityInrPerManDay": {
     "_note": "Value of work a single worker executes per working day, by trade. Used to derive durations from BOQ value when no schedule is supplied: duration = ceil(packageValue / (crew x productivity)). Calibrated so the SKF Pune BOQ (INR 82.1M / 26,484 sft) reproduces its 75-day contract programme. Material-heavy trades show a higher INR/man-day because material cost dominates the line item.",
-    "civil": 11000, "partition": 63000, "ceiling": 37000, "electrical": 55000, "hvac": 65000,
-    "plumbing": 12000, "sprinkler": 46000, "lv": 50000, "carpentry": 30000, "flooring": 55000,
-    "painting": 15000, "glass": 43000, "modular": 73000, "finishing": 24000, "cleaning": 24000, "general": 49000
+    "civil": 11000,
+    "partition": 63000,
+    "ceiling": 37000,
+    "electrical": 55000,
+    "hvac": 65000,
+    "plumbing": 12000,
+    "sprinkler": 46000,
+    "lv": 50000,
+    "carpentry": 30000,
+    "flooring": 55000,
+    "painting": 15000,
+    "glass": 43000,
+    "modular": 73000,
+    "finishing": 24000,
+    "cleaning": 24000,
+    "general": 49000
   },
   "physicalProductivity": {
     "_note": "Preferred duration driver when the BOQ carries QTY/UNIT columns: output per worker per working day, by trade. Applied per unit of physical quantity — duration = ceil(qty / (crew x perManDay)). Falls back to productivityInrPerManDay only when quantities are absent.",
-    "civil": { "unit": "sqm", "perManDay": 6 },
-    "partition": { "unit": "sqm", "perManDay": 4.5 },
-    "ceiling": { "unit": "sqm", "perManDay": 7 },
-    "flooring": { "unit": "sqm", "perManDay": 14 },
-    "painting": { "unit": "sqm", "perManDay": 25 },
-    "glass": { "unit": "sqm", "perManDay": 3.5 },
-    "carpentry": { "unit": "sqm", "perManDay": 2.5 },
-    "electrical": { "unit": "pts", "perManDay": 6 },
-    "lv": { "unit": "pts", "perManDay": 8 },
-    "hvac": { "unit": "sqm", "perManDay": 5 },
-    "sprinkler": { "unit": "rmt", "perManDay": 18 },
-    "plumbing": { "unit": "rmt", "perManDay": 12 }
+    "civil": {
+      "unit": "sqm",
+      "perManDay": 6
+    },
+    "partition": {
+      "unit": "sqm",
+      "perManDay": 4.5
+    },
+    "ceiling": {
+      "unit": "sqm",
+      "perManDay": 7
+    },
+    "flooring": {
+      "unit": "sqm",
+      "perManDay": 14
+    },
+    "painting": {
+      "unit": "sqm",
+      "perManDay": 25
+    },
+    "glass": {
+      "unit": "sqm",
+      "perManDay": 3.5
+    },
+    "carpentry": {
+      "unit": "sqm",
+      "perManDay": 2.5
+    },
+    "electrical": {
+      "unit": "pts",
+      "perManDay": 6
+    },
+    "lv": {
+      "unit": "pts",
+      "perManDay": 8
+    },
+    "hvac": {
+      "unit": "sqm",
+      "perManDay": 5
+    },
+    "sprinkler": {
+      "unit": "rmt",
+      "perManDay": 18
+    },
+    "plumbing": {
+      "unit": "rmt",
+      "perManDay": 12
+    }
   },
   "unitAliases": {
-    "sqm": ["sqm", "sq.m", "sq m", "m2", "sqmt", "sq.mt"],
-    "sft": ["sft", "sq.ft", "sq ft", "sqft", "ft2"],
-    "rmt": ["rmt", "rm", "mtr", "meter", "metre", "m", "lm", "r.mt"],
-    "pts": ["pts", "point", "points", "nos", "no", "each", "ea", "set"]
+    "sqm": [
+      "sqm",
+      "sq.m",
+      "sq m",
+      "m2",
+      "sqmt",
+      "sq.mt"
+    ],
+    "sft": [
+      "sft",
+      "sq.ft",
+      "sq ft",
+      "sqft",
+      "ft2"
+    ],
+    "rmt": [
+      "rmt",
+      "rm",
+      "mtr",
+      "meter",
+      "metre",
+      "m",
+      "lm",
+      "r.mt"
+    ],
+    "pts": [
+      "pts",
+      "point",
+      "points",
+      "nos",
+      "no",
+      "each",
+      "ea",
+      "set"
+    ]
   },
   "sftPerSqm": 10.7639,
   "wbsMinTradeValueShare": 0.02,
   "crewCaps": {
     "_note": "Realistic gang sizes a fit-out contractor staffs per trade on a single floor plate. The engine levels work content inside these bands instead of summing nominal crews, which is what produced implausible spikes like 30 electricians on one day.",
-    "default": { "min": 2, "max": 12 },
-    "civil": { "min": 4, "max": 16 },
-    "partition": { "min": 4, "max": 18 },
-    "ceiling": { "min": 4, "max": 14 },
-    "electrical": { "min": 4, "max": 14 },
-    "hvac": { "min": 3, "max": 12 },
-    "plumbing": { "min": 2, "max": 8 },
-    "sprinkler": { "min": 2, "max": 8 },
-    "lv": { "min": 2, "max": 10 },
-    "carpentry": { "min": 4, "max": 16 },
-    "flooring": { "min": 4, "max": 14 },
-    "painting": { "min": 4, "max": 16 },
-    "glass": { "min": 2, "max": 8 },
-    "modular": { "min": 4, "max": 14 },
-    "finishing": { "min": 2, "max": 10 },
-    "cleaning": { "min": 4, "max": 16 },
-    "general": { "min": 2, "max": 8 }
+    "default": {
+      "min": 2,
+      "max": 12
+    },
+    "civil": {
+      "min": 4,
+      "max": 16
+    },
+    "partition": {
+      "min": 4,
+      "max": 18
+    },
+    "ceiling": {
+      "min": 4,
+      "max": 14
+    },
+    "electrical": {
+      "min": 4,
+      "max": 14
+    },
+    "hvac": {
+      "min": 3,
+      "max": 12
+    },
+    "plumbing": {
+      "min": 2,
+      "max": 8
+    },
+    "sprinkler": {
+      "min": 2,
+      "max": 8
+    },
+    "lv": {
+      "min": 2,
+      "max": 10
+    },
+    "carpentry": {
+      "min": 4,
+      "max": 16
+    },
+    "flooring": {
+      "min": 4,
+      "max": 14
+    },
+    "painting": {
+      "min": 4,
+      "max": 16
+    },
+    "glass": {
+      "min": 2,
+      "max": 8
+    },
+    "modular": {
+      "min": 4,
+      "max": 14
+    },
+    "finishing": {
+      "min": 2,
+      "max": 10
+    },
+    "cleaning": {
+      "min": 4,
+      "max": 16
+    },
+    "general": {
+      "min": 2,
+      "max": 8
+    }
   },
   "crewByTrade": {
-    "civil": 8, "partition": 10, "ceiling": 8, "electrical": 10, "hvac": 8,
-    "plumbing": 4, "sprinkler": 5, "lv": 6, "carpentry": 8, "flooring": 6,
-    "painting": 8, "glass": 5, "modular": 6, "finishing": 6, "cleaning": 10, "general": 4
+    "civil": 8,
+    "partition": 10,
+    "ceiling": 8,
+    "electrical": 10,
+    "hvac": 8,
+    "plumbing": 4,
+    "sprinkler": 5,
+    "lv": 6,
+    "carpentry": 8,
+    "flooring": 6,
+    "painting": 8,
+    "glass": 5,
+    "modular": 6,
+    "finishing": 6,
+    "cleaning": 10,
+    "general": 4
   },
   "resourceRoleNorms": {
     "description": "Role slots per project scaled by area (sft). One PM up to 40k sft; site engineers 1 per 12k sft; MEP engineer 1 per 25k sft.",
     "roles": [
-      { "role": "Project Manager", "per_sft": 40000, "min": 1 },
-      { "role": "Site Engineer (Civil/Interior)", "per_sft": 12000, "min": 1 },
-      { "role": "MEP Engineer", "per_sft": 25000, "min": 1 },
-      { "role": "Design Lead", "per_sft": 40000, "min": 1 },
-      { "role": "Procurement Owner", "per_sft": 40000, "min": 1 },
-      { "role": "Safety Officer", "per_sft": 30000, "min": 1 },
-      { "role": "QC / Snag Engineer", "per_sft": 30000, "min": 1 }
+      {
+        "role": "Project Manager",
+        "per_sft": 40000,
+        "min": 1
+      },
+      {
+        "role": "Site Engineer (Civil/Interior)",
+        "per_sft": 12000,
+        "min": 1
+      },
+      {
+        "role": "MEP Engineer",
+        "per_sft": 25000,
+        "min": 1
+      },
+      {
+        "role": "Design Lead",
+        "per_sft": 40000,
+        "min": 1
+      },
+      {
+        "role": "Procurement Owner",
+        "per_sft": 40000,
+        "min": 1
+      },
+      {
+        "role": "Safety Officer",
+        "per_sft": 30000,
+        "min": 1
+      },
+      {
+        "role": "QC / Snag Engineer",
+        "per_sft": 30000,
+        "min": 1
+      }
     ]
   },
   "designDeliverableOffsets": {
     "description": "Working days before first dependent site activity by which each design deliverable must be issued.",
-    "layoutFreeze": 14, "gfc": 7, "threeD": 10, "sampling": 12, "mepDesign": 10
+    "layoutFreeze": 14,
+    "gfc": 7,
+    "threeD": 10,
+    "sampling": 12,
+    "mepDesign": 10
   },
-  "bufferPolicy": { "defaultInternalBufferDays": 7, "min": 0, "max": 15 },
+  "bufferPolicy": {
+    "defaultInternalBufferDays": 7,
+    "min": 0,
+    "max": 15
+  },
   "procurementOrderBufferDays": 3,
-  "defaultCalendar": { "weeklyOffDays": [], "holidays": [], "workModeFactor": 1 }
+  "defaultCalendar": {
+    "weeklyOffDays": [],
+    "holidays": [],
+    "workModeFactor": 1
+  },
+  "projectZones": {
+    "_note": "Zones a corporate fit-out is finished and sampled in. Finishes vary by location, so the sampling tracker is generated per zone rather than once per finish. Override per project when the layout uses different names.",
+    "zones": [
+      "Reception & Lounge",
+      "Workstations",
+      "Cabins & Meeting Rooms",
+      "Boardroom",
+      "Cafeteria & Pantry",
+      "Toilets",
+      "Support & Server"
+    ]
+  },
+  "standardMobilisationTodos": {
+    "_note": "Tasks common to every project at mobilisation, independent of scope. Day offsets are calendar days from the internal start; negative means before site start.",
+    "items": [
+      {
+        "description": "Site marking completed and signed off",
+        "responsibility": "Site engineer",
+        "priority": "HIGH",
+        "dayOffset": 2
+      },
+      {
+        "description": "Project resource allocation confirmed (PM, site engineer, MEP, design, procurement)",
+        "responsibility": "Project head",
+        "priority": "HIGH",
+        "dayOffset": -3
+      },
+      {
+        "description": "Site verification against the GFC layout",
+        "responsibility": "Site engineer",
+        "priority": "HIGH",
+        "dayOffset": 1
+      },
+      {
+        "description": "Project tool creation — tracker, folder structure and access",
+        "responsibility": "Project head",
+        "priority": "MEDIUM",
+        "dayOffset": -2
+      },
+      {
+        "description": "Wispr onboarding for the project team",
+        "responsibility": "Project head",
+        "priority": "MEDIUM",
+        "dayOffset": 0
+      },
+      {
+        "description": "Client WhatsApp group creation with the agreed participants",
+        "responsibility": "Project head",
+        "priority": "MEDIUM",
+        "dayOffset": -1
+      },
+      {
+        "description": "Welcome email issued to the client with team and escalation matrix",
+        "responsibility": "Project head",
+        "priority": "MEDIUM",
+        "dayOffset": 0
+      },
+      {
+        "description": "Kick-off meeting with the client and consultants",
+        "responsibility": "Project head",
+        "priority": "HIGH",
+        "dayOffset": 3
+      },
+      {
+        "description": "Building permissions, gate pass and work permits obtained",
+        "responsibility": "Site engineer",
+        "priority": "HIGH",
+        "dayOffset": 1
+      },
+      {
+        "description": "Labour onboarding, ID cards and safety induction",
+        "responsibility": "Site engineer",
+        "priority": "HIGH",
+        "dayOffset": 2
+      },
+      {
+        "description": "Temporary power, water and site lighting arranged",
+        "responsibility": "Site engineer",
+        "priority": "HIGH",
+        "dayOffset": 4
+      },
+      {
+        "description": "Day-0 site photographs and dilapidation record filed",
+        "responsibility": "Site engineer",
+        "priority": "MEDIUM",
+        "dayOffset": 1
+      }
+    ]
+  }
 }

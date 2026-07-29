@@ -149,7 +149,7 @@ describe('Trackers in the Flipspaces formats', () => {
       expect(r).toHaveProperty('criticality');
       expect(r).toHaveProperty('revision');
       // internal issue must precede client approval
-      if (r.endDateInt && r.endDateClient) expect(r.endDateInt < r.endDateClient).toBe(true);
+      if (r.readyBy && r.approvalBy) expect(r.readyBy < r.approvalBy).toBe(true);
     }
     expect(plan.modules.design.summary.drawings).toBe(rows.length);
   });
@@ -159,7 +159,7 @@ describe('Trackers in the Flipspaces formats', () => {
     expect(rows.length).toBeGreaterThan(20);
     for (const r of rows) {
       expect(r.basis).toContain('back-scheduled');
-      if (r.startDate && r.endDateInt) expect(r.startDate < r.endDateInt).toBe(true);
+      if (r.readyBy && r.approvalBy) expect(r.readyBy < r.approvalBy).toBe(true);
     }
   });
 

@@ -9,10 +9,11 @@ export type Criticality = 'Very Critical' | 'High' | 'Medium' | 'Low';
 export const CRITICALITIES: Criticality[] = ['Very Critical', 'High', 'Medium', 'Low'];
 
 /**
- * Design tracker — format from the GFC/MEP/Sampling tracker sheet:
- * Category | Sub Category | Drawing name | Criticality | Revision |
- * Start Date | End Date (INT) | Revised End Date (INT) | Status (INT) |
- * End Date (Client) | Revised End Date (Client) | Status (Client)
+ * Design tracker — two target dates and nothing else.
+ *
+ * Every other date the sheet used to carry (a prep start, two "revised" columns) was noise:
+ * what the team actually manages is when a drawing is ready to issue and when the client has
+ * to have approved it. Slippage is tracked by status against those two targets.
  */
 export interface DesignRow {
   id: string;
@@ -21,19 +22,23 @@ export interface DesignRow {
   drawingName: string;
   criticality: Criticality;
   revision: string;
-  startDate: string | null;
-  /** internal issue date target */
-  endDateInt: string | null;
-  revisedEndDateInt: string | null;
+  /** zone this row applies to; finishes vary by location, so sampling is per zone */
+  zone: string | null;
+  /** target date the drawing is ready to issue */
+  readyBy: string | null;
   statusInt: TrackStatus;
-  /** client/consultant approval target */
-  endDateClient: string | null;
-  revisedEndDateClient: string | null;
+  /** target date the client must have approved it by */
+  approvalBy: string | null;
   statusClient: TrackStatus;
   /** what this drawing releases downstream — the link to procurement & execution */
   releases: string[];
   /** provenance for the computed dates */
   basis: string;
+  /**
+   * Deadline validation. A tracker with dates nobody checked is worse than no tracker: these
+   * are the ways the two targets can be wrong relative to each other or to the programme.
+   */
+  issues: string[];
 }
 
 export interface DesignSummary {

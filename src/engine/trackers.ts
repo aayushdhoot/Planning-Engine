@@ -1,6 +1,6 @@
 // Generate the four trackers from the schedule. Dates are back-scheduled from the
 // site activities they gate, so design -> procurement -> execution stay linked.
-import type { ProjectInputs, ScheduledActivity } from '../domain/types';
+import type { BoqPackage, ProjectInputs, ScheduledActivity } from '../domain/types';
 import type { Criticality, DependencyRow, DesignRow, ProcurementRow, RaCheckpoint, RaMilestoneRow, TodoRow } from '../domain/trackers';
 import { addCalendarDays } from './calendar';
 import norms from '../norms/norms-v1.json';
@@ -17,6 +17,8 @@ interface DesignSpec {
   prepDays: number;
   /** days the client/consultant needs to approve after issue */
   approvalDays: number;
+  /** finishes vary by location, so these are raised once per zone rather than once per project */
+  perZone?: boolean;
 }
 
 const DESIGN_CATALOGUE: DesignSpec[] = [
@@ -55,14 +57,14 @@ const DESIGN_CATALOGUE: DesignSpec[] = [
   { category: 'MEP', subCategory: 'MEP', name: 'ACS / CCTV / WiFi Layout', criticality: 'High', gates: ['lv'], prepDays: 12, approvalDays: 7 },
   { category: 'MEP', subCategory: 'MEP', name: 'LV DBR', criticality: 'High', gates: ['lv'], prepDays: 12, approvalDays: 5 },
   // SAMPLING
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Floor and Dado Tiles', criticality: 'High', gates: ['flooring'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Carpentry Laminates & Veneer Shades', criticality: 'High', gates: ['carpentry'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Paint Shades', criticality: 'Medium', gates: ['painting'], prepDays: 8, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Carpet / SPC Flooring', criticality: 'High', gates: ['flooring'], prepDays: 10, approvalDays: 7 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Floor and Dado Tiles', perZone: true, criticality: 'High', gates: ['flooring'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Carpentry Laminates & Veneer Shades', perZone: true, criticality: 'High', gates: ['carpentry'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Paint Shades', perZone: true, criticality: 'Medium', gates: ['painting'], prepDays: 8, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Carpet / SPC Flooring', perZone: true, criticality: 'High', gates: ['flooring'], prepDays: 10, approvalDays: 7 },
   { category: 'SAMPLING', subCategory: 'Partitions', name: 'Demountable Glass Partition', criticality: 'Very Critical', gates: ['glass'], prepDays: 12, approvalDays: 7 },
   { category: 'SAMPLING', subCategory: 'Partitions', name: 'Backpainted Glass', criticality: 'Medium', gates: ['glass'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Ceiling', name: 'Grid & Stretch Ceiling', criticality: 'High', gates: ['ceiling'], prepDays: 10, approvalDays: 7 },
-  { category: 'SAMPLING', subCategory: 'Ceiling', name: 'Acoustics / Fluted Panel', criticality: 'Medium', gates: ['ceiling'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Ceiling', name: 'Grid & Stretch Ceiling', perZone: true, criticality: 'High', gates: ['ceiling'], prepDays: 10, approvalDays: 7 },
+  { category: 'SAMPLING', subCategory: 'Ceiling', name: 'Acoustics / Fluted Panel', perZone: true, criticality: 'Medium', gates: ['ceiling'], prepDays: 10, approvalDays: 5 },
   { category: 'SAMPLING', subCategory: 'MEP', name: 'Switch Sockets', criticality: 'Medium', gates: ['electrical'], prepDays: 8, approvalDays: 5 },
   { category: 'SAMPLING', subCategory: 'MEP', name: 'Decorative Lights', criticality: 'High', gates: ['electrical'], prepDays: 10, approvalDays: 7 },
   { category: 'SAMPLING', subCategory: 'MEP', name: 'Sanitary Fixtures', criticality: 'Medium', gates: ['plumbing'], prepDays: 10, approvalDays: 5 },
@@ -81,36 +83,142 @@ const statusFor = (target: string | null, today: string): 'Not Started' | 'WIP' 
   return target <= soon ? 'WIP' : 'Not Started';
 };
 
-export function buildDesignTracker(acts: ScheduledActivity[], today: string): DesignRow[] {
+/**
+ * Carpentry and joinery cannot be built from a layout — every element needs a technical
+ * drawing. These are derived from the BOQ rather than listed by hand, so a project with more
+ * joinery packages gets more TDs.
+ */
+const CARPENTRY_TRADES = new Set(['carpentry', 'modular', 'partition']);
+
+/** Elevations are raised per zone: each area's wall treatment is drawn separately. */
+const ELEVATION_APPROVAL_DAYS = 5;
+const ELEVATION_PREP_DAYS = 10;
+
+function windowFor(
+  driver: ScheduledActivity | null,
+  spec: { approvalDays: number; prepDays: number },
+  fallback: { start: string; end: string } | null,
+): { readyBy: string | null; approvalBy: string | null; basis: string } {
+  if (driver) {
+    const approvalBy = addCalendarDays(driver.startDate, -1);
+    return {
+      readyBy: addCalendarDays(approvalBy, -spec.approvalDays),
+      approvalBy,
+      basis: `back-scheduled from "${driver.name}" starting ${driver.startDate}, less ${spec.approvalDays}d client approval`,
+    };
+  }
+  // No gated activity in the programme. Rather than leaving the row dateless — the complaint
+  // that started this — anchor it to the project window and say so, so the date is visibly
+  // weaker than a back-scheduled one instead of silently absent.
+  if (fallback) {
+    const approvalBy = addCalendarDays(fallback.start, spec.prepDays + spec.approvalDays);
+    return {
+      readyBy: addCalendarDays(approvalBy, -spec.approvalDays),
+      approvalBy,
+      basis: `no gated site activity in the programme — anchored to the project start ${fallback.start} plus ${spec.prepDays}d preparation`,
+    };
+  }
+  return { readyBy: null, approvalBy: null, basis: 'no dependent site activity and no project window' };
+}
+
+/**
+ * Validate the two targets. A tracker whose deadlines nobody checked is worse than no tracker,
+ * so each row states what is wrong with it rather than presenting an impossible date plainly.
+ */
+function validateDesignRow(
+  readyBy: string | null,
+  approvalBy: string | null,
+  driver: ScheduledActivity | null,
+  today: string,
+  projectStart: string | null,
+): string[] {
+  const issues: string[] = [];
+  if (!readyBy || !approvalBy) {
+    issues.push('No target date could be computed.');
+    return issues;
+  }
+  if (readyBy >= approvalBy) issues.push(`Drawing readiness (${readyBy}) is not before client approval (${approvalBy}).`);
+  if (driver && approvalBy >= driver.startDate)
+    issues.push(`Client approval (${approvalBy}) lands on or after "${driver.name}" starts (${driver.startDate}) — the site would be waiting on the drawing.`);
+  if (projectStart && readyBy < projectStart)
+    issues.push(`Drawing readiness (${readyBy}) is before the project starts (${projectStart}) — this drawing is already late on day one.`);
+  if (readyBy < today) issues.push(`Readiness target (${readyBy}) has already passed.`);
+  return issues;
+}
+
+export function buildDesignTracker(
+  acts: ScheduledActivity[],
+  today: string,
+  packages: BoqPackage[] = [],
+  zones: string[] = (norms.projectZones as { zones: string[] }).zones,
+): DesignRow[] {
   const rows: DesignRow[] = [];
-  DESIGN_CATALOGUE.forEach((spec, i) => {
-    const gated = spec.gates.map((t) => firstOfTrade(acts, t)).filter((x): x is ScheduledActivity => x !== null);
-    const driver = gated.sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0] ?? null;
-    // client approval must land before the gated activity starts; internal issue
-    // must land approvalDays before that; prep starts prepDays before issue.
-    const approvalBy = driver ? addCalendarDays(driver.startDate, -1) : null;
-    const issueBy = approvalBy ? addCalendarDays(approvalBy, -spec.approvalDays) : null;
-    const startDate = issueBy ? addCalendarDays(issueBy, -spec.prepDays) : null;
+  const window = acts.length
+    ? {
+        start: acts.reduce((m, a) => (a.startDate < m ? a.startDate : m), acts[0].startDate),
+        end: acts.reduce((m, a) => (a.endDate > m ? a.endDate : m), acts[0].endDate),
+      }
+    : null;
+  let n = 0;
+
+  const push = (
+    spec: DesignSpec,
+    drawingName: string,
+    zone: string | null,
+    driver: ScheduledActivity | null,
+    gated: ScheduledActivity[],
+  ) => {
+    const { readyBy, approvalBy, basis } = windowFor(driver, spec, window);
     rows.push({
-      id: `d${i + 1}`,
+      id: `d${++n}`,
       category: spec.category,
       subCategory: spec.subCategory,
-      drawingName: spec.name,
+      drawingName,
       criticality: spec.criticality,
       revision: 'R0',
-      startDate,
-      endDateInt: issueBy,
-      revisedEndDateInt: null,
-      statusInt: statusFor(issueBy, today),
-      endDateClient: approvalBy,
-      revisedEndDateClient: null,
+      zone,
+      readyBy,
+      statusInt: statusFor(readyBy, today),
+      approvalBy,
       statusClient: statusFor(approvalBy, today),
       releases: gated.map((g) => g.name),
-      basis: driver
-        ? `back-scheduled from "${driver.name}" starting ${driver.startDate}, less ${spec.approvalDays}d approval and ${spec.prepDays}d preparation`
-        : 'no dependent site activity found in the programme',
+      basis,
+      issues: validateDesignRow(readyBy, approvalBy, driver, today, window?.start ?? null),
     });
-  });
+  };
+
+  for (const spec of DESIGN_CATALOGUE) {
+    const gated = spec.gates.map((t) => firstOfTrade(acts, t)).filter((x): x is ScheduledActivity => x !== null);
+    const driver = gated.sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0] ?? null;
+    if (spec.perZone && zones.length) for (const z of zones) push(spec, `${spec.name} — ${z}`, z, driver, gated);
+    else push(spec, spec.name, null, driver, gated);
+  }
+
+  // ---- Technical drawings, one per carpentry/joinery cost head (from the BOQ, not a list)
+  const carpentry = packages.filter((pk) => CARPENTRY_TRADES.has(pk.trade));
+  for (const pk of carpentry) {
+    const driver = firstOfTrade(acts, pk.trade);
+    push(
+      { category: 'GFC', subCategory: 'TD', name: '', criticality: 'Very Critical', gates: [pk.trade], prepDays: 12, approvalDays: 5 },
+      `TD — ${pk.name}`,
+      null,
+      driver,
+      driver ? [driver] : [],
+    );
+  }
+
+  // ---- Elevations, one per zone
+  for (const z of zones) {
+    const driver = firstOfTrade(acts, 'partition') ?? firstOfTrade(acts, 'carpentry');
+    push(
+      { category: 'GFC', subCategory: 'Elevations', name: '', criticality: 'High', gates: ['partition'], prepDays: ELEVATION_PREP_DAYS, approvalDays: ELEVATION_APPROVAL_DAYS },
+      `Elevation — ${z}`,
+      z,
+      driver,
+      driver ? [driver] : [],
+    );
+  }
+
   return rows;
 }
 
@@ -136,7 +244,7 @@ export function buildProcurementTracker(
     // the design deliverable that must be approved before this package can be ordered
     const gate = design
       .filter((d) => d.releases.some((r) => feeds && r === feeds.name))
-      .sort((a, b) => ((a.endDateClient ?? '') < (b.endDateClient ?? '') ? -1 : 1))[0];
+      .sort((a, b) => ((a.approvalBy ?? '') < (b.approvalBy ?? '') ? -1 : 1))[0];
 
     return {
       id: `p${i + 1}`,
@@ -151,7 +259,7 @@ export function buildProcurementTracker(
       deliveryStatus: 'Not Started',
       responsibility: 'Procurement',
       remarks: orderBy && orderBy < today ? 'Order-by date has passed — release the PO or re-plan the dependent activity.' : '',
-      gatedBy: gate ? `${gate.drawingName} (client approval ${gate.endDateClient})` : null,
+      gatedBy: gate ? `${gate.drawingName} (client approval ${gate.approvalBy})` : null,
       feeds: feeds ? `${feeds.name} (${feeds.startDate})` : null,
       basis: feeds
         ? `delivery 2d before "${feeds.name}" starts ${feeds.startDate}; order-by = delivery − ${leadDays}d lead (${pkg.code in overrides ? 'in-app override' : `${norms.version}:packageLeadTimes.${pkg.code}`})`
@@ -165,11 +273,37 @@ export function buildTodoTracker(
   proc: ProcurementRow[],
   design: DesignRow[],
   today: string,
+  projectStart: string | null = null,
 ): TodoRow[] {
   const rows: TodoRow[] = [];
   const horizon = addCalendarDays(today, 21);
   let n = 0;
   const push = (r: Omit<TodoRow, 'id'>) => rows.push({ ...r, id: `t${++n}` });
+
+  // ---- Standard mobilisation checklist.
+  // These are the same on every project and are not derivable from the schedule — site
+  // marking, resource allocation, tool creation, Wispr onboarding, client group, welcome
+  // email. They belong in the targets like anything else, so they are seeded from norms
+  // rather than left to memory. Unlike the derived rows they are NOT horizon-filtered: a
+  // mobilisation task nobody did stays on the list until it is closed.
+  const std = norms.standardMobilisationTodos as {
+    items: { description: string; responsibility: string; priority: string; dayOffset: number }[];
+  };
+  if (projectStart)
+    for (const item of std.items) {
+      const due = addCalendarDays(projectStart, item.dayOffset);
+      push({
+        description: item.description,
+        responsibility: item.responsibility,
+        priority: item.priority as TodoRow['priority'],
+        status: due < today ? 'Delayed' : 'Not Started',
+        startDate: null,
+        endDate: due,
+        revisedDate: null,
+        notes: `Standard project mobilisation task (${norms.version}) — day ${item.dayOffset >= 0 ? '+' : ''}${item.dayOffset} from site start.`,
+        category: 'site',
+      });
+    }
 
   for (const a of acts)
     if (a.startDate <= horizon && a.endDate >= today)
@@ -200,16 +334,16 @@ export function buildTodoTracker(
       });
 
   for (const d of design)
-    if (d.endDateInt && d.endDateInt <= horizon)
+    if (d.readyBy && d.readyBy <= horizon)
       push({
         description: `Issue for approval: ${d.drawingName}`,
         responsibility: d.category === 'MEP' ? 'MEP design lead' : 'Design lead',
         priority: d.criticality === 'Very Critical' ? 'HIGH' : d.criticality === 'High' ? 'HIGH' : 'MEDIUM',
         status: d.statusInt,
-        startDate: d.startDate,
-        endDate: d.endDateInt,
+        startDate: null,
+        endDate: d.readyBy,
         revisedDate: null,
-        notes: d.releases.length ? `Releases: ${d.releases.slice(0, 2).join(', ')}` : '',
+        notes: [d.releases.length ? `Releases: ${d.releases.slice(0, 2).join(', ')}` : '', d.issues[0] ?? ''].filter(Boolean).join(' · '),
         category: 'design',
       });
 

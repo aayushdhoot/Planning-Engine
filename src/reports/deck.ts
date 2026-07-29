@@ -121,7 +121,7 @@ export function clientDeck(plan: Plan): Pptx {
     plan.modules.dependencies.map((d) => [String(d.sr), d.area, d.description, d.responsibility, d.planDate ?? '—']), brand, [0.7, 1.8, 5.6, 2.2, 2.0], 12);
 
   tableSlides(pptx, 'Design deliverables — approval dates', ['Category', 'Deliverable', 'Criticality', 'Approval by'],
-    plan.modules.design.rows.map((d) => [d.category, d.drawingName, d.criticality, d.endDateClient ?? '—']), brand, [1.5, 6.4, 2.2, 2.2], 14);
+    plan.modules.design.rows.map((d) => [d.category, d.drawingName, d.criticality, d.approvalBy ?? '—']), brand, [1.5, 6.4, 2.2, 2.2], 14);
 
   tableSlides(pptx, 'Procurement — delivery dates required on site', ['Package', 'Criticality', 'Delivery required'],
     plan.modules.procurement.map((i) => [i.category, i.criticality, i.deliveryRequired ?? '—']), brand, [7, 2.6, 2.7], 14);
@@ -163,8 +163,8 @@ export function internalDeck(plan: Plan): Pptx {
     brand, [0.7, 4.4, 2.4, 0.8, 1.5, 1.5, 1.0], 16);
 
   tableSlides(pptx, 'Design tracker — GFC / MEP / Sampling',
-    ['Category', 'Sub', 'Drawing', 'Crit', 'Issue (INT)', 'Status (INT)', 'Approval', 'Status (client)'],
-    plan.modules.design.rows.map((d) => [d.category, d.subCategory, d.drawingName, d.criticality, d.endDateInt ?? '—', d.statusInt, d.endDateClient ?? '—', d.statusClient]),
+    ['Category', 'Sub', 'Drawing', 'Crit', 'Ready by', 'Status (INT)', 'Approval by', 'Status (client)'],
+    plan.modules.design.rows.map((d) => [d.category, d.subCategory, d.drawingName, d.criticality, d.readyBy ?? '—', d.statusInt, d.approvalBy ?? '—', d.statusClient]),
     brand, [1.1, 1.5, 3.9, 1.3, 1.2, 1.2, 1.1, 1.0], 15);
 
   tableSlides(pptx, 'Procurement — order-by and delivery required',

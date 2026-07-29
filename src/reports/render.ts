@@ -76,7 +76,7 @@ function clientReport(plan: Plan): string {
 
   <h2>Design deliverables — approval dates</h2>
   <table><thead><tr><th>Category</th><th>Deliverable</th><th>Criticality</th><th>Approval required by</th></tr></thead><tbody>
-  ${plan.modules.design.rows.map((d) => `<tr><td>${d.category}</td><td>${esc(d.drawingName)}</td><td>${d.criticality}</td><td>${d.endDateClient ?? '—'}</td></tr>`).join('')}
+  ${plan.modules.design.rows.map((d) => `<tr><td>${d.category}</td><td>${esc(d.drawingName)}</td><td>${d.criticality}</td><td>${d.approvalBy ?? '—'}</td></tr>`).join('')}
   </tbody></table>
 
   <h2>Procurement — delivery dates required on site</h2>
@@ -143,8 +143,8 @@ function internalReport(plan: Plan): string {
   </tbody></table>
 
   <h2>Design tracker — GFC / MEP / Sampling</h2>
-  <table><thead><tr><th>Category</th><th>Sub</th><th>Drawing</th><th>Criticality</th><th>Issue (INT)</th><th>Status (INT)</th><th>Approval (client)</th><th>Status (client)</th></tr></thead><tbody>
-  ${plan.modules.design.rows.map((d) => `<tr><td>${d.category}</td><td class="muted">${esc(d.subCategory)}</td><td>${esc(d.drawingName)}</td><td>${d.criticality}</td><td>${d.endDateInt ?? '—'}</td><td>${d.statusInt}</td><td>${d.endDateClient ?? '—'}</td><td>${d.statusClient}</td></tr>`).join('')}
+  <table><thead><tr><th>Category</th><th>Sub</th><th>Drawing</th><th>Criticality</th><th>Ready by</th><th>Status (INT)</th><th>Client approval by</th><th>Status (client)</th></tr></thead><tbody>
+  ${plan.modules.design.rows.map((d) => `<tr><td>${d.category}</td><td class="muted">${esc(d.subCategory)}</td><td>${esc(d.drawingName)}</td><td>${d.criticality}</td><td>${d.readyBy ?? '—'}</td><td>${d.statusInt}</td><td>${d.approvalBy ?? '—'}</td><td>${d.statusClient}</td></tr>`).join('')}
   </tbody></table>
 
   <h2>Procurement — order-by and delivery required</h2>

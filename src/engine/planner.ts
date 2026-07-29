@@ -229,7 +229,7 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
   // ----- Modules 4-7: the four live trackers, in the Flipspaces working formats -----
   // Design gates procurement, procurement gates execution, so these are built in order.
   const overrides = cfg.normsOverrides?.packageLeadTimeDays ?? {};
-  const designRows = buildDesignTracker(cpm.activities, today);
+  const designRows = buildDesignTracker(cpm.activities, today, p.boqPackages);
   base.modules.design = { rows: designRows, summary: summariseDesign(designRows) };
 
   base.modules.procurement = buildProcurementTracker(p, cpm.activities, designRows, today, overrides);
@@ -237,7 +237,7 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
     if (!pr.feeds)
       assumptions.push({ area: 'procurement', text: `Package "${pr.category}" has no mapped site activity; order-by date not computed.`, internalOnly: true });
 
-  base.modules.todos = buildTodoTracker(cpm.activities, base.modules.procurement, designRows, today);
+  base.modules.todos = buildTodoTracker(cpm.activities, base.modules.procurement, designRows, today, start);
   base.modules.dependencies = buildDependencyTracker(cpm.activities, today, start);
 
   // ----- Module 8: RA billing milestones -----

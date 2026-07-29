@@ -66,6 +66,24 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
   schema rejects a *silent* breach.
 - **Calendar default is a 7-day week** (Sundays working — Flipspaces convention). Toggle in Settings.
 
+## Trackers
+- **Design carries two dates only** — `readyBy` (drawing ready to issue) and `approvalBy`
+  (client must have approved). The old `startDate` / `revisedEndDateInt` /
+  `revisedEndDateClient` columns are gone; nobody managed them. Slippage is tracked by status.
+- **No row may be dateless.** When no gated site activity exists, `windowFor()` anchors to the
+  project window and says so in `basis`, so a weak date is visibly weaker rather than absent.
+- **`issues[]` validates each row**: readiness before approval, approval before the activity it
+  gates, nothing before the project starts, nothing already past. The UI banners them.
+- **TDs come from the BOQ, not a list.** Every carpentry / modular / partition cost head raises
+  a `TD — <package>` row, so a project with more joinery gets more technical drawings.
+  Elevations are one per zone.
+- **Sampling is per zone** (`norms.projectZones`), because finishes vary by location. A spec is
+  marked `perZone` only when it actually varies — switch sockets stay a single row.
+- **Standard mobilisation to-dos** live in `norms.standardMobilisationTodos` (site marking,
+  resource allocation, site verification, tool creation, Wispr onboarding, client group,
+  welcome email…). They are seeded from the project start and, unlike the derived rows, are
+  NOT horizon-filtered — a mobilisation task nobody did stays on the list until it is closed.
+
 ## Actual dates vs contract dates
 `cfg.dates` (`ScheduleDates`) carries four optional overrides. A contract states a start and a
 duration; site reality often differs, and the plan must follow the real dates.

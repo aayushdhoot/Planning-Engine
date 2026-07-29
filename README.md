@@ -19,7 +19,7 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 170 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 185 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -56,7 +56,7 @@ calendar, norms, Drive access and the canonical JSON live here).
 
 | Tracker | Columns |
 |---|---|
-| Design | Category (GFC/MEP/Sampling) · Sub Category · Drawing · Criticality · Revision · Start · End (INT) · Revised (INT) · Status (INT) · End (Client) · Revised (Client) · Status (Client) |
+| Design | Category (GFC/MEP/Sampling) · Sub Category · **Zone** · Drawing · Criticality · Revision · **Ready by** · Status (INT) · **Client approval by** · Status (Client) · Releases — two targets only, each validated against the activity it gates |
 | Procurement | Category · Sub Category · Criticality · **Order by** · **Delivery required** · Revised · Vendor · Order status · Delivery status · Responsibility · Gated by · Feeds |
 | To-do | Description · Responsibility · Priority · Status · Start · End · Revised · Notes |
 | Dependencies | Sr · Area · Description · Responsibility · Plan date · Actual date · Delay · Status · Remarks |
@@ -64,6 +64,13 @@ calendar, norms, Drive access and the canonical JSON live here).
 
 Every status, date and note is editable in the app. Procurement deliberately carries **no BOQ
 or BCS value** — only when to order and when it must land on site.
+
+**GFC covers what actually has to be drawn.** Technical drawings are raised from the BOQ — every
+carpentry, modular and partition cost head gets a TD — and elevations are raised per zone.
+Sampling is split by zone too, because paint, laminate and tile shades vary by location. The
+to-do list is seeded with the standard mobilisation tasks (site marking, resource allocation,
+site verification, tool creation, Wispr onboarding, client group, welcome email) alongside the
+project-specific ones.
 
 **Design → procurement → execution are linked.** Each drawing's client-approval date is
 back-scheduled from the site activity it releases; each package shows the design approval that
