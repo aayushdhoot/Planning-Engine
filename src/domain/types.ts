@@ -99,6 +99,27 @@ export interface EngineConfig {
   normsVersion: string;
   /** in-app edits to versioned norms; applied without mutating the norms file */
   normsOverrides?: { packageLeadTimeDays?: Record<string, number> };
+  /**
+   * Actual dates, when they differ from what the contract says. A contract states a
+   * commencement date and a duration; site reality often does not match, and the plan has to
+   * follow the real dates rather than the paper ones. Blank fields fall back to the contract.
+   *
+   * The internal pair drives the CPM baseline the team works to; the client pair drives the
+   * committed baseline the client is shown. They are deliberately independent — that gap is
+   * the buffer.
+   */
+  dates?: ScheduleDates;
+}
+
+export interface ScheduleDates {
+  /** re-anchors the CPM baseline; every computed date shifts with it */
+  internalStart?: string | null;
+  /** internal target finish. Reported as variance against the CPM finish, never used to
+   *  silently compress durations — the engine states the gap rather than inventing pace. */
+  internalEnd?: string | null;
+  clientStart?: string | null;
+  /** committed finish shown to the client; replaces contract start + duration when set */
+  clientEnd?: string | null;
 }
 
 // ---------- Scheduled output ----------

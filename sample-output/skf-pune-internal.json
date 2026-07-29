@@ -117,7 +117,9 @@
   "internal": {
     "durationWorkingDays": 68,
     "end": "2026-08-14",
-    "start": "2026-06-08"
+    "start": "2026-06-08",
+    "target": null,
+    "varianceDays": null
   },
   "margin": {
     "provenance": "computed",

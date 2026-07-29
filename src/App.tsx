@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from 'react';
-import type { CalendarConfig, EngineConfig, ProjectInputs, Traced } from './domain/types';
+import type { CalendarConfig, EngineConfig, ProjectInputs, ScheduleDates, Traced } from './domain/types';
 import type { DesignRow, TodoRow, TrackStatus } from './domain/trackers';
 import { TRACK_STATUSES, delayDays } from './domain/trackers';
 import { buildPlan, clientView, type Plan } from './engine/planner';
@@ -46,6 +46,8 @@ export default function App() {
   const [workMode, setWorkMode] = useState(1);
   const [buffer, setBuffer] = useState(normsData.bufferPolicy.defaultInternalBufferDays);
   const [leadOverrides, setLeadOverrides] = useState<Record<string, number>>({});
+  // actual dates, when they differ from the contract's
+  const [dates, setDates] = useState<ScheduleDates>({});
   // Persisted, or it would be lost on every reload — see services/settings-store.ts.
   const [clientId, setClientIdState] = useState(readDriveClientId);
   const setClientId = (v: string) => {
@@ -70,8 +72,9 @@ export default function App() {
       buffer: { internalBufferDays: buffer, min: normsData.bufferPolicy.min, max: normsData.bufferPolicy.max },
       normsVersion: normsData.version,
       normsOverrides: { packageLeadTimeDays: leadOverrides },
+      dates,
     };
-  }, [sundaysOff, holidays, workMode, buffer, leadOverrides]);
+  }, [sundaysOff, holidays, workMode, buffer, leadOverrides, dates]);
 
   const full = useMemo(() => buildPlan(project, cfg, today), [project, cfg, today]);
   const plan: Plan = view === 'external' ? clientView(full) : full;
@@ -154,6 +157,7 @@ export default function App() {
             buffer={buffer} setBuffer={setBuffer}
             leadOverrides={leadOverrides} setLeadOverrides={setLeadOverrides}
             clientId={clientId} setClientId={setClientId}
+            dates={dates} setDates={setDates}
             project={project}
             ingestResult={ingestResult}
             onParsed={(boq, file) => {
@@ -291,17 +295,96 @@ function PertSection({ tree, today, plan, view }: { tree: PertTree; today: strin
           {showGantt ? 'Same programme, drawn against the calendar.' : 'MS-Project columns, collapsible by section.'}
         </span>
       </div>
-      {!showGantt ? <Pert tree={tree} today={today} /> : <GanttView plan={plan} view={view} />}
+      <ScheduleSummary plan={plan} view={view} today={today} />
+      {!showGantt ? <Pert tree={tree} today={today} /> : <GanttView plan={plan} view={view} today={today} />}
     </>
   );
 }
 
-function GanttView({ plan, view }: { plan: Plan; view: string }) {
+/**
+ * Management-level read of the schedule, above the detail. The client view is a real document
+ * here rather than a stripped internal one: it is anchored to the committed client dates, and
+ * says what is due next and what is outstanding, without float, buffer or critical path.
+ */
+function ScheduleSummary({ plan, view, today }: { plan: Plan; view: string; today: string }) {
+  const acts = plan.modules.timeline.activities;
+  if (!acts.length) return null;
+  const client = view === 'external';
+  const baseStart = client ? plan.external?.start : plan.internal?.start;
+  const baseEnd = client ? plan.external?.end : plan.internal?.end;
+  const done = acts.filter((a) => (a.percentComplete?.value ?? 0) >= 100).length;
+  const behind = acts.filter((a) => a.endDate < today && (a.percentComplete?.value ?? 0) < 100).length;
+  const nextMilestone = plan.external?.milestones.find((m) => m.date >= today) ?? null;
+  const daysLeft = baseEnd ? Math.round((Date.parse(baseEnd + 'T00:00:00Z') - Date.parse(today + 'T00:00:00Z')) / 86400000) : null;
+
+  return (
+    <div className="cards" style={{ marginBottom: 16 }}>
+      <div className="card">
+        <div className="k">{client ? 'Committed baseline' : 'Internal baseline'}</div>
+        <div className="v" style={{ fontSize: 15 }}>{baseStart ?? '—'} → {baseEnd ?? '—'}</div>
+        <div className="s">{client ? 'dates the client is held to' : `${plan.internal?.durationWorkingDays ?? 0} working days (CPM)`}</div>
+      </div>
+      <div className="card">
+        <div className="k">Time remaining</div>
+        <div className="v" style={{ color: daysLeft !== null && daysLeft < 0 ? 'var(--crit)' : undefined }}>
+          {daysLeft === null ? '—' : `${daysLeft} d`}
+        </div>
+        <div className="s">{daysLeft !== null && daysLeft < 0 ? 'past the baseline finish' : `to ${baseEnd}`}</div>
+      </div>
+      <div className="card">
+        <div className="k">Activities complete</div>
+        <div className="v">{done} / {acts.length}</div>
+        <div className="s">as recorded by the team</div>
+      </div>
+      <div className="card" style={behind ? { borderColor: 'var(--crit)', background: 'var(--crit-soft)' } : undefined}>
+        <div className="k">Behind plan</div>
+        <div className="v" style={{ color: behind ? 'var(--crit)' : undefined }}>{behind}</div>
+        <div className="s">past planned finish, not signed off</div>
+      </div>
+      {nextMilestone && (
+        <div className="card">
+          <div className="k">Next milestone</div>
+          <div className="v" style={{ fontSize: 15 }}>{nextMilestone.code} · {nextMilestone.date}</div>
+          <div className="s">{nextMilestone.percent}% of contract value</div>
+        </div>
+      )}
+      {!client && (
+        <div className="card">
+          <div className="k">Buffer to client date</div>
+          <div className="v">{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div>
+          <div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH — internal finish is past the client date'}</div>
+        </div>
+      )}
+      {!client && plan.internal?.target && (
+        <div className="card" style={(plan.internal.varianceDays ?? 0) > 0 ? { borderColor: 'var(--warn)', background: 'var(--warn-soft)' } : undefined}>
+          <div className="k">Vs internal target</div>
+          <div className="v" style={{ color: (plan.internal.varianceDays ?? 0) > 0 ? 'var(--warn)' : 'var(--ok)' }}>
+            {(plan.internal.varianceDays ?? 0) > 0 ? `+${plan.internal.varianceDays}` : plan.internal.varianceDays} d
+          </div>
+          <div className="s">target {plan.internal.target}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GanttView({ plan, view, today }: { plan: Plan; view: string; today: string }) {
   const acts = plan.modules.timeline.activities;
   if (!acts.length) return <p className="muted">No schedule — inputs pending.</p>;
+  // progress is whatever has actually been recorded against an activity, never inferred
+  const progress = Object.fromEntries(
+    acts.filter((a) => a.percentComplete).map((a) => [a.id, { percent: a.percentComplete!.value }]),
+  );
+  const behind = acts.filter((a) => a.endDate < today && (a.percentComplete?.value ?? 0) < 100).length;
   return (
     <>
-      <Gantt plan={plan} />
+      {behind > 0 && (
+        <div className="banner" style={{ marginBottom: 12 }}>
+          <strong>{behind} activit{behind === 1 ? 'y is' : 'ies are'} past their planned finish</strong> without being recorded complete.
+          Red bars and labels mark them; the engine will not treat a passed date as work done.
+        </div>
+      )}
+      <Gantt plan={plan} today={today} progress={progress} />
       <h2>Activities {view === 'external' ? '(client view — float withheld)' : '(internal — full CPM)'}</h2>
       <div className="tblwrap">
         <table>
@@ -733,6 +816,7 @@ function Settings(p: {
   buffer: number; setBuffer: (v: number) => void;
   leadOverrides: Record<string, number>; setLeadOverrides: (v: Record<string, number>) => void;
   clientId: string; setClientId: (v: string) => void;
+  dates: ScheduleDates; setDates: (v: ScheduleDates) => void;
   plan: Plan;
   project: ProjectInputs;
   ingestResult: { boq: IngestedBoq; file: string } | null;
@@ -782,7 +866,45 @@ function Settings(p: {
         </div>
       </div>
 
-      <h2>Google Drive access</h2>
+      <h2>Actual project dates</h2>
+      <p className="muted" style={{ marginTop: -6, maxWidth: 860 }}>
+        The contract states a commencement date and a duration. Site reality often differs — set the actual dates
+        here and the whole plan is recomputed from them. Leave a field blank to use the contract.
+        The internal pair is the baseline the team works to; the client pair is what the client is shown. The gap
+        between them is the buffer.
+      </p>
+      <div className="row">
+        <div className="field">
+          <label>Internal start (actual)</label>
+          <input type="date" value={p.dates.internalStart ?? ''} onChange={(e) => p.setDates({ ...p.dates, internalStart: e.target.value || null })} />
+        </div>
+        <div className="field">
+          <label>Internal target finish</label>
+          <input type="date" value={p.dates.internalEnd ?? ''} onChange={(e) => p.setDates({ ...p.dates, internalEnd: e.target.value || null })} />
+        </div>
+        <div className="field">
+          <label>Client start</label>
+          <input type="date" value={p.dates.clientStart ?? ''} onChange={(e) => p.setDates({ ...p.dates, clientStart: e.target.value || null })} />
+        </div>
+        <div className="field">
+          <label>Client committed finish</label>
+          <input type="date" value={p.dates.clientEnd ?? ''} onChange={(e) => p.setDates({ ...p.dates, clientEnd: e.target.value || null })} />
+        </div>
+        <button onClick={() => p.setDates({})} disabled={!Object.values(p.dates).some(Boolean)}>Reset to contract</button>
+      </div>
+      {p.plan.internal && (
+        <div className={`banner ${p.plan.internal.varianceDays !== null && p.plan.internal.varianceDays > 0 ? '' : 'ok'}`} style={{ marginTop: 12, maxWidth: 900 }}>
+          Internal baseline <strong>{p.plan.internal.start} → {p.plan.internal.end}</strong> ({p.plan.internal.durationWorkingDays} working days).
+          {' '}Client baseline <strong>{p.plan.external?.start} → {p.plan.external?.end}</strong>.
+          {p.plan.internal.target && (
+            p.plan.internal.varianceDays !== null && p.plan.internal.varianceDays > 0
+              ? ` The CPM finish is ${p.plan.internal.varianceDays}d past your internal target of ${p.plan.internal.target} — the engine reports the gap rather than compressing durations to hide it.`
+              : ` Inside the internal target of ${p.plan.internal.target} by ${Math.abs(p.plan.internal.varianceDays ?? 0)}d.`
+          )}
+        </div>
+      )}
+
+      <h2 style={{ marginTop: 26 }}>Google Drive access</h2>
       <div className="row">
         <div className="field" style={{ minWidth: 420 }}>
           <label>OAuth client ID (for live Drive scanning)</label>

@@ -50,7 +50,11 @@ const summarise = (n: PertNode): PertNode => {
 
 export function buildPertFromPlan(plan: Plan, today: string): PertTree {
   counter = 0;
-  if (plan.project.status !== 'planned' || !plan.internal || !plan.external)
+  // Deliberately does NOT require plan.internal. clientView() nulls it, and requiring it here
+  // meant the client saw "no PERT programme available" — the schedule is the main thing a
+  // client is owed. Everything below is built from the external baseline and the activities,
+  // both of which survive redaction; float and critical flags are already stripped by then.
+  if (plan.project.status !== 'planned' || !plan.external)
     return { root: null, byCategory: { schedule: [], design: [], procurement: [], execution: [] }, totalTasks: 0, source: 'no plan' };
 
   // ---- Schedule & Milestones

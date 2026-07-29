@@ -38,7 +38,15 @@ export interface Plan {
   };
   calendar: EngineConfig['calendar'];
   buffer: EngineConfig['buffer'];
-  internal: { start: string; end: string; durationWorkingDays: number } | null;
+  internal: {
+    start: string;
+    end: string;
+    durationWorkingDays: number;
+    /** internal target finish, when one has been set in settings */
+    target: string | null;
+    /** CPM finish minus target, in calendar days. Positive = late against the target. */
+    varianceDays: number | null;
+  } | null;
   external: { start: string; end: string; milestones: { code: string; date: string; percent: number; description: string }[] } | null;
   ieInvariant: { externalEnd: string | null; internalEnd: string | null; bufferCalendarDays: number | null; holds: boolean };
   modules: {
@@ -121,7 +129,22 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
     return base;
   }
 
-  const start = p.contractStart!;
+  // Actual dates beat contract dates. A contract says "start 8-Jun for 75 days"; site may have
+  // started a week late, and every downstream date has to move with it rather than the plan
+  // quietly describing a project that is not happening.
+  const d = cfg.dates ?? {};
+  const contractStart = p.contractStart!;
+  const start = d.internalStart || contractStart;
+  // Anchored to the CONTRACT, not to the internal start. If site began two weeks late that is
+  // an internal fact; the date the client is held to does not move unless it is renegotiated —
+  // and the resulting squeeze is exactly what the buffer and the I/E invariant should show.
+  const clientStart = d.clientStart || contractStart;
+  if (d.internalStart && d.internalStart !== contractStart)
+    assumptions.push({
+      area: 'schedule',
+      text: `Internal baseline re-anchored to the actual start ${d.internalStart} (contract says ${contractStart}); every internal date is computed from it.`,
+      internalOnly: false,
+    });
   // ----- Module 1: timeline (internal = CPM) -----
   // Site work-mode changes productivity, so both activity durations AND the overlap
   // lags between them stretch — otherwise the network shape would freeze and a slower
@@ -137,7 +160,14 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
   const cpm: CpmResult = computeCpm(scaled, start, cfg.calendar);
   const internalEnd = cpm.activities.reduce((m, a) => (a.endDate > m ? a.endDate : m), start);
 
-  const externalEnd = p.contractDurationCalDays ? addCalendarDays(start, p.contractDurationCalDays.value) : internalEnd;
+  const contractEnd = p.contractDurationCalDays ? addCalendarDays(clientStart, p.contractDurationCalDays.value) : internalEnd;
+  const externalEnd = d.clientEnd || contractEnd;
+  if (d.clientEnd && d.clientEnd !== contractEnd)
+    assumptions.push({
+      area: 'schedule',
+      text: `Client baseline finish set to ${d.clientEnd} rather than the contract's ${contractEnd}.`,
+      internalOnly: false,
+    });
   const bufferCal = Math.round((parseIso(externalEnd).getTime() - parseIso(internalEnd).getTime()) / 86400000);
   if (bufferCal < cfg.buffer.min)
     assumptions.push({ area: 'schedule', text: `Internal CPM finish (${internalEnd}) leaves only ${bufferCal}d buffer vs contract end (${externalEnd}) — below configured minimum ${cfg.buffer.min}d. Crash critical-path trades or renegotiate.`, internalOnly: true });
@@ -153,11 +183,21 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
     };
   });
 
-  base.internal = { start, end: internalEnd, durationWorkingDays: cpm.projectDurationDays };
+  // An internal target is reported as a variance, never used to compress durations: shortening
+  // work to hit a date would be inventing a pace nothing supports.
+  const target = d.internalEnd || null;
+  const varianceDays = target ? Math.round((parseIso(internalEnd).getTime() - parseIso(target).getTime()) / 86400000) : null;
+  if (target && varianceDays !== null && varianceDays > 0)
+    assumptions.push({
+      area: 'schedule',
+      text: `CPM finish ${internalEnd} is ${varianceDays}d past the internal target ${target}. The engine does not compress durations to meet a date — recover it by crashing critical-path trades or re-sequencing.`,
+      internalOnly: true,
+    });
+  base.internal = { start, end: internalEnd, durationWorkingDays: cpm.projectDurationDays, target, varianceDays };
   base.external = {
-    start,
+    start: clientStart,
     end: externalEnd,
-    milestones: p.milestones.map((m) => ({ code: m.code, date: addCalendarDays(start, m.dayOffset), percent: m.percent, description: m.description })),
+    milestones: p.milestones.map((m) => ({ code: m.code, date: addCalendarDays(clientStart, m.dayOffset), percent: m.percent, description: m.description })),
   };
   base.ieInvariant = { externalEnd, internalEnd, bufferCalendarDays: bufferCal, holds: externalEnd >= internalEnd };
   base.modules.timeline = { activities: cpm.activities, criticalPath: cpm.criticalPath, phases };

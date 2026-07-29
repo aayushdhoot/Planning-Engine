@@ -182,7 +182,9 @@
   "internal": {
     "durationWorkingDays": 120,
     "end": "2026-11-03",
-    "start": "2026-07-07"
+    "start": "2026-07-07",
+    "target": null,
+    "varianceDays": null
   },
   "margin": null,
   "missingInputs": [],

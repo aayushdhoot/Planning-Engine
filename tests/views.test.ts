@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CalendarConfig, EngineConfig } from '../src/domain/types';
 import { buildPlan, clientView } from '../src/engine/planner';
 import { validatePlan, canonicalJson } from '../src/engine/schema';
+import { buildPertFromPlan } from '../src/engine/pert-build';
 import { renderReport } from '../src/reports/render';
 import { skf } from '../src/data/skf';
 import { emirates } from '../src/data/others';
@@ -108,5 +109,103 @@ describe('Dependency-driven overrun is detected and flagged', () => {
     expect(overdue.length).toBeGreaterThan(0);
     expect(overdue.some((x) => x.remarks.includes('has passed'))).toBe(true);
     expect(late.modules.todos.some((t) => t.category === 'procurement' && t.status === 'Delayed')).toBe(true);
+  });
+});
+
+describe('actual dates override the contract (#16)', () => {
+  const base: EngineConfig = {
+    calendar: { weeklyOffDays: [], holidays: [], workModeFactor: 1 },
+    buffer: { internalBufferDays: 7, min: norms.bufferPolicy.min, max: norms.bufferPolicy.max },
+    normsVersion: norms.version,
+  };
+  const TODAY = '2026-07-01';
+
+  it('re-anchors the whole baseline when the site actually started late', () => {
+    const onContract = buildPlan(skf, base, TODAY);
+    const late = buildPlan(skf, { ...base, dates: { internalStart: '2026-06-15' } }, TODAY);
+    expect(onContract.internal!.start).toBe('2026-06-08');
+    expect(late.internal!.start).toBe('2026-06-15');
+    // every downstream date moves with it rather than the plan describing a project that is not happening
+    expect(late.internal!.end > onContract.internal!.end).toBe(true);
+    expect(late.assumptions.some((a) => /re-anchored to the actual start/i.test(a.text))).toBe(true);
+  });
+
+  it('uses a client committed finish in place of contract start + duration', () => {
+    const p = buildPlan(skf, { ...base, dates: { clientEnd: '2026-09-30' } }, TODAY);
+    expect(p.external!.end).toBe('2026-09-30');
+    expect(p.ieInvariant.externalEnd).toBe('2026-09-30');
+    expect(p.assumptions.some((a) => /Client baseline finish set to 2026-09-30/.test(a.text))).toBe(true);
+  });
+
+  it('reports a missed internal target as a variance instead of compressing durations', () => {
+    const p = buildPlan(skf, { ...base, dates: { internalEnd: '2026-07-31' } }, TODAY);
+    expect(p.internal!.target).toBe('2026-07-31');
+    expect(p.internal!.varianceDays).toBeGreaterThan(0);
+    // the durations themselves must be untouched — the engine states the gap, it does not invent pace
+    const plain = buildPlan(skf, base, TODAY);
+    expect(p.internal!.end).toBe(plain.internal!.end);
+    expect(p.assumptions.some((a) => /does not compress durations/i.test(a.text))).toBe(true);
+  });
+
+  it('shifts the client milestone dates with the client start', () => {
+    const p = buildPlan(skf, { ...base, dates: { clientStart: '2026-06-22' } }, TODAY);
+    expect(p.external!.start).toBe('2026-06-22');
+    expect(p.external!.milestones[0].date).toBe('2026-06-22');
+  });
+
+  it('leaves the contract dates alone when nothing is overridden', () => {
+    const p = buildPlan(skf, { ...base, dates: {} }, TODAY);
+    expect(p.internal!.start).toBe('2026-06-08');
+    expect(p.internal!.target).toBeNull();
+    expect(p.internal!.varianceDays).toBeNull();
+  });
+});
+
+describe('the client baseline does not drift with internal reality', () => {
+  const base: EngineConfig = {
+    calendar: { weeklyOffDays: [], holidays: [], workModeFactor: 1 },
+    buffer: { internalBufferDays: 7, min: norms.bufferPolicy.min, max: norms.bufferPolicy.max },
+    normsVersion: norms.version,
+  };
+
+  it('holds the client dates on the contract when only the internal start slips', () => {
+    const late = buildPlan(skf, { ...base, dates: { internalStart: '2026-06-22' } }, '2026-07-01');
+    // internal moved…
+    expect(late.internal!.start).toBe('2026-06-22');
+    // …the client commitment did not
+    expect(late.external!.start).toBe('2026-06-08');
+    expect(late.external!.end).toBe('2026-08-22');
+  });
+
+  it('turns a slip that eats the buffer into a visible invariant breach', () => {
+    const late = buildPlan(skf, { ...base, dates: { internalStart: '2026-07-20' } }, '2026-07-01');
+    expect(late.ieInvariant.externalEnd).toBe('2026-08-22');
+    expect(late.internal!.end > late.ieInvariant.externalEnd!).toBe(true);
+    expect(late.ieInvariant.holds).toBe(false);
+  });
+});
+
+describe('the client can actually see the schedule (#16)', () => {
+  const c = cfg();
+  const internal = buildPlan(skf, c, '2026-07-01');
+  const client = clientView(internal);
+
+  it('builds a PERT programme for the client view, not an empty tree', () => {
+    const tree = buildPertFromPlan(client, '2026-07-01');
+    expect(tree.root).not.toBeNull();
+    expect(tree.totalTasks).toBeGreaterThan(0);
+    expect(tree.byCategory.execution.length).toBeGreaterThan(0);
+    expect(tree.source).not.toBe('no plan');
+  });
+
+  it('gives the client the same programme depth as internal', () => {
+    const i = buildPertFromPlan(internal, '2026-07-01');
+    const e = buildPertFromPlan(client, '2026-07-01');
+    expect(e.totalTasks).toBe(i.totalTasks);
+  });
+
+  it('still produces nothing for a project with no plan', () => {
+    const pending = buildPlan(emirates, c, '2026-07-01');
+    expect(buildPertFromPlan(pending, '2026-07-01').root).toBeNull();
   });
 });

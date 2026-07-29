@@ -66,6 +66,20 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
   schema rejects a *silent* breach.
 - **Calendar default is a 7-day week** (Sundays working — Flipspaces convention). Toggle in Settings.
 
+## Actual dates vs contract dates
+`cfg.dates` (`ScheduleDates`) carries four optional overrides. A contract states a start and a
+duration; site reality often differs, and the plan must follow the real dates.
+- `internalStart` re-anchors the CPM baseline — every internal date moves with it.
+- **`clientStart` falls back to the CONTRACT start, never to the overridden internal start.**
+  A late site start is an internal fact; the date the client is held to does not move unless it
+  is renegotiated, and the resulting squeeze is what the buffer and I/E invariant exist to show.
+- `internalEnd` is a *target*. The engine reports `internal.varianceDays` against it and
+  **never compresses durations to meet it** — shortening work to hit a date invents a pace
+  nothing supports. Same reasoning as an overrun being a finding, not an error.
+- `buildPertFromPlan()` must NOT require `plan.internal`. `clientView()` nulls it, and the old
+  guard meant the client saw "no PERT programme available" — the schedule is the main thing a
+  client is owed. It builds from `external` + activities, both of which survive redaction.
+
 ## RA milestones replaced cashflow
 `modules.cashflow` is gone; `modules.raMilestones` took its slot in `REQUIRED_MODULES`.
 - A milestone is a list of physical things that must be true on site, not a monthly money

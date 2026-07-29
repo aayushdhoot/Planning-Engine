@@ -19,7 +19,7 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 160 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 170 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -40,6 +40,13 @@ issued programme get the same four-category view derived from their computed pla
 **Manpower that a contractor would recognise.** Work content is levelled across each trade's
 engagement window against realistic gang caps, so trades hold a stable core team and surge
 only where activities genuinely overlap. Electricians now peak at 14, not 30.
+
+**Actual dates.** Settings carries internal and client start/finish overrides. Setting the real
+site start re-drives every internal date; the client baseline stays on the contract unless you
+change it, so a slip shows up as buffer erosion rather than quietly moving the client's date. An
+internal target finish is reported as a variance — the engine never compresses durations to hit
+a date. The Gantt marks today, draws recorded progress, and flags activities past their planned
+finish that nobody has signed off.
 
 **Sections.** Overview · PERT (with the Gantt behind a toggle) · Manpower · Design ·
 Procurement · To-do · Dependencies · RA Milestones · New project · Settings (resource plan,
