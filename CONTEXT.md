@@ -66,6 +66,15 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
   schema rejects a *silent* breach.
 - **Calendar default is a 7-day week** (Sundays working — Flipspaces convention). Toggle in Settings.
 
+## S-curve
+`src/engine/scurve.ts` + `src/ui/SCurve.tsx`, shown as the third mode in the PERT section.
+- Weighted by **man-days** (`duration × crew`), the same quantity manpower levels — never by
+  activity count, or ten one-day snagging items outrank a twenty-day HVAC run.
+- **Actual is recorded progress only.** There is deliberately no "assume it is on track"
+  fallback: an activity whose window has passed with nothing recorded drags the curve down,
+  which is the truth the chart exists to show. Future points carry `actual: null` so the line
+  stops at today rather than being drawn flat.
+
 ## Trackers
 - **Design carries two dates only** — `readyBy` (drawing ready to issue) and `approvalBy`
   (client must have approved). The old `startDate` / `revisedEndDateInt` /

@@ -19,7 +19,7 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 185 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 192 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -41,6 +41,11 @@ issued programme get the same four-category view derived from their computed pla
 engagement window against realistic gang caps, so trades hold a stable core team and surge
 only where activities genuinely overlap. Electricians now peak at 14, not 30.
 
+**S-curve.** Planned vs actual cumulative progress, weighted by **work content** rather than
+activity count — finishing ten one-day snagging items is not the same progress as one twenty-day
+HVAC run. Actual is only ever what someone recorded; the engine never infers progress from a
+date having passed, so an unrecorded project reads 0% and says so.
+
 **Actual dates.** Settings carries internal and client start/finish overrides. Setting the real
 site start re-drives every internal date; the client baseline stays on the contract unless you
 change it, so a slip shows up as buffer erosion rather than quietly moving the client's date. An
@@ -48,7 +53,7 @@ internal target finish is reported as a variance — the engine never compresses
 a date. The Gantt marks today, draws recorded progress, and flags activities past their planned
 finish that nobody has signed off.
 
-**Sections.** Overview · PERT (with the Gantt behind a toggle) · Manpower · Design ·
+**Sections.** Overview · PERT (**PERT network / Gantt / S-curve**) · Manpower · Design ·
 Procurement · To-do · Dependencies · RA Milestones · New project · Settings (resource plan,
 calendar, norms, Drive access and the canonical JSON live here).
 

@@ -12,6 +12,8 @@ import { kohler } from './data/kohler';
 import { buildEmiratesPert } from './data/emirates-pert';
 import normsData from './norms/norms-v1.json';
 import { Gantt } from './ui/Gantt';
+import { SCurveChart } from './ui/SCurve';
+import { buildSCurve } from './engine/scurve';
 import { Pert } from './ui/Pert';
 import type { PertTree } from './domain/pert';
 import { Intake } from './ui/Intake';
@@ -282,21 +284,53 @@ function Overview({ plan, view }: { plan: Plan; view: string }) {
  * a separate module, so it lives here behind a toggle instead of on its own tab.
  */
 function PertSection({ tree, today, plan, view }: { tree: PertTree; today: string; plan: Plan; view: string }) {
-  const [showGantt, setShowGantt] = useState(false);
+  const [mode, setMode] = useState<'pert' | 'gantt' | 'scurve'>('pert');
   const acts = plan.modules.timeline.activities;
+  const curve = useMemo(() => buildSCurve(acts, today), [acts, today]);
+  const blurb =
+    mode === 'gantt' ? 'Same programme, drawn against the calendar.'
+    : mode === 'scurve' ? 'Cumulative progress weighted by work content, not by activity count.'
+    : 'MS-Project columns, collapsible by section.';
   return (
     <>
       <div className="row" style={{ marginBottom: 12 }}>
         <div className="seg">
-          <button className={!showGantt ? 'on' : ''} onClick={() => setShowGantt(false)}>PERT network</button>
-          <button className={showGantt ? 'on' : ''} onClick={() => setShowGantt(true)} disabled={!acts.length}>Gantt chart</button>
+          <button className={mode === 'pert' ? 'on' : ''} onClick={() => setMode('pert')}>PERT network</button>
+          <button className={mode === 'gantt' ? 'on' : ''} onClick={() => setMode('gantt')} disabled={!acts.length}>Gantt chart</button>
+          <button className={mode === 'scurve' ? 'on' : ''} onClick={() => setMode('scurve')} disabled={!acts.length}>S-curve</button>
         </div>
-        <span className="muted" style={{ fontSize: 12 }}>
-          {showGantt ? 'Same programme, drawn against the calendar.' : 'MS-Project columns, collapsible by section.'}
-        </span>
+        <span className="muted" style={{ fontSize: 12 }}>{blurb}</span>
       </div>
       <ScheduleSummary plan={plan} view={view} today={today} />
-      {!showGantt ? <Pert tree={tree} today={today} /> : <GanttView plan={plan} view={view} today={today} />}
+      {mode === 'pert' && <Pert tree={tree} today={today} />}
+      {mode === 'gantt' && <GanttView plan={plan} view={view} today={today} />}
+      {mode === 'scurve' && <SCurveView curve={curve} today={today} />}
+    </>
+  );
+}
+
+function SCurveView({ curve, today }: { curve: ReturnType<typeof buildSCurve>; today: string }) {
+  if (!curve.points.length) return <p className="muted">No schedule — inputs pending.</p>;
+  const behind = curve.varianceToday < 0;
+  return (
+    <>
+      <div className="cards">
+        <div className="card"><div className="k">Planned to date</div><div className="v">{curve.plannedToday}%</div><div className="s">by work content</div></div>
+        <div className="card"><div className="k">Actual to date</div><div className="v" style={{ color: 'var(--ok)' }}>{curve.actualToday}%</div><div className="s">recorded progress only</div></div>
+        <div className="card" style={behind ? { borderColor: 'var(--crit)', background: 'var(--crit-soft)' } : undefined}>
+          <div className="k">Variance</div>
+          <div className="v" style={{ color: behind ? 'var(--crit)' : 'var(--ok)' }}>{curve.varianceToday > 0 ? '+' : ''}{curve.varianceToday}%</div>
+          <div className="s">{behind ? 'behind the curve' : 'at or ahead of plan'}</div>
+        </div>
+        <div className="card"><div className="k">Total work content</div><div className="v">{curve.totalManDays.toLocaleString('en-IN')}</div><div className="s">man-days across the programme</div></div>
+      </div>
+      {curve.actualToday === 0 && (
+        <div className="banner" style={{ marginBottom: 12 }}>
+          No progress has been recorded against any activity yet, so the actual curve sits at zero. The engine will not
+          infer progress from the calendar — a date passing is not evidence that work happened.
+        </div>
+      )}
+      <SCurveChart curve={curve} today={today} />
     </>
   );
 }
