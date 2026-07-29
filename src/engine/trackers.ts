@@ -251,6 +251,8 @@ export function buildProcurementTracker(
       category: pkg.name,
       subCategory: base.label,
       criticality: criticalityFor(leadDays, base.longLead),
+      longLead: base.longLead,
+      leadDays,
       orderBy,
       deliveryRequired,
       revisedDate: null,
@@ -302,6 +304,7 @@ export function buildTodoTracker(
         revisedDate: null,
         notes: `Standard project mobilisation task (${norms.version}) — day ${item.dayOffset >= 0 ? '+' : ''}${item.dayOffset} from site start.`,
         category: 'site',
+        source: 'standard',
       });
     }
 
@@ -317,6 +320,7 @@ export function buildTodoTracker(
         revisedDate: null,
         notes: a.critical ? 'On the critical path — any slip moves the finish date.' : `Float ${a.totalFloat}d.`,
         category: 'site',
+        source: 'derived',
       });
 
   for (const pr of proc)
@@ -331,6 +335,7 @@ export function buildTodoTracker(
         revisedDate: null,
         notes: pr.gatedBy ? `Gated by ${pr.gatedBy}` : 'No design gate recorded.',
         category: 'procurement',
+        source: 'derived',
       });
 
   for (const d of design)
@@ -345,6 +350,7 @@ export function buildTodoTracker(
         revisedDate: null,
         notes: [d.releases.length ? `Releases: ${d.releases.slice(0, 2).join(', ')}` : '', d.issues[0] ?? ''].filter(Boolean).join(' · '),
         category: 'design',
+        source: 'derived',
       });
 
   return rows.sort((a, b) => ((a.endDate ?? '') < (b.endDate ?? '') ? -1 : 1));
@@ -440,6 +446,29 @@ export function parseMilestoneClauses(description: string): { kind: RaCheckpoint
   return out;
 }
 
+/**
+ * The milestone headings the tracking sheet groups sub-milestones under. A clause is filed by
+ * discipline so "Block wall" and "Anti-termite treatment" sit under Civil Work rather than in
+ * one flat list of twenty clauses.
+ */
+const RA_GROUPS: [RegExp, string][] = [
+  [/authority|bmc|fire noc|approval/i, 'Authority Approval'],
+  [/block ?wall|anti.?termite|waterproof|plumb|gypsum|ply |civil|plaster|screed|marking|masonry|tiling|marble|cubicle|sanitaryware|false ceiling|paint|flooring|partition|skinning|demolition/i, 'Civil Work'],
+  [/electric|conduit|raceway|wiring|ht\/lt|switch|light|db\b|mcb|panel/i, 'Electrical'],
+  [/hvac|duct|grill|damper|exhaust|return air|machine deliver|piping/i, 'HVAC'],
+  [/sprinkler|fire alarm|fas\b|safety|acs|pa\b|fa\b|security|detector/i, 'Sprinkler & Safety System'],
+  [/network|data|passive|it\b/i, 'Networking'],
+  [/furniture|chair|carpentry|joinery|mill ?work/i, 'Furniture & Joinery'],
+  [/design closure|design/i, 'Design Closure'],
+  [/clean|snag|touch ?up|handover|commission/i, 'Completion & Handover'],
+];
+
+function groupFor(kind: RaCheckpoint['kind'], text: string): string {
+  if (kind === 'order') return 'Key Order Closures';
+  for (const [re, label] of RA_GROUPS) if (re.test(text)) return label;
+  return kind === 'material' ? 'Material Delivery' : 'Execution';
+}
+
 const STOPWORDS = new Set(['the', 'and', 'for', 'with', 'from', 'all', 'material', 'delivery', 'works', 'work', 'key', 'closures']);
 const tokens = (s: string) =>
   s
@@ -465,13 +494,21 @@ export function buildRaTracker(
   acts: ScheduledActivity[],
   projectStart: string,
   today: string,
+  /** % withheld as retention; defaults to the norm (0), so nothing is invented for a contract without one */
+  retention?: number,
 ): RaMilestoneRow[] {
+  const terms = norms.commercialTerms as { gstPercent: number; defaultRetentionPercent: number };
+  const gstPercent = terms.gstPercent;
+  const retentionPercent = retention ?? terms.defaultRetentionPercent;
+
   return p.milestones.map((m, i) => {
     const dueDate = addCalendarDays(projectStart, m.dayOffset);
+    const amount = p.contractValue ? Math.round((m.percent / 100) * p.contractValue.value) : null;
     const checkpoints: RaCheckpoint[] = parseMilestoneClauses(m.description).map((c, j) => {
       const a = c.kind === 'execution' ? activityForClause(c.text, acts) : null;
       return {
         id: `${m.code}-c${j + 1}`,
+        group: groupFor(c.kind, c.text),
         description: c.text.charAt(0).toUpperCase() + c.text.slice(1),
         kind: c.kind,
         activityId: a?.id ?? null,
@@ -490,7 +527,9 @@ export function buildRaTracker(
       code: m.code,
       dayOffset: m.dayOffset,
       percent: m.percent,
-      amount: p.contractValue ? Math.round((m.percent / 100) * p.contractValue.value) : null,
+      amount,
+      amountIncTax: amount === null ? null : Math.round(amount * (1 + gstPercent / 100)),
+      postRetention: amount === null ? null : Math.round(amount * (1 + gstPercent / 100) * (1 - retentionPercent / 100)),
       dueDate,
       revisedDate: null,
       checkpoints,
@@ -498,6 +537,11 @@ export function buildRaTracker(
       status: statusFor(dueDate, today),
       invoiceNo: '',
       invoiceDate: null,
+      // what was actually invoiced, received and when: tracked by the team, never computed —
+      // the engine has no way to know what a client paid
+      invoiceRaised: null,
+      amountReceived: null,
+      paymentDate: null,
       remarks: checkpoints.length ? '' : 'No checkable clauses in the contract wording for this milestone.',
     };
   });

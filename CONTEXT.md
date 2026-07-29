@@ -108,6 +108,15 @@ duration; site reality often differs, and the plan must follow the real dates.
   client is owed. It builds from `external` + activities, both of which survive redaction.
 
 ## RA milestones replaced cashflow
+Laid out to match the client's own payment-schedule sheet: **RA → Milestone → Sub-milestone**,
+with Amount (excl. tax) / Incl. GST / Post retention / Invoice raised / Received / Payment date.
+- `RaCheckpoint.group` is the milestone heading ("Civil Work", "Electrical", "Key Order
+  Closures"); `groupFor()` files a clause by discipline so twenty clauses read as five groups.
+- GST is a norm (18%, statutory). **Retention defaults to 0** so nothing is invented for a
+  contract that has none — set it per project when the contract defines one.
+- Invoice raised / received / payment date are **entered, never computed**. The engine cannot
+  know what a client paid.
+
 `modules.cashflow` is gone; `modules.raMilestones` took its slot in `REQUIRED_MODULES`.
 - A milestone is a list of physical things that must be true on site, not a monthly money
   projection. `parseMilestoneClauses()` splits the contract prose ("Execution: a, b. Material

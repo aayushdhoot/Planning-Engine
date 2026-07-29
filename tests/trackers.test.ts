@@ -134,3 +134,48 @@ describe('RA milestone clause parsing', () => {
     expect(c.some((x) => x.kind === 'material')).toBe(true);
   });
 });
+
+describe('to-do list is general by default, not a restatement of the other tabs', () => {
+  const todos = plan.modules.todos;
+
+  it('tags every row by where it came from', () => {
+    for (const t of todos) expect(['standard', 'derived', 'custom']).toContain(t.source);
+  });
+
+  it('keeps the general list short enough to read', () => {
+    const general = todos.filter((t) => t.source === 'standard');
+    expect(general.length).toBe((norms.standardMobilisationTodos as { items: unknown[] }).items.length);
+    // the derived rows are the ones that made it unreadable — they are separable
+    expect(todos.filter((t) => t.source === 'derived').length).toBeGreaterThan(general.length);
+  });
+});
+
+describe('procurement flags long-lead packages (#3)', () => {
+  const proc = plan.modules.procurement;
+
+  it('exposes the long-lead flag and the lead time it used', () => {
+    expect(proc.some((p) => p.longLead)).toBe(true);
+    for (const p of proc) {
+      expect(typeof p.longLead).toBe('boolean');
+      expect(p.leadDays).toBeGreaterThan(0);
+    }
+  });
+
+  it('matches the long-lead flag to the norms, not to a guess', () => {
+    const leads = norms.packageLeadTimes as Record<string, { days: number; longLead: boolean }>;
+    for (const p of proc) {
+      const code = skf.boqPackages.find((b) => b.name === p.category)?.code;
+      if (code && leads[code]) expect(`${p.category}:${p.longLead}`).toBe(`${p.category}:${leads[code].longLead}`);
+    }
+  });
+
+  it('gives long-lead packages more runway than short-lead ones', () => {
+    const gap = (p: (typeof proc)[number]) =>
+      p.orderBy && p.deliveryRequired
+        ? Math.round((Date.parse(p.deliveryRequired) - Date.parse(p.orderBy)) / 86400000)
+        : 0;
+    const long = proc.filter((p) => p.longLead && p.orderBy);
+    const short = proc.filter((p) => !p.longLead && p.orderBy);
+    expect(Math.min(...long.map(gap))).toBeGreaterThanOrEqual(Math.max(...short.map(gap)));
+  });
+});

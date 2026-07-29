@@ -2158,6 +2158,8 @@
         "feeds": "Waterproofing (2025-09-26)",
         "gatedBy": "Base Build Layout (client approval 2025-09-25)",
         "id": "p1",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": "2025-09-03",
         "orderStatus": "Open",
         "remarks": "",
@@ -2175,6 +2177,8 @@
         "feeds": "Site Measurement for Modular Cubicle (2025-12-24)",
         "gatedBy": "Furniture Layout (client approval 2025-12-23)",
         "id": "p2",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": "2025-12-01",
         "orderStatus": "Open",
         "remarks": "",
@@ -2192,6 +2196,8 @@
         "feeds": "Conduiting for Raw Power, UPS, lighting, IT (2025-10-24)",
         "gatedBy": "Lighting Layout (with dimensions) (client approval 2025-10-23)",
         "id": "p3",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": "2025-10-01",
         "orderStatus": "Open",
         "remarks": "",
@@ -2209,6 +2215,8 @@
         "feeds": "Marking & Support fixing of Ducts (2025-10-31)",
         "gatedBy": "HVAC DBR (client approval 2025-10-30)",
         "id": "p4",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": "2025-10-08",
         "orderStatus": "Open",
         "remarks": "",
@@ -2226,6 +2234,8 @@
         "feeds": "Marking of plumbing lines (2025-10-14)",
         "gatedBy": "PHE DBR & Plumbing Layout (client approval 2025-10-13)",
         "id": "p5",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": "2025-09-21",
         "orderStatus": "Open",
         "remarks": "",
@@ -2243,6 +2253,8 @@
         "feeds": "Cutout for power/data entrys (2025-11-21)",
         "gatedBy": "FA / PA System Layout (client approval 2025-11-20)",
         "id": "p6",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": "2025-10-29",
         "orderStatus": "Open",
         "remarks": "",
@@ -2260,6 +2272,8 @@
         "feeds": "Marking & supports fixing for fire pipes (2025-10-13)",
         "gatedBy": "Fire Sprinkler Layout (client approval 2025-10-12)",
         "id": "p7",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": "2025-09-20",
         "orderStatus": "Open",
         "remarks": "",
@@ -2277,6 +2291,8 @@
         "feeds": null,
         "gatedBy": null,
         "id": "p8",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": null,
         "orderStatus": "Open",
         "remarks": "",
@@ -2294,6 +2310,8 @@
         "feeds": null,
         "gatedBy": null,
         "id": "p9",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": null,
         "orderStatus": "Open",
         "remarks": "",
@@ -2311,6 +2329,8 @@
         "feeds": "Mobilisation Period (2025-07-20)",
         "gatedBy": null,
         "id": "p10",
+        "leadDays": 21,
+        "longLead": false,
         "orderBy": "2025-06-27",
         "orderStatus": "Open",
         "remarks": "",
@@ -2323,12 +2343,15 @@
     "raMilestones": [
       {
         "amount": 0,
+        "amountIncTax": 0,
+        "amountReceived": null,
         "checkpoints": [
           {
             "activityId": null,
             "activityName": null,
             "actualDate": null,
             "description": "Mobilisation",
+            "group": "Execution",
             "id": "RA1-c1",
             "kind": "execution",
             "plannedDate": "2025-07-26",
@@ -2341,6 +2364,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Kick-off",
+            "group": "Execution",
             "id": "RA1-c2",
             "kind": "execution",
             "plannedDate": "2025-06-23",
@@ -2353,6 +2377,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "PO release",
+            "group": "Execution",
             "id": "RA1-c3",
             "kind": "execution",
             "plannedDate": "2025-06-23",
@@ -2367,7 +2392,10 @@
         "id": "ra-1",
         "invoiceDate": null,
         "invoiceNo": "",
+        "invoiceRaised": null,
+        "paymentDate": null,
         "percent": 0,
+        "postRetention": 0,
         "readiness": 0,
         "remarks": "",
         "revisedDate": null,
@@ -2375,12 +2403,15 @@
       },
       {
         "amount": 35925000,
+        "amountIncTax": 42391500,
+        "amountReceived": null,
         "checkpoints": [
           {
             "activityId": null,
             "activityName": null,
             "actualDate": null,
             "description": "Design freeze",
+            "group": "Design Closure",
             "id": "RA2-c1",
             "kind": "execution",
             "plannedDate": "2025-08-22",
@@ -2393,6 +2424,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Liaisoning approvals (BMC",
+            "group": "Authority Approval",
             "id": "RA2-c2",
             "kind": "execution",
             "plannedDate": "2025-08-22",
@@ -2405,6 +2437,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Fire NOC)",
+            "group": "Authority Approval",
             "id": "RA2-c3",
             "kind": "execution",
             "plannedDate": "2026-01-07",
@@ -2417,6 +2450,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Site mobilisation",
+            "group": "Execution",
             "id": "RA2-c4",
             "kind": "execution",
             "plannedDate": "2025-07-26",
@@ -2431,7 +2465,10 @@
         "id": "ra-2",
         "invoiceDate": null,
         "invoiceNo": "",
+        "invoiceRaised": null,
+        "paymentDate": null,
         "percent": 15,
+        "postRetention": 42391500,
         "readiness": 0,
         "remarks": "",
         "revisedDate": null,
@@ -2439,12 +2476,15 @@
       },
       {
         "amount": 47900000,
+        "amountIncTax": 56522000,
+        "amountReceived": null,
         "checkpoints": [
           {
             "activityId": null,
             "activityName": null,
             "actualDate": null,
             "description": "Civil",
+            "group": "Civil Work",
             "id": "RA3-c1",
             "kind": "execution",
             "plannedDate": "2025-10-11",
@@ -2457,6 +2497,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Dry-wall partitions",
+            "group": "Civil Work",
             "id": "RA3-c2",
             "kind": "execution",
             "plannedDate": "2025-12-01",
@@ -2469,6 +2510,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "MEP first fix",
+            "group": "Execution",
             "id": "RA3-c3",
             "kind": "execution",
             "plannedDate": "2025-10-11",
@@ -2481,6 +2523,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Raceways",
+            "group": "Electrical",
             "id": "RA3-c4",
             "kind": "execution",
             "plannedDate": "2025-12-02",
@@ -2493,6 +2536,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Conduiting",
+            "group": "Electrical",
             "id": "RA3-c5",
             "kind": "execution",
             "plannedDate": "2025-11-02",
@@ -2507,7 +2551,10 @@
         "id": "ra-3",
         "invoiceDate": null,
         "invoiceNo": "",
+        "invoiceRaised": null,
+        "paymentDate": null,
         "percent": 20,
+        "postRetention": 56522000,
         "readiness": 0,
         "remarks": "",
         "revisedDate": null,
@@ -2515,12 +2562,15 @@
       },
       {
         "amount": 59875000,
+        "amountIncTax": 70652500,
+        "amountReceived": null,
         "checkpoints": [
           {
             "activityId": null,
             "activityName": null,
             "actualDate": null,
             "description": "Ceilings",
+            "group": "Execution",
             "id": "RA4-c1",
             "kind": "execution",
             "plannedDate": "2025-11-30",
@@ -2533,6 +2583,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Flooring",
+            "group": "Civil Work",
             "id": "RA4-c2",
             "kind": "execution",
             "plannedDate": "2025-10-30",
@@ -2545,6 +2596,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Second fix MEP",
+            "group": "Execution",
             "id": "RA4-c3",
             "kind": "execution",
             "plannedDate": "2025-10-27",
@@ -2557,6 +2609,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Glass partitions",
+            "group": "Civil Work",
             "id": "RA4-c4",
             "kind": "execution",
             "plannedDate": "2025-12-01",
@@ -2571,7 +2624,10 @@
         "id": "ra-4",
         "invoiceDate": null,
         "invoiceNo": "",
+        "invoiceRaised": null,
+        "paymentDate": null,
         "percent": 25,
+        "postRetention": 70652500,
         "readiness": 0,
         "remarks": "",
         "revisedDate": null,
@@ -2579,12 +2635,15 @@
       },
       {
         "amount": 59875000,
+        "amountIncTax": 70652500,
+        "amountReceived": null,
         "checkpoints": [
           {
             "activityId": null,
             "activityName": null,
             "actualDate": null,
             "description": "Painting",
+            "group": "Civil Work",
             "id": "RA5-c1",
             "kind": "execution",
             "plannedDate": "2025-11-20",
@@ -2597,6 +2656,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Wall finishes",
+            "group": "Execution",
             "id": "RA5-c2",
             "kind": "execution",
             "plannedDate": "2025-11-21",
@@ -2609,6 +2669,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Modular furniture",
+            "group": "Furniture & Joinery",
             "id": "RA5-c3",
             "kind": "execution",
             "plannedDate": "2025-12-01",
@@ -2621,6 +2682,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Commissioning",
+            "group": "Completion & Handover",
             "id": "RA5-c4",
             "kind": "execution",
             "plannedDate": "2025-11-19",
@@ -2635,7 +2697,10 @@
         "id": "ra-5",
         "invoiceDate": null,
         "invoiceNo": "",
+        "invoiceRaised": null,
+        "paymentDate": null,
         "percent": 25,
+        "postRetention": 70652500,
         "readiness": 0,
         "remarks": "",
         "revisedDate": null,
@@ -2643,12 +2708,15 @@
       },
       {
         "amount": 35925000,
+        "amountIncTax": 42391500,
+        "amountReceived": null,
         "checkpoints": [
           {
             "activityId": null,
             "activityName": null,
             "actualDate": null,
             "description": "Snagging",
+            "group": "Completion & Handover",
             "id": "RA6-c1",
             "kind": "execution",
             "plannedDate": "2026-02-23",
@@ -2661,6 +2729,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Deep cleaning",
+            "group": "Completion & Handover",
             "id": "RA6-c2",
             "kind": "execution",
             "plannedDate": "2026-02-22",
@@ -2673,6 +2742,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Handover",
+            "group": "Completion & Handover",
             "id": "RA6-c3",
             "kind": "execution",
             "plannedDate": "2026-02-23",
@@ -2685,6 +2755,7 @@
             "activityName": null,
             "actualDate": null,
             "description": "Close-out documents",
+            "group": "Execution",
             "id": "RA6-c4",
             "kind": "execution",
             "plannedDate": "2026-02-23",
@@ -2699,7 +2770,10 @@
         "id": "ra-6",
         "invoiceDate": null,
         "invoiceNo": "",
+        "invoiceRaised": null,
+        "paymentDate": null,
         "percent": 15,
+        "postRetention": 42391500,
         "readiness": 0,
         "remarks": "",
         "revisedDate": null,
@@ -8561,6 +8635,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8573,6 +8648,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8585,6 +8661,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8597,6 +8674,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8609,6 +8687,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8621,6 +8700,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8633,6 +8713,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8645,6 +8726,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8657,6 +8739,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8669,6 +8752,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8681,6 +8765,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8693,6 +8778,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8705,6 +8791,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8717,6 +8804,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8729,6 +8817,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8741,6 +8830,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8753,6 +8843,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8765,6 +8856,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8777,6 +8869,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8789,6 +8882,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8801,6 +8895,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8813,6 +8908,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8825,6 +8921,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8837,6 +8934,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8849,6 +8947,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8861,6 +8960,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8873,6 +8973,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8885,6 +8986,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8897,6 +8999,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8909,6 +9012,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8921,6 +9025,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8933,6 +9038,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8945,6 +9051,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8957,6 +9064,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8969,6 +9077,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8981,6 +9090,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -8993,6 +9103,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9005,6 +9116,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9017,6 +9129,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9029,6 +9142,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9041,6 +9155,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9053,6 +9168,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9065,6 +9181,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9077,6 +9194,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9089,6 +9207,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9101,6 +9220,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9113,6 +9233,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9125,6 +9246,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9137,6 +9259,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9149,6 +9272,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9161,6 +9285,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9173,6 +9298,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9185,6 +9311,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9197,6 +9324,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9209,6 +9337,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9221,6 +9350,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9233,6 +9363,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9245,6 +9376,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9257,6 +9389,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9269,6 +9402,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9281,6 +9415,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9293,6 +9428,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9305,6 +9441,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9317,6 +9454,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9329,6 +9467,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9341,6 +9480,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9353,6 +9493,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9365,6 +9506,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9377,6 +9519,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9389,6 +9532,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9401,6 +9545,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9413,6 +9558,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9425,6 +9571,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9437,6 +9584,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9449,6 +9597,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9461,6 +9610,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9473,6 +9623,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9485,6 +9636,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9497,6 +9649,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9509,6 +9662,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9521,6 +9675,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9533,6 +9688,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9545,6 +9701,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9557,6 +9714,7 @@
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9569,6 +9727,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9581,6 +9740,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9593,6 +9753,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9605,6 +9766,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9617,6 +9779,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9629,6 +9792,7 @@
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9641,6 +9805,7 @@
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       }

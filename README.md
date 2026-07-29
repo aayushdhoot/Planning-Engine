@@ -19,7 +19,7 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 192 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 197 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -65,7 +65,7 @@ calendar, norms, Drive access and the canonical JSON live here).
 | Procurement | Category · Sub Category · Criticality · **Order by** · **Delivery required** · Revised · Vendor · Order status · Delivery status · Responsibility · Gated by · Feeds |
 | To-do | Description · Responsibility · Priority · Status · Start · End · Revised · Notes |
 | Dependencies | Sr · Area · Description · Responsibility · Plan date · Actual date · Delay · Status · Remarks |
-| RA milestones | RA · Due · Revised · % · Amount · Readiness · Status · Invoice no. · Invoice date, each expanding into the contract clauses that must be true before billing |
+| RA milestones | RA · Day · % · Amount (excl. tax) · Incl. GST · Post retention · Due · Revised · Readiness · Status · Invoice raised · Received · Payment date — each RA expands into its milestones, and each milestone into its sub-milestones |
 
 Every status, date and note is editable in the app. Procurement deliberately carries **no BOQ
 or BCS value** — only when to order and when it must land on site.

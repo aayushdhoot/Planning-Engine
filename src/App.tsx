@@ -56,6 +56,9 @@ export default function App() {
     setClientIdState(v);
     writeDriveClientId(v);
   };
+  // user-added and user-removed to-dos, per project
+  const [customTodos, setCustomTodos] = useState<Record<string, TodoRow[]>>({});
+  const [deletedTodos, setDeletedTodos] = useState<Record<string, string[]>>({});
   // live tracker edits, keyed by project then row id
   const [edits, setEdits] = useState<Record<string, Record<string, Record<string, string>>>>({});
 
@@ -137,7 +140,38 @@ export default function App() {
         {tab === 'Manpower' && <Manpower plan={plan} />}
         {tab === 'Design' && <Design plan={plan} edit={edit} val={val} />}
         {tab === 'Procurement' && <Procurement plan={plan} view={view} edit={edit} val={val} />}
-        {tab === 'To-do' && <Todos plan={plan} edit={edit} val={val} />}
+        {tab === 'To-do' && (
+          <Todos
+            plan={plan}
+            edit={edit}
+            val={val}
+            custom={customTodos[project.id] ?? []}
+            deleted={new Set(deletedTodos[project.id] ?? [])}
+            onAdd={(description) =>
+              setCustomTodos((prev) => ({
+                ...prev,
+                [project.id]: [
+                  ...(prev[project.id] ?? []),
+                  {
+                    id: `custom-${project.id}-${Date.now()}`,
+                    description,
+                    responsibility: '',
+                    priority: 'MEDIUM',
+                    status: 'Not Started',
+                    startDate: null,
+                    endDate: null,
+                    revisedDate: null,
+                    notes: '',
+                    category: 'site',
+                    source: 'custom',
+                  },
+                ],
+              }))
+            }
+            onDelete={(id) => setDeletedTodos((prev) => ({ ...prev, [project.id]: [...(prev[project.id] ?? []), id] }))}
+            onRestore={() => setDeletedTodos((prev) => ({ ...prev, [project.id]: [] }))}
+          />
+        )}
         {tab === 'Dependencies' && <Dependencies plan={plan} today={today} edit={edit} val={val} />}
         {tab === 'RA Milestones' && <RaMilestones plan={plan} view={view} today={today} edit={edit} val={val} />}
         {tab === 'New project' && (
@@ -239,42 +273,6 @@ function Overview({ plan, view }: { plan: Plan; view: string }) {
         <div className="card"><div className="k">Confidence</div><div className="v">{Math.round(plan.confidence.score * 100)}%</div><div className="s">{plan.confidence.basis}</div></div>
       </div>
 
-      {plan.external && (
-        <>
-          <h2>Contract milestones</h2>
-          <div className="tblwrap">
-            <table>
-              <thead><tr><th>Code</th><th>Date</th><th>%</th><th>Scope</th></tr></thead>
-              <tbody>{plan.external.milestones.map((x) => (
-                <tr key={x.code}><td><span className="tag ext">{x.code}</span></td><td className="mono">{x.date}</td><td className="mono">{x.percent}%</td><td className="muted">{x.description}</td></tr>
-              ))}</tbody>
-            </table>
-          </div>
-        </>
-      )}
-
-      <h2>Phases</h2>
-      <div className="tblwrap">
-        <table>
-          <thead><tr><th>Phase</th><th>Start</th><th>End</th><th>Critical path</th></tr></thead>
-          <tbody>{plan.modules.timeline.phases.map((p) => (
-            <tr key={p.name}><td>{p.name}</td><td className="mono">{p.start}</td><td className="mono">{p.end}</td><td>{p.critical ? <span className="tag crit">yes</span> : <span className="faint">no</span>}</td></tr>
-          ))}</tbody>
-        </table>
-      </div>
-
-      <h2>Assumptions & gaps</h2>
-      <div className="tblwrap">
-        <table>
-          <thead><tr><th>Area</th><th>Assumption</th><th>Visibility</th></tr></thead>
-          <tbody>
-            {plan.assumptions.length === 0 && <tr><td colSpan={3} className="faint">None recorded.</td></tr>}
-            {plan.assumptions.map((a, i) => (
-              <tr key={i}><td><span className="tag">{a.area}</span></td><td>{a.text}</td><td>{a.internalOnly ? <span className="tag warn">internal only</span> : <span className="tag">shared</span>}</td></tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </>
   );
 }
@@ -597,37 +595,85 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
 }
 
 function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit: EditFn; val: ValFn }) {
-  const items = plan.modules.procurement;
-  if (!items.length) return <p className="muted">No procurement tracker — inputs pending.</p>;
-  const overdue = items.filter((i) => i.orderBy && i.orderBy < new Date().toISOString().slice(0, 10)).length;
+  const all = plan.modules.procurement;
+  const [longLeadOnly, setLongLeadOnly] = useState(false);
+  const today = new Date().toISOString().slice(0, 10);
+  if (!all.length) return <p className="muted">No procurement tracker — inputs pending.</p>;
+  const longLead = all.filter((i) => i.longLead);
+  const items = longLeadOnly ? longLead : all;
+  const overdue = all.filter((i) => i.orderBy && i.orderBy < today).length;
+  const longLeadOverdue = longLead.filter((i) => i.orderBy && i.orderBy < today).length;
+  const daysTo = (d: string | null) => (d ? Math.round((Date.parse(d + 'T00:00:00Z') - Date.parse(today + 'T00:00:00Z')) / 86400000) : null);
+
   return (
     <>
       <div className="cards">
-        <div className="card"><div className="k">Packages</div><div className="v">{items.length}</div></div>
-        <div className="card"><div className="k">Very critical</div><div className="v" style={{ color: 'var(--crit)' }}>{items.filter((i) => i.criticality === 'Very Critical').length}</div></div>
-        <div className="card"><div className="k">Order-by passed</div><div className="v" style={{ color: 'var(--warn)' }}>{overdue}</div></div>
+        <div className="card"><div className="k">Packages</div><div className="v">{all.length}</div></div>
+        <div className="card" style={{ borderColor: 'var(--ext)' }}>
+          <div className="k">Long-lead</div>
+          <div className="v" style={{ color: 'var(--ext)' }}>{longLead.length}</div>
+          <div className="s">these sink the programme if ordered late</div>
+        </div>
+        <div className="card" style={longLeadOverdue ? { borderColor: 'var(--crit)', background: 'var(--crit-soft)' } : undefined}>
+          <div className="k">Long-lead past order-by</div>
+          <div className="v" style={{ color: longLeadOverdue ? 'var(--crit)' : undefined }}>{longLeadOverdue}</div>
+          <div className="s">order now or re-plan the activity</div>
+        </div>
+        <div className="card"><div className="k">Order-by passed (all)</div><div className="v" style={{ color: 'var(--warn)' }}>{overdue}</div></div>
       </div>
+
+      {longLeadOverdue > 0 && (
+        <div className="banner" style={{ marginBottom: 12 }}>
+          <strong>{longLeadOverdue} long-lead package{longLeadOverdue === 1 ? '' : 's'} are already past their order-by date.</strong>{' '}
+          {longLead.filter((i) => i.orderBy && i.orderBy < today).map((i) => `${i.category} (${i.leadDays}d lead, order-by ${i.orderBy})`).join(' · ')}
+        </div>
+      )}
 
       <h2>Package plan — order and delivery dates</h2>
       <p className="muted" style={{ marginTop: -4, fontSize: 12.5 }}>
         Commercial values are deliberately not shown here. Order-by is derived from the delivery date the
         programme needs, less the lead time; each package also shows the design approval that gates it.
       </p>
+      <div className="row" style={{ margin: '10px 0' }}>
+        <div className="seg">
+          <button className={!longLeadOnly ? 'on' : ''} onClick={() => setLongLeadOnly(false)}>All packages ({all.length})</button>
+          <button className={longLeadOnly ? 'on' : ''} onClick={() => setLongLeadOnly(true)}>Long-lead only ({longLead.length})</button>
+        </div>
+      </div>
       <div className="tblwrap">
         <table>
           <thead>
             <tr>
-              <th>Category</th><th>Sub Category</th><th>Criticality</th><th>Order by</th><th>Delivery required</th>
+              <th>Category</th><th>Sub Category</th><th>Lead</th><th>Criticality</th><th>Order by</th><th>Delivery required</th>
               <th>Revised date</th>{view === 'internal' && <th>Vendor</th>}<th>Order status</th><th>Delivery status</th>
               <th>Responsibility</th><th>Gated by (design)</th><th>Feeds (site)</th>{view === 'internal' && <th>Remarks</th>}
             </tr>
           </thead>
           <tbody>{items.map((i) => (
-            <tr key={i.id}>
-              <td>{i.category}</td>
+            <tr key={i.id} style={i.longLead ? { background: 'var(--ext-soft)' } : undefined}>
+              <td>
+                {i.category}
+                {i.longLead && <div><span className="tag ext" style={{ marginTop: 3 }}>LONG-LEAD</span></div>}
+              </td>
               <td className="muted">{i.subCategory}</td>
+              <td className="mono">{i.leadDays}d</td>
               <td><span className={`tag ${i.criticality === 'Very Critical' ? 'crit' : i.criticality === 'High' ? 'warn' : ''}`}>{i.criticality}</span></td>
-              <td className="mono">{i.orderBy ?? '—'}</td>
+              <td className="mono">
+                {(() => {
+                  const d = daysTo(i.orderBy);
+                  const late = d !== null && d < 0;
+                  return (
+                    <>
+                      <strong style={late ? { color: 'var(--crit)' } : i.longLead ? { color: 'var(--ext)' } : undefined}>{i.orderBy ?? '—'}</strong>
+                      {d !== null && (
+                        <div className="faint" style={{ fontSize: 11, color: late ? 'var(--crit)' : undefined }}>
+                          {late ? `${Math.abs(d)}d overdue` : `in ${d}d`}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </td>
               <td className="mono">{i.deliveryRequired ?? '—'}</td>
               <DateCell id={i.id} field="revised" current={i.revisedDate} edit={edit} val={val} />
               {view === 'internal' && <TextCell id={i.id} field="vendor" current={i.vendor} edit={edit} val={val} placeholder="vendor" />}
@@ -653,43 +699,96 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
   );
 }
 
-function Todos({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
-  const rows = plan.modules.todos;
-  const [cat, setCat] = useState<'all' | TodoRow['category']>('all');
-  if (!rows.length) return <p className="muted">Nothing due in the next 21 days.</p>;
-  const shown = cat === 'all' ? rows : rows.filter((r) => r.category === cat);
+/**
+ * The general project to-do list.
+ *
+ * It used to fold in every activity, PO and drawing in the next three weeks — over a hundred
+ * rows restating the PERT, Procurement and Design tabs, which made it unreadable. Those rows
+ * are still available behind a toggle, but the default is the general list: the standard
+ * mobilisation checklist plus whatever the team adds. Rows can be added and removed here.
+ */
+function Todos({
+  plan, edit, val, custom, onAdd, onDelete, deleted, onRestore,
+}: {
+  plan: Plan; edit: EditFn; val: ValFn;
+  custom: TodoRow[];
+  onAdd: (description: string) => void;
+  onDelete: (id: string) => void;
+  deleted: Set<string>;
+  onRestore: () => void;
+}) {
+  const [showDerived, setShowDerived] = useState(false);
+  const [draft, setDraft] = useState('');
+
+  const general = [...plan.modules.todos.filter((r) => r.source === 'standard'), ...custom];
+  const derived = plan.modules.todos.filter((r) => r.source === 'derived');
+  const rows = (showDerived ? [...general, ...derived] : general).filter((r) => !deleted.has(r.id));
+
+  const add = () => {
+    const t = draft.trim();
+    if (!t) return;
+    onAdd(t);
+    setDraft('');
+  };
+
   return (
     <>
       <div className="row" style={{ marginBottom: 12 }}>
         <div className="seg">
-          {(['all', 'site', 'procurement', 'design', 'commercial'] as const).map((c) => (
-            <button key={c} className={cat === c ? 'on' : ''} onClick={() => setCat(c)}>{c === 'all' ? 'All' : c}</button>
-          ))}
+          <button className={!showDerived ? 'on' : ''} onClick={() => setShowDerived(false)}>General ({general.length})</button>
+          <button className={showDerived ? 'on' : ''} onClick={() => setShowDerived(true)}>Include schedule-derived ({general.length + derived.length})</button>
         </div>
-        <span className="muted" style={{ fontSize: 12 }}>{shown.length} open items · next 21 days</span>
+        <span className="muted" style={{ fontSize: 12, maxWidth: 560 }}>
+          {showDerived
+            ? 'Schedule-derived rows also appear in the PERT, Procurement and Design tabs — shown here only when you ask.'
+            : 'The tasks that are not derivable from the schedule. Add your own below.'}
+        </span>
+        {deleted.size > 0 && <button onClick={onRestore}>Restore {deleted.size} removed</button>}
       </div>
-      <div className="tblwrap">
-        <table>
-          <thead><tr><th>Description</th><th>Responsibility</th><th>Priority</th><th>Status</th><th>Start date</th><th>End date</th><th>Revised date</th><th>Notes</th></tr></thead>
-          <tbody>{shown.map((r) => (
-            <tr key={r.id}>
-              <td>{r.description}</td>
-              <TextCell id={r.id} field="responsibility" current={r.responsibility} edit={edit} val={val} />
-              <td className="edit">
-                <select value={val(r.id, 'priority', r.priority) as string} onChange={(e) => edit(r.id, 'priority', e.target.value)}
-                  className={`tag ${r.priority === 'HIGH' ? 'crit' : ''}`}>
-                  {['HIGH', 'MEDIUM', 'LOW'].map((s) => <option key={s}>{s}</option>)}
-                </select>
-              </td>
-              <StatusCell id={r.id} field="status" current={r.status} edit={edit} val={val} />
-              <td className="mono">{r.startDate ?? '—'}</td>
-              <td className="mono">{r.endDate ?? '—'}</td>
-              <DateCell id={r.id} field="revised" current={r.revisedDate} edit={edit} val={val} />
-              <TextCell id={r.id} field="notes" current={r.notes} edit={edit} val={val} />
-            </tr>
-          ))}</tbody>
-        </table>
+
+      <div className="row" style={{ marginBottom: 12 }}>
+        <div className="field" style={{ minWidth: 460 }}>
+          <label>Add a to-do</label>
+          <input
+            value={draft}
+            placeholder="e.g. Confirm lift booking with building management"
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') add(); }}
+          />
+        </div>
+        <button className="primary" onClick={add} disabled={!draft.trim()}>Add</button>
       </div>
+
+      {!rows.length ? (
+        <p className="muted">Nothing on the list. Add a to-do above.</p>
+      ) : (
+        <div className="tblwrap">
+          <table>
+            <thead><tr><th>Description</th><th>Responsibility</th><th>Priority</th><th>Status</th><th>Due</th><th>Revised date</th><th>Notes</th><th /></tr></thead>
+            <tbody>{rows.map((r) => (
+              <tr key={r.id} style={r.source === 'derived' ? { opacity: 0.75 } : undefined}>
+                <td>
+                  {r.description}
+                  {r.source === 'derived' && <div><span className="tag" style={{ marginTop: 3 }}>from schedule</span></div>}
+                  {r.source === 'custom' && <div><span className="tag info" style={{ marginTop: 3 }}>added by you</span></div>}
+                </td>
+                <TextCell id={r.id} field="responsibility" current={r.responsibility} edit={edit} val={val} />
+                <td className="edit">
+                  <select value={val(r.id, 'priority', r.priority) as string} onChange={(e) => edit(r.id, 'priority', e.target.value)}
+                    className={`tag ${r.priority === 'HIGH' ? 'crit' : ''}`}>
+                    {['HIGH', 'MEDIUM', 'LOW'].map((x) => <option key={x}>{x}</option>)}
+                  </select>
+                </td>
+                <StatusCell id={r.id} field="status" current={r.status} edit={edit} val={val} />
+                <td className="mono">{r.endDate ?? '—'}</td>
+                <DateCell id={r.id} field="revised" current={r.revisedDate} edit={edit} val={val} />
+                <TextCell id={r.id} field="notes" current={r.notes} edit={edit} val={val} />
+                <td><button title="Remove from the list" onClick={() => onDelete(r.id)}>✕</button></td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      )}
     </>
   );
 }
@@ -780,24 +879,31 @@ function RaMilestones({
       </div>
 
       <h2>RA milestone tracker</h2>
-      <p className="muted" style={{ marginTop: -6, maxWidth: 820 }}>
-        Each milestone expands into the clauses the contract requires before it can be billed. Tick a clause when
-        site confirms it; readiness is the share of clauses complete, so a milestone never reads as ready just
-        because its date arrived.
+      <p className="muted" style={{ marginTop: -6, maxWidth: 860 }}>
+        The payment schedule in its working format: each RA expands into the milestones the contract requires, and
+        each milestone into its sub-milestones. Tick a sub-milestone when site confirms it — readiness is the share
+        complete, so an RA never reads as billable just because its date arrived. Invoiced and received figures are
+        entered by the team; the engine has no way to know what a client actually paid.
       </p>
       <div className="tblwrap">
         <table>
           <thead>
             <tr>
-              <th style={{ width: 28 }} /><th>RA</th><th>Due</th><th>Revised</th><th>%</th>
-              {view === 'internal' && <th>Amount</th>}
-              <th>Readiness</th><th>Status</th><th>Invoice no.</th><th>Invoice date</th>
+              <th style={{ width: 28 }} /><th>RA</th><th>Day</th><th>%</th>
+              {view === 'internal' && <><th>Amount (excl. tax)</th><th>Incl. GST</th><th>Post retention</th></>}
+              <th>Due</th><th>Revised</th><th>Readiness</th><th>Status</th>
+              {view === 'internal' && <><th>Invoice raised</th><th>Received</th><th>Payment date</th></>}
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => {
               const isOpen = open.has(r.id);
               const ready = readinessOf(r);
+              // sub-milestones grouped under their milestone, as the tracking sheet lays them out
+              const groups = [...new Map(r.checkpoints.map((c) => [c.group, [] as typeof r.checkpoints])).keys()].map((g) => ({
+                group: g,
+                items: r.checkpoints.filter((c) => c.group === g),
+              }));
               return (
                 <Fragment key={r.id}>
                   <tr>
@@ -809,50 +915,56 @@ function RaMilestones({
                         {isOpen ? '▾' : '▸'}
                       </button>
                     </td>
-                    <td><strong>{r.code}</strong><div className="faint" style={{ fontSize: 11 }}>day {r.dayOffset}</div></td>
+                    <td><strong>{r.code}</strong></td>
+                    <td className="mono">{r.dayOffset}</td>
+                    <td className="mono">{r.percent}%</td>
+                    {view === 'internal' && <>
+                      <td className="mono">{r.amount == null ? '—' : inr(r.amount)}</td>
+                      <td className="mono faint">{r.amountIncTax == null ? '—' : inr(r.amountIncTax)}</td>
+                      <td className="mono faint">{r.postRetention == null ? '—' : inr(r.postRetention)}</td>
+                    </>}
                     <td className="mono">{r.dueDate}</td>
                     <td><input type="date" value={String(val(r.id, 'revisedDate', r.revisedDate ?? ''))} onChange={(e) => edit(r.id, 'revisedDate', e.target.value)} /></td>
-                    <td className="mono">{r.percent}%</td>
-                    {view === 'internal' && <td className="mono">{r.amount == null ? '—' : inr(r.amount)}</td>}
                     <td style={{ minWidth: 110 }}>
                       <div className="bar"><div style={{ width: `${ready}%`, background: ready === 100 ? 'var(--ok)' : 'var(--accent)' }} /></div>
-                      <span className="faint" style={{ fontSize: 11 }}>{ready}% · {r.checkpoints.length} clauses</span>
+                      <span className="faint" style={{ fontSize: 11 }}>{ready}% · {r.checkpoints.length} sub-milestones</span>
                     </td>
                     <td>
                       <select value={statusOf(r)} onChange={(e) => edit(r.id, 'status', e.target.value)}>
                         {TRACK_STATUSES.map((x) => <option key={x} value={x}>{x}</option>)}
                       </select>
                     </td>
-                    <td><input value={String(val(r.id, 'invoiceNo', r.invoiceNo))} onChange={(e) => edit(r.id, 'invoiceNo', e.target.value)} style={{ width: 110 }} /></td>
-                    <td><input type="date" value={String(val(r.id, 'invoiceDate', r.invoiceDate ?? ''))} onChange={(e) => edit(r.id, 'invoiceDate', e.target.value)} /></td>
+                    {view === 'internal' && <>
+                      <td><input style={{ width: 110 }} placeholder="0" value={String(val(r.id, 'invoiceRaised', r.invoiceRaised ?? ''))} onChange={(e) => edit(r.id, 'invoiceRaised', e.target.value)} /></td>
+                      <td><input style={{ width: 110 }} placeholder="0" value={String(val(r.id, 'amountReceived', r.amountReceived ?? ''))} onChange={(e) => edit(r.id, 'amountReceived', e.target.value)} /></td>
+                      <td><input type="date" value={String(val(r.id, 'paymentDate', r.paymentDate ?? ''))} onChange={(e) => edit(r.id, 'paymentDate', e.target.value)} /></td>
+                    </>}
                   </tr>
-                  {isOpen && r.checkpoints.map((c) => (
-                    <tr key={c.id} style={{ background: 'var(--panel2)' }}>
-                      <td />
-                      <td colSpan={2} style={{ paddingLeft: 18 }}>
-                        <span className={`tag ${c.kind === 'execution' ? 'info' : c.kind === 'material' ? 'warn' : 'ext'}`}>{c.kind}</span>{' '}
-                        {c.description}
-                        {c.activityName && <div className="faint" style={{ fontSize: 11 }}>evidenced by: {c.activityName}</div>}
-                      </td>
-                      <td className="mono">{c.plannedDate ?? '—'}</td>
-                      <td colSpan={view === 'internal' ? 2 : 1} />
-                      <td>
-                        <input type="date" value={String(val(c.id, 'actualDate', c.actualDate ?? ''))} onChange={(e) => edit(c.id, 'actualDate', e.target.value)} />
-                      </td>
-                      <td>
-                        <select value={cpStatusOf(c)} onChange={(e) => edit(c.id, 'status', e.target.value)}>
-                          {TRACK_STATUSES.map((x) => <option key={x} value={x}>{x}</option>)}
-                        </select>
-                      </td>
-                      <td colSpan={2} className="muted" style={{ fontSize: 11.5 }}>
-                        {view === 'internal' ? c.responsibility : ''}
-                      </td>
-                    </tr>
+                  {isOpen && groups.map(({ group, items }) => (
+                    <Fragment key={`${r.id}-${group}`}>
+                      {items.map((c, idx) => (
+                        <tr key={c.id} style={{ background: 'var(--panel2)' }}>
+                          <td />
+                          {/* the milestone name spans its sub-milestones, as in the sheet */}
+                          <td colSpan={2} style={{ paddingLeft: 18, fontWeight: idx === 0 ? 600 : 400 }}>
+                            {idx === 0 ? group : ''}
+                          </td>
+                          <td colSpan={view === 'internal' ? 4 : 1}>{c.description}</td>
+                          <td className="mono faint">{c.plannedDate ?? '—'}</td>
+                          <td><input type="date" value={String(val(c.id, 'actualDate', c.actualDate ?? ''))} onChange={(e) => edit(c.id, 'actualDate', e.target.value)} /></td>
+                          <td className="faint" style={{ fontSize: 11 }}>{c.activityName ?? ''}</td>
+                          <td>
+                            <select value={cpStatusOf(c)} onChange={(e) => edit(c.id, 'status', e.target.value)}>
+                              {TRACK_STATUSES.map((x) => <option key={x} value={x}>{x}</option>)}
+                            </select>
+                          </td>
+                          {view === 'internal' && <td colSpan={3} className="muted" style={{ fontSize: 11.5 }}>{c.responsibility}</td>}
+                        </tr>
+                      ))}
+                    </Fragment>
                   ))}
                   {isOpen && !r.checkpoints.length && (
-                    <tr style={{ background: 'var(--panel2)' }}>
-                      <td /><td colSpan={9} className="muted" style={{ fontSize: 12 }}>{r.remarks}</td>
-                    </tr>
+                    <tr style={{ background: 'var(--panel2)' }}><td /><td colSpan={13} className="muted" style={{ fontSize: 12 }}>{r.remarks}</td></tr>
                   )}
                 </Fragment>
               );

@@ -536,5 +536,10 @@
         "dayOffset": 1
       }
     ]
+  },
+  "commercialTerms": {
+    "_note": "Statutory and standard commercial terms for the RA payment schedule. GST is the Indian statutory rate. Retention defaults to 0 so nothing is invented for a contract that does not have it — set it per project when the contract defines one.",
+    "gstPercent": 18,
+    "defaultRetentionPercent": 0
   }
 }

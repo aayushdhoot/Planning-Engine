@@ -59,7 +59,13 @@ export interface DesignSummary {
  */
 export interface RaCheckpoint {
   id: string;
-  /** the clause text, e.g. "partition line marking" */
+  /**
+   * The milestone this sub-milestone sits under — "Civil Work", "Electrical", "HVAC",
+   * "Key Order Closures". The tracking sheet groups sub-milestones under these, so a whole
+   * discipline can be read at a glance rather than as a flat list of clauses.
+   */
+  group: string;
+  /** the sub-milestone text, e.g. "Block wall" */
   description: string;
   /** 'execution' | 'material' | 'order' — the three kinds a milestone clause takes */
   kind: 'execution' | 'material' | 'order';
@@ -84,6 +90,10 @@ export interface RaMilestoneRow {
   percent: number;
   /** amount, when a contract value is known; null in views where value is withheld */
   amount: number | null;
+  /** the same figure with GST applied */
+  amountIncTax: number | null;
+  /** amount payable after retention is withheld; equals amountIncTax when no retention applies */
+  postRetention: number | null;
   dueDate: string;
   revisedDate: string | null;
   /** the clauses that must be satisfied to raise this bill */
@@ -93,6 +103,11 @@ export interface RaMilestoneRow {
   status: TrackStatus;
   invoiceNo: string;
   invoiceDate: string | null;
+  /** what was actually invoiced, excluding tax — tracked, not computed */
+  invoiceRaised: number | null;
+  /** what actually landed */
+  amountReceived: number | null;
+  paymentDate: string | null;
   remarks: string;
 }
 
@@ -127,6 +142,10 @@ export interface ProcurementRow {
   category: string;
   subCategory: string;
   criticality: Criticality;
+  /** long-lead packages are the ones that sink a programme if ordered late */
+  longLead: boolean;
+  /** lead time in days used to compute the order-by date */
+  leadDays: number;
   /** latest date the PO can be released without hitting the programme */
   orderBy: string | null;
   /** date the material must be on site */
@@ -159,6 +178,14 @@ export interface TodoRow {
   revisedDate: string | null;
   notes: string;
   category: 'site' | 'procurement' | 'design' | 'commercial';
+  /**
+   * 'standard'  — the mobilisation checklist every project runs
+   * 'derived'   — generated from the schedule, and therefore also visible in its own tracker
+   * 'custom'    — added by the user in-app
+   * The list defaults to standard + custom; derived rows duplicate the PERT, Design and
+   * Procurement tabs, which is what made it unreadable.
+   */
+  source: 'standard' | 'derived' | 'custom';
 }
 
 /**
