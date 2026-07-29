@@ -69,37 +69,12 @@
     "internalEnd": null
   },
   "internal": null,
+  "margin": null,
   "missingInputs": [
     "3D design",
     "Sales KT / email thread"
   ],
   "modules": {
-    "cashflow": {
-      "margin": null,
-      "rows": [
-        {
-          "cumulativeInflow": 16420080,
-          "cumulativeOutflow": null,
-          "inflow": 16420080,
-          "outflow": null,
-          "period": "2026-06"
-        },
-        {
-          "cumulativeInflow": 36945180,
-          "cumulativeOutflow": null,
-          "inflow": 20525100,
-          "outflow": null,
-          "period": "2026-07"
-        },
-        {
-          "cumulativeInflow": 82100400,
-          "cumulativeOutflow": null,
-          "inflow": 45155220,
-          "outflow": null,
-          "period": "2026-08"
-        }
-      ]
-    },
     "dependencies": [
       {
         "actualDate": null,
@@ -1542,6 +1517,428 @@
         "revisedDate": null,
         "subCategory": "GSS / miscellaneous",
         "vendor": ""
+      }
+    ],
+    "raMilestones": [
+      {
+        "amount": 0,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Project mobilisation (no advance payable)",
+            "id": "RA1-c1",
+            "kind": "execution",
+            "plannedDate": "2026-06-08",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA1",
+        "dayOffset": 0,
+        "dueDate": "2026-06-08",
+        "id": "ra-1",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 0,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 16420080,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Partition marking",
+            "id": "RA2-c1",
+            "kind": "execution",
+            "plannedDate": "2026-06-13",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Frameworks",
+            "id": "RA2-c2",
+            "kind": "execution",
+            "plannedDate": "2026-06-28",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Skinning",
+            "id": "RA2-c3",
+            "kind": "execution",
+            "plannedDate": "2026-06-28",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Civil walls",
+            "id": "RA2-c4",
+            "kind": "execution",
+            "plannedDate": "2026-08-11",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Conduiting",
+            "id": "RA2-c5",
+            "kind": "execution",
+            "plannedDate": "2026-07-29",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Raceways",
+            "id": "RA2-c6",
+            "kind": "execution",
+            "plannedDate": "2026-06-28",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Gypsum/electrical material delivery",
+            "id": "RA2-c7",
+            "kind": "material",
+            "plannedDate": "2026-06-28",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA2",
+        "dayOffset": 20,
+        "dueDate": "2026-06-28",
+        "id": "ra-2",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 20,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 20525100,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Partition closing",
+            "id": "RA3-c1",
+            "kind": "execution",
+            "plannedDate": "2026-07-10",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Wiring",
+            "id": "RA3-c2",
+            "kind": "execution",
+            "plannedDate": "2026-08-05",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Sprinkler piping",
+            "id": "RA3-c3",
+            "kind": "execution",
+            "plannedDate": "2026-07-06",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "FAS wiring",
+            "id": "RA3-c4",
+            "kind": "execution",
+            "plannedDate": "2026-08-05",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Duct/cable/ply/tile delivery",
+            "id": "RA3-c5",
+            "kind": "material",
+            "plannedDate": "2026-07-18",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Furniture/carpet/glass orders closed",
+            "id": "RA3-c6",
+            "kind": "material",
+            "plannedDate": "2026-07-18",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA3",
+        "dayOffset": 40,
+        "dueDate": "2026-07-18",
+        "id": "ra-3",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 25,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 20525100,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Paint base coats",
+            "id": "RA4-c1",
+            "kind": "execution",
+            "plannedDate": "2026-08-11",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Glass channels",
+            "id": "RA4-c2",
+            "kind": "execution",
+            "plannedDate": "2026-07-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Duct installation",
+            "id": "RA4-c3",
+            "kind": "execution",
+            "plannedDate": "2026-07-14",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Ceiling framing",
+            "id": "RA4-c4",
+            "kind": "execution",
+            "plannedDate": "2026-07-10",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Carpet/sanitary/doors/DB delivery",
+            "id": "RA4-c5",
+            "kind": "material",
+            "plannedDate": "2026-08-02",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          }
+        ],
+        "code": "RA4",
+        "dayOffset": 55,
+        "dueDate": "2026-08-02",
+        "id": "ra-4",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 25,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "WIP"
+      },
+      {
+        "amount": 20525100,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Switches",
+            "id": "RA5-c1",
+            "kind": "execution",
+            "plannedDate": "2026-08-17",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Sanitary fixtures",
+            "id": "RA5-c2",
+            "kind": "execution",
+            "plannedDate": "2026-08-17",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Carpentry",
+            "id": "RA5-c3",
+            "kind": "execution",
+            "plannedDate": "2026-08-17",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Doors",
+            "id": "RA5-c4",
+            "kind": "execution",
+            "plannedDate": "2026-07-20",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "First paint coat",
+            "id": "RA5-c5",
+            "kind": "execution",
+            "plannedDate": "2026-08-11",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "False ceiling",
+            "id": "RA5-c6",
+            "kind": "execution",
+            "plannedDate": "2026-07-13",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Pre-commissioning",
+            "id": "RA5-c7",
+            "kind": "execution",
+            "plannedDate": "2026-08-01",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          }
+        ],
+        "code": "RA5",
+        "dayOffset": 70,
+        "dueDate": "2026-08-17",
+        "id": "ra-5",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 25,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "WIP"
+      },
+      {
+        "amount": 4105020,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Against 12-month DLP bank guarantee at virtual completion/handover",
+            "id": "RA6-c1",
+            "kind": "execution",
+            "plannedDate": "2026-08-14",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          }
+        ],
+        "code": "RA6",
+        "dayOffset": 75,
+        "dueDate": "2026-08-22",
+        "id": "ra-6",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 5,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Not Started"
       }
     ],
     "resources": [],

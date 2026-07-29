@@ -2,11 +2,11 @@
 // All dates come from the CPM engine / contract arithmetic — never guessed.
 import type { CpmResult, EngineConfig, ProjectInputs, ScheduledActivity, Traced } from '../domain/types';
 import { computeCpm } from './cpm';
-import { addCalendarDays, parseIso, workingDaysBetween } from './calendar';
+import { addCalendarDays, parseIso } from './calendar';
 import { deriveWbs } from './wbs';
 import { levelManpower, type ManpowerPlan } from './manpower';
-import { buildDependencyTracker, buildDesignTracker, buildProcurementTracker, buildTodoTracker } from './trackers';
-import { summariseDesign, type DependencyRow, type DesignRow, type DesignSummary, type ProcurementRow, type TodoRow } from '../domain/trackers';
+import { buildDependencyTracker, buildDesignTracker, buildProcurementTracker, buildRaTracker, buildTodoTracker } from './trackers';
+import { summariseDesign, type DependencyRow, type DesignRow, type DesignSummary, type ProcurementRow, type RaMilestoneRow, type TodoRow } from '../domain/trackers';
 import norms from '../norms/norms-v1.json';
 
 const comp = (v: number, src: string): Traced<number> => ({ value: v, provenance: 'computed', source: src });
@@ -49,8 +49,10 @@ export interface Plan {
     design: { rows: DesignRow[]; summary: DesignSummary };
     todos: TodoRow[];
     dependencies: DependencyRow[];
-    cashflow: { rows: CashflowRow[]; margin: Traced<number> | null };
+    raMilestones: RaMilestoneRow[];
   };
+  /** contract vs BCS, internal only — kept at plan level now that cashflow is gone */
+  margin: Traced<number> | null;
   assumptions: Assumption[];
   confidence: { score: number; basis: string };
   missingInputs: string[];
@@ -101,8 +103,9 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
       design: { rows: [], summary: { drawings: 0, approved: 0, pending: 0, percentComplete: 0 } },
       todos: [],
       dependencies: [],
-      cashflow: { rows: [], margin: null },
+      raMilestones: [],
     },
+    margin: null,
     assumptions,
     confidence: { score: 0, basis: '' },
     missingInputs: missing,
@@ -197,45 +200,30 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
   base.modules.todos = buildTodoTracker(cpm.activities, base.modules.procurement, designRows, today);
   base.modules.dependencies = buildDependencyTracker(cpm.activities, today, start);
 
-  // ----- Module 8: cashflow -----
-  const rows = new Map<string, { inflow: number; outflow: number }>();
-  const bump = (period: string, k: 'inflow' | 'outflow', v: number) => {
-    const r = rows.get(period) ?? { inflow: 0, outflow: 0 };
-    r[k] += v;
-    rows.set(period, r);
-  };
-  if (p.contractValue)
-    for (const m of base.external.milestones) bump(m.date.slice(0, 7), 'inflow', Math.round((m.percent / 100) * p.contractValue!.value));
-  // outflow: BCS per package spread uniformly over the package's activity window
-  for (const pkg of p.boqPackages) {
-    const cost = pkg.bcsAmount?.value ?? Math.round(pkg.clientAmount.value * 0.72); // fallback: avg 28% margin (BOQ_BCS margin column) — recorded as assumption
-    if (!pkg.bcsAmount)
-      assumptions.push({ area: 'cashflow', text: `Package ${pkg.code}: BCS cost missing; assumed 72% of client amount (28% margin norm from BOQ_BCS margin column).`, internalOnly: true });
-    const acts = cpm.activities.filter((a) => a.packageCode === pkg.code);
-    const span = acts.length
-      ? { s: acts.reduce((m, a) => (a.startDate < m ? a.startDate : m), acts[0].startDate), e: acts.reduce((m, a) => (a.endDate > m ? a.endDate : m), acts[0].endDate) }
-      : { s: base.internal!.start, e: base.internal!.end };
-    const wd = workingDaysBetween(span.s, span.e, cfg.calendar);
-    let d = span.s;
-    for (let i = 0; i < wd; i++) {
-      bump(d.slice(0, 7), 'outflow', cost / wd);
-      d = nextWorkingDay(d, cfg);
-    }
-  }
-  let ci = 0;
-  let co = 0;
-  base.modules.cashflow.rows = [...rows.entries()]
-    .sort(([x], [y]) => (x < y ? -1 : 1))
-    .map(([period, r]) => {
-      ci += r.inflow;
-      co += r.outflow;
-      return { period, inflow: Math.round(r.inflow), outflow: Math.round(r.outflow), cumulativeInflow: Math.round(ci), cumulativeOutflow: Math.round(co) };
-    });
+  // ----- Module 8: RA billing milestones -----
+  // Replaces the cashflow curve. A milestone is a list of physical things that must be true on
+  // site before the bill can go out, so it is tracked as clauses the project team ticks off,
+  // not as a monthly money projection.
+  base.modules.raMilestones = buildRaTracker(p, cpm.activities, start, today);
   if (p.contractValue && p.bcsValue)
-    base.modules.cashflow.margin = comp(
+    base.margin = comp(
       Math.round(((p.contractValue.value - p.bcsValue.value) / p.contractValue.value) * 1000) / 10,
       `(contractValue − bcsValue)/contractValue from ${p.contractValue.source}`,
     );
+  for (const pkg of p.boqPackages)
+    if (!pkg.bcsAmount)
+      assumptions.push({
+        area: 'billing',
+        text: `Package ${pkg.code}: BCS cost missing; margin for it assumed at the 28% norm from the BOQ_BCS margin column.`,
+        internalOnly: true,
+      });
+  for (const m of base.modules.raMilestones)
+    if (!m.checkpoints.length)
+      assumptions.push({
+        area: 'billing',
+        text: `Milestone ${m.code} has no checkable clauses in its contract wording — billing readiness cannot be tracked against site progress for it.`,
+        internalOnly: true,
+      });
 
   // ----- confidence -----
   const providedCount = Object.values(prov).filter(Boolean).length;
@@ -262,10 +250,15 @@ function nextWorkingDay(iso: string, cfg: EngineConfig): string {
 export function clientView(plan: Plan): Plan {
   const clone: Plan = JSON.parse(JSON.stringify(plan));
   clone.audience = 'client';
+  clone.margin = null;
   // never expose internal buffer, BCS, margins, internal-only assumptions, internal CPM end
   clone.assumptions = clone.assumptions.filter((a) => !a.internalOnly);
-  clone.modules.cashflow.margin = null;
-  clone.modules.cashflow.rows = clone.modules.cashflow.rows.map((r) => ({ ...r, outflow: null, cumulativeOutflow: null }));
+  // the client sees which milestones are due and when, never the internal readiness working
+  clone.modules.raMilestones = clone.modules.raMilestones.map((m) => ({
+    ...m,
+    checkpoints: m.checkpoints.map((c) => ({ ...c, responsibility: '', remarks: '', activityId: null, activityName: null })),
+    remarks: '',
+  }));
   // procurement carries no money at all now, but vendor and internal remarks stay internal
   clone.modules.procurement = clone.modules.procurement.map((x) => ({ ...x, vendor: '', remarks: '', basis: '' }));
   clone.buffer = { ...clone.buffer, internalBufferDays: 0 };

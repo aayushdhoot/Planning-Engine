@@ -29,7 +29,7 @@ describe('Client vs internal documents genuinely differ', () => {
 
   it('schema rejects a client plan that leaks internal data', () => {
     const leaky = structuredClone(client);
-    leaky.modules.cashflow.margin = { value: 27.5, provenance: 'computed', source: 'x' };
+    leaky.margin = { value: 27.5, provenance: 'computed', source: 'x' };
     expect(validatePlan(leaky).ok).toBe(false);
     const leaky2 = structuredClone(client);
     leaky2.modules.timeline.activities[0].critical = true;

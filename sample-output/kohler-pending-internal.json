@@ -1,0 +1,89 @@
+{
+  "assumptions": [
+    {
+      "area": "inputs",
+      "internalOnly": false,
+      "text": "Mandatory inputs missing (Project BOQ (priced); Project Contract / PO; Project Layout…). No plan generated — the engine does not fabricate numbers. Provide a priced BOQ and contract to generate the baseline."
+    }
+  ],
+  "audience": "internal",
+  "buffer": {
+    "internalBufferDays": 7,
+    "max": 15,
+    "min": 0
+  },
+  "calendar": {
+    "holidays": [],
+    "weeklyOffDays": [],
+    "workModeFactor": 1
+  },
+  "confidence": {
+    "basis": "No mandatory inputs present.",
+    "score": 0.05
+  },
+  "engine": {
+    "name": "DnB Planning Engine",
+    "normsVersion": "norms-v1",
+    "version": "1.0.0"
+  },
+  "external": null,
+  "ieInvariant": {
+    "bufferCalendarDays": null,
+    "externalEnd": null,
+    "holds": true,
+    "internalEnd": null
+  },
+  "internal": null,
+  "margin": null,
+  "missingInputs": [
+    "Project BOQ (priced)",
+    "Project Contract / PO",
+    "Project Layout",
+    "Drawings",
+    "Day 0 site images",
+    "3D design",
+    "Sales KT / email thread",
+    "Make list",
+    "Payment terms"
+  ],
+  "modules": {
+    "dependencies": [],
+    "design": {
+      "rows": [],
+      "summary": {
+        "approved": 0,
+        "drawings": 0,
+        "pending": 0,
+        "percentComplete": 0
+      }
+    },
+    "manpower": {
+      "averageDaily": 0,
+      "days": [],
+      "peak": 0,
+      "peakDate": null,
+      "smoothness": 1,
+      "totalManDays": 0,
+      "trades": [],
+      "warnings": []
+    },
+    "procurement": [],
+    "raMilestones": [],
+    "resources": [],
+    "timeline": {
+      "activities": [],
+      "criticalPath": [],
+      "phases": []
+    },
+    "todos": []
+  },
+  "project": {
+    "areaSft": null,
+    "client": "Kohler",
+    "contractValue": null,
+    "id": "kohler-pending",
+    "location": "—",
+    "name": "KOHLER OS (no inputs)",
+    "status": "pending_inputs"
+  }
+}

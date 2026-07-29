@@ -9,7 +9,8 @@ import { renderReport } from '../src/reports/render';
 import { buildDeck } from '../src/reports/deck';
 import { skf } from '../src/data/skf';
 import { emirates } from '../src/data/emirates';
-import { kohler } from '../src/data/others';
+import { pendingKohler } from '../src/data/others';
+import { kohler } from '../src/data/kohler';
 import norms from '../src/norms/norms-v1.json';
 
 const OUT = 'sample-output';
@@ -30,7 +31,7 @@ const check = (name: string, ok: boolean, detail = '') => {
   console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ' — ' + detail : ''}`);
 };
 
-for (const p of [skf, emirates, kohler]) {
+for (const p of [skf, emirates, kohler, pendingKohler]) {
   console.log(`\n=== ${p.name} ===`);
   const internal = buildPlan(p, cfg, TODAY);
   const external = clientView(internal);
@@ -56,7 +57,7 @@ for (const p of [skf, emirates, kohler]) {
   const leaks: string[] = [];
   if (p.bcsValue && eJson.includes(String(p.bcsValue.value))) leaks.push('BCS total');
   if (eJson.includes('"internalOnly": true')) leaks.push('internal-only assumption');
-  if (eJson.includes('"margin"') && external.modules.cashflow.margin !== null) leaks.push('margin');
+  if (eJson.includes('"margin"') && external.margin !== null) leaks.push('margin');
   check('Client view has no internal leakage', leaks.length === 0, leaks.join(', '));
 
   console.log(`  status=${internal.project.status} activities=${internal.modules.timeline.activities.length} ` +

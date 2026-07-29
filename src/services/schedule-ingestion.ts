@@ -13,6 +13,22 @@ import * as XLSX from 'xlsx';
 import type { Activity, Dependency, DepType, Traced } from '../domain/types';
 import norms from '../norms/norms-v1.json';
 
+/**
+ * A dependency whose planned dates contradict the logic the sheet states for it — the
+ * successor starts before its predecessor could release it. Real programmes are full of
+ * these; they are reported rather than silently absorbed, because each one is either a
+ * genuine overlap that should be written as SS+lag or a date that will not survive contact
+ * with site.
+ */
+export interface LogicConflict {
+  activity: string;
+  activityName: string;
+  pred: string;
+  type: DepType;
+  /** negative lag the issued dates force onto the stated relationship, in days */
+  impliedLag: number;
+}
+
 export interface ParsedSchedule {
   activities: Activity[];
   projectStart: string | null;
@@ -20,6 +36,7 @@ export interface ParsedSchedule {
   durationDays: number | null;
   sections: string[];
   warnings: string[];
+  logicConflicts: LogicConflict[];
   rowsScanned: number;
   rowsSkipped: number;
 }
@@ -27,9 +44,18 @@ export interface ParsedSchedule {
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 const DAY_MS = 86400000;
 
+const pad = (n: number) => String(n).padStart(2, '0');
+
 /** "7-Jul-26" / "07-Jul-2026" / "2026-07-07" / a real Date -> ISO, else null. */
 export function parseScheduleDate(raw: unknown): string | null {
-  if (raw instanceof Date && !Number.isNaN(raw.getTime())) return raw.toISOString().slice(0, 10);
+  // A date cell out of SheetJS is not clean midnight: KOHLER's 7-Jul start arrives as
+  // 2026-07-06T18:29:50Z — ten seconds short, from the serial-to-date float conversion, and
+  // therefore the WRONG calendar day under both local and UTC getters. Rounding the instant
+  // to the nearest whole day recovers the day the sheet displays, in any host timezone.
+  if (raw instanceof Date && !Number.isNaN(raw.getTime())) {
+    const d = new Date(Math.round(raw.getTime() / DAY_MS) * DAY_MS);
+    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+  }
   const s = String(raw ?? '').trim();
   if (!s) return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
@@ -145,7 +171,7 @@ interface RawRow {
  * carry genuine float. Without this the network reproduces the *stated* logic rather than the
  * *issued* dates — and in real programmes the two disagree.
  */
-function deriveLags(rows: RawRow[], startIso: string): RawRow[] {
+function deriveLags(rows: RawRow[], startIso: string, conflicts: LogicConflict[]): RawRow[] {
   const base = Date.parse(`${startIso}T00:00:00Z`);
   const idx = new Map(rows.map((r) => [r.id, Math.round((Date.parse(`${r.start}T00:00:00Z`) - base) / DAY_MS)]));
   const dur = new Map(rows.map((r) => [r.id, r.duration]));
@@ -163,10 +189,10 @@ function deriveLags(rows: RawRow[], startIso: string): RawRow[] {
     const nat = natural as number[];
     const maxNat = Math.max(...nat);
     const driver = nat.indexOf(maxNat);
-    return {
-      ...r,
-      deps: r.deps.map((d, i) => ({ ...d, lag: i === driver ? selfStart - maxNat : Math.min(0, selfStart - nat[i]) })),
-    };
+    const deps = r.deps.map((d, i) => ({ ...d, lag: i === driver ? selfStart - maxNat : Math.min(0, selfStart - nat[i]) }));
+    for (const d of deps)
+      if (d.lag < 0) conflicts.push({ activity: r.id, activityName: r.name, pred: d.pred, type: d.type, impliedLag: d.lag });
+    return { ...r, deps };
   });
 }
 
@@ -182,12 +208,41 @@ export class ScheduleIngestionService {
         : XLSX.read(new Uint8Array(file.data), { type: 'array', cellDates: true });
 
     const names = sheet ? [sheet] : wb.SheetNames;
+    let best: ParsedSchedule | null = null;
     for (const n of names) {
-      const grid = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[n], { header: 1, blankrows: false, raw: false });
-      const parsed = this.fromGrid(grid, `${file.name} · ${n}`);
+      const parsed = this.fromGrid(this.gridOf(wb.Sheets[n]), `${file.name} · ${n}`);
       if (parsed.activities.length) return parsed;
+      // keep the most informative failure rather than replacing it with a generic message
+      if (!best || parsed.warnings.length > best.warnings.length) best = parsed;
     }
-    return { activities: [], projectStart: null, durationDays: null, sections: [], warnings: [`No activity rows found in ${file.name}.`], rowsScanned: 0, rowsSkipped: 0 };
+    return (
+      best ?? { activities: [], projectStart: null, durationDays: null, sections: [], warnings: [`No activity rows found in ${file.name}.`], logicConflicts: [], rowsScanned: 0, rowsSkipped: 0 }
+    );
+  }
+
+  /**
+   * Read a sheet as a grid of strings, except where a cell is a genuine date — those come
+   * through as Date objects.
+   *
+   * Text is primary, and deliberately so. It keeps activity ids intact — read raw, "14.10"
+   * becomes the number 14.1 and the id is silently corrupted — and where a sheet writes
+   * "7-Jul-26" that string is unambiguous and authoritative.
+   *
+   * The typed value is consulted only where the text cannot be read as a date, which is what
+   * rescues sheets whose Start column holds real date cells and formats them as a locale
+   * "7/7/26" (ambiguous between 7-Jul and 7-Oct, so never guessed from the text).
+   */
+  private gridOf(ws: XLSX.WorkSheet): unknown[][] {
+    const text = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, blankrows: false, raw: false });
+    // date cells arrive as Date objects because the workbook is read with cellDates: true
+    const typed = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, blankrows: false, raw: true });
+    return text.map((row, i) =>
+      row.map((c, j) => {
+        if (parseScheduleDate(c) !== null) return c;
+        const t = typed[i]?.[j];
+        return t instanceof Date ? t : c;
+      }),
+    );
   }
 
   /** Exposed separately so tests can drive it with a literal grid. */
@@ -205,7 +260,7 @@ export class ScheduleIngestionService {
       }
     }
     if (head < 0)
-      return { activities: [], projectStart: null, durationDays: null, sections: [], warnings: ['No header row with "Activity No." and "Dur" columns.'], rowsScanned: grid.length, rowsSkipped: grid.length };
+      return { activities: [], projectStart: null, durationDays: null, sections: [], warnings: ['No header row with "Activity No." and "Dur" columns.'], logicConflicts: [], rowsScanned: grid.length, rowsSkipped: grid.length };
 
     const hdr = grid[head].map((c) => String(c ?? '').replace(/\s+/g, ' ').toLowerCase());
     const col = (re: RegExp, fallback: number) => {
@@ -256,7 +311,7 @@ export class ScheduleIngestionService {
     }
 
     if (!raw.length)
-      return { activities: [], projectStart: null, durationDays: null, sections: [], warnings: [...warnings, 'No rows carried a readable start date.'], rowsScanned: grid.length, rowsSkipped: skipped };
+      return { activities: [], projectStart: null, durationDays: null, sections: [], warnings: [...warnings, 'No rows carried a readable start date.'], logicConflicts: [], rowsScanned: grid.length, rowsSkipped: skipped };
 
     const projectStart = raw.reduce((m, r) => (r.start < m ? r.start : m), raw[0].start);
     const base = Date.parse(`${projectStart}T00:00:00Z`);
@@ -277,7 +332,8 @@ export class ScheduleIngestionService {
     }
 
     const ordered = [...raw].sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : a.id.localeCompare(b.id)));
-    const activities: Activity[] = deriveLags(ordered, projectStart).map((r) => ({
+    const logicConflicts: LogicConflict[] = [];
+    const activities: Activity[] = deriveLags(ordered, projectStart, logicConflicts).map((r) => ({
       id: r.id,
       name: r.name,
       phase: r.section,
@@ -294,7 +350,13 @@ export class ScheduleIngestionService {
       projectStart,
       durationDays,
       sections: [...new Set(ordered.map((r) => r.section))],
-      warnings,
+      warnings: logicConflicts.length
+        ? [
+            ...warnings,
+            `${logicConflicts.length} of ${ordered.reduce((n, r) => n + r.deps.length, 0)} dependencies have planned dates that contradict the stated logic (a successor starts before its predecessor releases it). The issued dates are reproduced as given; each conflict is either a real overlap that should be written as SS+lag, or a date that will slip on site.`,
+          ]
+        : warnings,
+      logicConflicts,
       rowsScanned: grid.length,
       rowsSkipped: skipped,
     };

@@ -77,12 +77,14 @@ UI render tests; coverage is held at 4.5 by the items below.
 
 | # | Limitation | Effort to close |
 |---|---|---|
-| 1 | Only the BOQ is parsed structurally on read. Contracts, PERT PDFs and drawings are logged as evidence but not extracted — Emirates' programme was transcribed by hand. | Medium: a PERT/PDF parser. |
+| 1 | ~~Only the BOQ is parsed structurally on read.~~ **Closed for spreadsheet programmes** — `src/services/schedule-ingestion.ts` ingests an issued schedule sheet; KOHLER's 66-activity programme came in that way with zero hand-transcription. Contracts and drawings (PDF/DWG) are still logged as evidence only. | Remaining: a PDF/contract parser. |
 | 2 | Intake answers set start date, duration and area, but do not yet auto-generate milestones from the free-text RA answer. | Low. |
 | 3 | Tracker edits live in session state and export with the workspace JSON; there is no shared server, so two people editing simultaneously will not see each other. | Medium: needs a backend. |
 | 4 | Productivity norms are calibrated on SKF only. Emirates now provides a second calibration point that has not yet been folded in. | Low. |
 | 5 | Google OAuth needs a client ID you create; without it the manifest path is used. | Trivial, one-time. |
-| 6 | KOHLER remains a shortcut that does not resolve — still `pending_inputs`. | Blocked on you. |
+| 6 | ~~KOHLER remains a shortcut that does not resolve.~~ **Closed** — the folder was supplied and KOHLER OS, Pune is now a fully planned project (66 activities, 19 cost heads, ₹5.70 Cr, 120 days). `KOHLER OS (no inputs)` is retained as the T1-DEGRADE fixture. | Done. |
+| 8 | KOHLER's issued programme has **29 of 88** dependencies whose planned dates contradict their own stated predecessor logic, and pins handover to day 120 (3-Nov) while an activity on it finishes 4-Nov. The engine reproduces the dates as issued and reports the conflicts. | Blocked on the project head reissuing the programme. |
+| 9 | KOHLER's BOQ carries no BCS column, so margin and cash outflow rest on the 28% margin norm rather than costed packages. | Low: supply a BOQ_BCS. |
 | 7 | `node_modules/` in this folder is a stale partial install the sandbox cannot delete. **`rm -rf` it before `npm install`.** | Trivial. |
 
 ---

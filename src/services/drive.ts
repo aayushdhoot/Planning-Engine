@@ -29,7 +29,7 @@ export interface DriveScan {
 }
 
 export interface DriveService {
-  readonly kind: 'google' | 'manifest' | 'local';
+  readonly kind: 'google' | 'manifest' | 'local' | 'public';
   isConfigured(): boolean;
   scanFolder(folderIdOrUrl: string): Promise<DriveScan>;
   /** fetch the bytes of one file — only called after the user grants read permission */
@@ -176,6 +176,172 @@ export class GoogleDriveService implements DriveService {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${this.token}` } });
     if (!res.ok) throw new Error(`Could not read "${file.name}" (${res.status}).`);
     return res.arrayBuffer();
+  }
+}
+
+// -------------------------------------------------------------- Public link
+
+/**
+ * Scans a folder shared as "anyone with the link" with NO Google account, NO OAuth client ID
+ * and NO API key — the case that kept sending people to the Cloud Console for a credential
+ * they should never have needed.
+ *
+ * It reads Drive's own public folder-listing page (the one embeddedfolderview renders) and
+ * downloads files through the public `uc?export=download` endpoint. Both are plain HTML/binary
+ * over HTTP with no CORS headers, so the browser cannot call them directly; the dev server
+ * proxies them under /gdrive (see vite.config.ts). That means this path works under
+ * `npm run dev` and not in the standalone single-file build, which has no server to proxy
+ * through — `isProxyAvailable()` is how the UI tells the difference before promising anything.
+ *
+ * Limits worth knowing: the folder really must be link-shared (a private folder returns a
+ * sign-in page, which is reported as such), and Google-native Docs/Sheets are export-only, so
+ * they are fetched in their .xlsx form.
+ */
+const PROXY = '/gdrive';
+const ENTRY_RE = /<div class="flip-entry" id="entry-([^"]+)".*?<a href="([^"]+)".*?<div class="flip-entry-title">(.*?)<\/div>/gs;
+
+/**
+ * Drive escapes folder names in this HTML, and Flipspaces folders are full of characters that
+ * get escaped — "01 · Sales &amp; Client". Numeric entities must be handled too, or the middot
+ * survives into the path as a literal "&#183;".
+ */
+const decodeEntities = (s: string) =>
+  s
+    .replace(/<[^>]+>/g, '')
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&') // last: an escaped "&amp;amp;" must not collapse twice
+    .trim();
+
+export interface ListingEntry {
+  id: string;
+  title: string;
+  isFolder: boolean;
+}
+
+/**
+ * Pull the entries out of Drive's public folder-listing HTML. A folder link points at
+ * /drive/folders/<id>; anything else is a file. Split out from the fetch so it can be tested
+ * against real captured markup without a network.
+ */
+export function parseFolderListing(html: string): ListingEntry[] {
+  const out: ListingEntry[] = [];
+  const re = new RegExp(ENTRY_RE.source, ENTRY_RE.flags);
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) out.push({ id: m[1], title: decodeEntities(m[3]), isFolder: m[2].includes('/drive/folders/') });
+  return out;
+}
+
+/** The folder's own name, or null when Drive served a sign-in or error page instead. */
+export function listingTitle(html: string): string | null {
+  const t = html.match(/<title>([^<]*)<\/title>/);
+  const title = t ? decodeEntities(t[1]) : '';
+  return !title || /sign in|meet google|error/i.test(title) ? null : title;
+}
+
+/** Raised when the /gdrive proxy is not in front of us, i.e. this is not the dev server. */
+export class DriveProxyUnavailable extends Error {
+  constructor() {
+    super(
+      'Link scanning needs the dev server, which proxies Drive for the browser. Run `npm run dev` and open ' +
+        'http://localhost:5173, or pick the folder off this computer instead.',
+    );
+    this.name = 'DriveProxyUnavailable';
+  }
+}
+
+/** Raised when the folder exists but is not shared by link, so a sign-in is genuinely required. */
+export class DriveFolderNotPublic extends Error {
+  constructor() {
+    super(
+      'That folder is not shared with "Anyone with the link", so it cannot be read without signing in. ' +
+        'Either set its Drive sharing to "Anyone with the link — Viewer", or configure the one-time Google sign-in.',
+    );
+    this.name = 'DriveFolderNotPublic';
+  }
+}
+
+export class PublicLinkDriveService implements DriveService {
+  readonly kind = 'public' as const;
+  private names = new Map<string, string>();
+
+  isConfigured() {
+    return true; // no credential to configure — that is the point
+  }
+
+  /**
+   * Probing with a fake id does not work: Drive answers 404 for it, which is indistinguishable
+   * from the dev server having no proxy. Instead every response is checked for our own SPA
+   * shell, which is what Vite serves when a path is not proxied.
+   */
+  private async listing(id: string): Promise<string> {
+    let res: Response;
+    try {
+      res = await fetch(`${PROXY}/embeddedfolderview?id=${encodeURIComponent(id)}#list`);
+    } catch {
+      throw new DriveProxyUnavailable();
+    }
+    const html = await res.text();
+    if (html.includes('<div id="root">') || html.includes('/src/main.tsx')) throw new DriveProxyUnavailable();
+    if (!res.ok) throw new DriveFolderNotPublic();
+    return html;
+  }
+
+  async scanFolder(folderIdOrUrl: string): Promise<DriveScan> {
+    const rootId = folderIdFrom(folderIdOrUrl);
+    const files: DriveFile[] = [];
+    const skipped: string[] = [];
+    const notes: string[] = [];
+    let rootName = 'Shared folder';
+
+    const walk = async (id: string, path: string, depth: number) => {
+      if (depth > 5) {
+        skipped.push(path);
+        return;
+      }
+      const html = await this.listing(id);
+      if (depth === 0) {
+        const title = listingTitle(html);
+        if (!title) throw new DriveFolderNotPublic();
+        rootName = title;
+        path = title;
+      }
+      for (const e of parseFolderListing(html)) {
+        const p = `${path}/${e.title}`;
+        if (e.isFolder) await walk(e.id, p, depth + 1);
+        else {
+          this.names.set(e.id, e.title);
+          files.push({
+            id: e.id,
+            name: e.title,
+            mimeType: '',
+            sizeBytes: null,
+            modifiedTime: null,
+            path: p,
+            webViewLink: `https://drive.google.com/file/d/${e.id}/view`,
+          });
+        }
+      }
+    };
+
+    await walk(rootId, '', 0);
+    if (!files.length) notes.push('The folder listing came back empty. If it has content, check it is shared with "anyone with the link".');
+    return { folderId: rootId, folderName: rootName, scannedAt: new Date().toISOString(), files, skipped, notes };
+  }
+
+  async readFile(file: DriveFile): Promise<ArrayBuffer> {
+    const res = await fetch(`${PROXY}/uc?export=download&id=${encodeURIComponent(file.id)}`);
+    if (!res.ok) throw new Error(`Could not download "${file.name}" (${res.status}).`);
+    const buf = await res.arrayBuffer();
+    // Drive answers very large files with an HTML interstitial instead of the bytes
+    const head = new TextDecoder().decode(buf.slice(0, 200)).toLowerCase();
+    if (head.startsWith('<!doctype html') || head.startsWith('<html'))
+      throw new Error(`Drive served a confirmation page rather than "${file.name}" — it is probably too large for direct download. Use "Prepare by hand" to upload it.`);
+    return buf;
   }
 }
 

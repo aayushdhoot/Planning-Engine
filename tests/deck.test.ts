@@ -74,7 +74,7 @@ describe('PPTX decks — client and internal are different documents', () => {
     expect(text).toContain('CLIENT ISSUE');
     expect(text).toContain('Payment milestones');
     expect(text).toContain('What we need from you');
-    expect(text).toContain('Billing schedule');
+    expect(text).toContain('Billing milestones');
   });
 
   it('pending-input projects still produce a coherent deck rather than crashing', async () => {

@@ -24,7 +24,7 @@ export interface ValidationResult {
 }
 
 const REQUIRED_TOP = ['audience', 'engine', 'project', 'calendar', 'buffer', 'internal', 'external', 'ieInvariant', 'modules', 'assumptions', 'confidence', 'missingInputs'] as const;
-const REQUIRED_MODULES = ['timeline', 'manpower', 'resources', 'procurement', 'design', 'todos', 'dependencies', 'cashflow'] as const;
+const REQUIRED_MODULES = ['timeline', 'manpower', 'resources', 'procurement', 'design', 'todos', 'dependencies', 'raMilestones'] as const;
 
 /** Validate a plan object against the canonical schema (SPEC §7). */
 export function validatePlan(plan: Plan): ValidationResult {
@@ -45,8 +45,9 @@ export function validatePlan(plan: Plan): ValidationResult {
   }
   if (plan.audience !== 'internal' && plan.audience !== 'client') errors.push('audience must be internal|client');
   if (plan.audience === 'client') {
-    if (plan.modules.cashflow.margin !== null) errors.push('client plan must not expose margin');
-    if (plan.modules.cashflow.rows.some((r) => r.outflow !== null)) errors.push('client plan must not expose outflow');
+    if (plan.margin !== null) errors.push('client plan must not expose margin');
+    if (plan.modules.raMilestones.some((m) => m.checkpoints.some((c) => c.responsibility || c.remarks || c.activityId)))
+      errors.push('client plan must not expose internal RA checkpoint working');
     if (plan.modules.procurement.some((x) => x.vendor || x.remarks)) errors.push('client plan must not expose vendor or internal procurement remarks');
     if (plan.modules.manpower.days.length) errors.push('client plan must not expose manpower loading');
     if (plan.assumptions.some((a) => a.internalOnly)) errors.push('client plan must not expose internal-only assumptions');

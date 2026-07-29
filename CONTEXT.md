@@ -66,6 +66,63 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
   schema rejects a *silent* breach.
 - **Calendar default is a 7-day week** (Sundays working — Flipspaces convention). Toggle in Settings.
 
+## RA milestones replaced cashflow
+`modules.cashflow` is gone; `modules.raMilestones` took its slot in `REQUIRED_MODULES`.
+- A milestone is a list of physical things that must be true on site, not a monthly money
+  projection. `parseMilestoneClauses()` splits the contract prose ("Execution: a, b. Material
+  delivery: c.") into checkpoints, and each execution clause is matched to the activity that
+  evidences it. Readiness comes from ticked clauses, never from the due date arriving.
+- **Margin moved to `plan.margin`** (top level, internal-only). It used to hang off
+  `modules.cashflow.margin`; `clientView()` and `validatePlan()` both still enforce it.
+- The Gantt is no longer a tab — it is a toggle inside the PERT section. Resources and the
+  canonical JSON moved into Settings.
+
+## Drive without OAuth
+`PublicLinkDriveService` scans a link-shared folder with no credential at all — it reads Drive's
+public folder-listing HTML and downloads via `uc?export=download`.
+- Neither endpoint sends CORS headers, so the browser cannot call them. `vite.config.ts` proxies
+  them under `/gdrive`, with **`followRedirects: true`** — downloads 302 to
+  `drive.usercontent.google.com`, and without that the browser gets the redirect and is blocked.
+- Do not probe the proxy with a fake folder id: Drive answers 404 for it, which is
+  indistinguishable from "no proxy". `listing()` detects the SPA shell in the response instead.
+- `DriveFolderNotPublic` is the *only* error that should fall through to OAuth. Everything else
+  must report itself, or the app goes back to demanding a client ID it does not need.
+
+## Drive coverage — "What is in Drive"
+`src/engine/coverage.ts` + `src/ui/DriveCoverage.tsx`. The screen answers "is the engine reading
+all my input data?", so its whole value is in **not overstating what was read**.
+- `extracted` ≠ `logged`. Opening a contract PDF is not reading it. Never collapse these into
+  one "read" badge — a contract shown as READ is exactly the false assurance this replaces.
+- `extractorFor()` is deliberately conservative and checks the **path as well as the filename**:
+  KOHLER's real BOQ is `KOHLER_PUNE_FS_26TH JUNE_V5.xlsx`, identified only by its parent folder
+  `BOQ & Project Plan`. Filename-only matching hid the project's most important document.
+- `slotFor()` is the opposite way round — **name beats path** — or the programme sitting in that
+  same BOQ folder gets labelled as the BOQ.
+- Adding an extractor means adding it here *and* in `applyBytes()` in `Intake.tsx`, or the row
+  will offer "Read now" and then mark the file `logged`.
+
+## Schedule ingestion (closes the old limitation #1)
+`src/services/schedule-ingestion.ts` parses an issued programme sheet
+(`Activity No | Section | Description | Pred. | Dur | Start | Finish | Float | Critical`) into
+activities. Emirates had to be transcribed by hand; KOHLER did not.
+- Predecessor notation `2.1 SS+1`, `9.6 SS+3, 11.1`, `-` is read for **logic**; lags are then
+  **derived** from the planned Start column, same as `deriveLags()` in `skf.ts`. CPM therefore
+  reproduces the issued dates instead of the stated logic — in real programmes they disagree.
+- Where they disagree the parser records a `LogicConflict` rather than absorbing it silently.
+  KOHLER has **29 of 88** dependencies whose dates contradict their stated predecessor.
+- `tradeForSection()` must only ever return a trade that exists in `norms.crewByTrade`, or
+  manpower levelling silently falls back to the default cap. Watch the word boundaries: without
+  `\bduct`, "site induction" books an HVAC gang.
+- **Dates out of xlsx are a trap.** Read raw and `"14.10"` becomes the number `14.1`, silently
+  corrupting activity ids. Read formatted and a real date cell becomes a locale `"7/7/26"`,
+  ambiguous between 7-Jul and 7-Oct. `gridOf()` therefore takes formatted text first and the
+  typed `Date` only where the text will not parse. And a SheetJS date is not clean midnight —
+  KOHLER's 7-Jul arrives as `2026-07-06T18:29:50Z`, the wrong day under both local *and* UTC
+  getters — so `parseScheduleDate()` rounds the instant to the nearest whole day.
+- Regenerate KOHLER with `npx vite-node scripts/generate-kohler.ts`; sources are in
+  `source-documents/kohler/`. `src/data/kohler.ts` is generated — do not hand-edit it. It must
+  come out byte-identical unless a source document changed.
+
 ## Continuing the loop
 1. `npm run gates` — must be green before you start.
 2. Pick from the remaining-defects table in `BUILD_REPORT.md` §5; it is ranked with score recovery.

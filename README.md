@@ -19,16 +19,18 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 104 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 160 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
 ## What's in it
 
-**Three projects, two of them real.** *SKF, Pune* — 69 activities, 18 BOQ packages, ₹8.21 Cr,
-75-day contract. *Emirates Mumbai* — the issued 392-row MS-Project programme, 216 execution
-activities, 10 cost heads, ₹23.95 Cr over 245 days. *KOHLER* stays in `pending_inputs` until
-its folder has readable documents; the engine will not invent numbers for it.
+**Three real projects, plus a degraded-input fixture.** *SKF, Pune* — 69 activities, 18 BOQ
+packages, ₹8.21 Cr, 75-day contract. *Emirates Mumbai* — the issued 392-row MS-Project
+programme, 216 execution activities, 10 cost heads, ₹23.95 Cr over 245 days. *KOHLER OS, Pune*
+— 66 activities, 19 cost heads, ₹5.70 Cr over 120 days, **ingested** from its Drive documents
+rather than transcribed (`npx vite-node scripts/generate-kohler.ts`). *KOHLER OS (no inputs)*
+stays in `pending_inputs` as the degrade fixture; the engine will not invent numbers for it.
 
 **PERT view.** MS-Project format — ID, Task Name, Duration, Start, Finish, Actual Start,
 Actual Finish — with collapsible summary rows, roll-up progress, delay flags and inline bars.
@@ -39,7 +41,11 @@ issued programme get the same four-category view derived from their computed pla
 engagement window against realistic gang caps, so trades hold a stable core team and surge
 only where activities genuinely overlap. Electricians now peak at 14, not 30.
 
-**Four live trackers**, in the working formats:
+**Sections.** Overview · PERT (with the Gantt behind a toggle) · Manpower · Design ·
+Procurement · To-do · Dependencies · RA Milestones · New project · Settings (resource plan,
+calendar, norms, Drive access and the canonical JSON live here).
+
+**Five live trackers**, in the working formats:
 
 | Tracker | Columns |
 |---|---|
@@ -47,6 +53,7 @@ only where activities genuinely overlap. Electricians now peak at 14, not 30.
 | Procurement | Category · Sub Category · Criticality · **Order by** · **Delivery required** · Revised · Vendor · Order status · Delivery status · Responsibility · Gated by · Feeds |
 | To-do | Description · Responsibility · Priority · Status · Start · End · Revised · Notes |
 | Dependencies | Sr · Area · Description · Responsibility · Plan date · Actual date · Delay · Status · Remarks |
+| RA milestones | RA · Due · Revised · % · Amount · Readiness · Status · Invoice no. · Invoice date, each expanding into the contract clauses that must be true before billing |
 
 Every status, date and note is editable in the app. Procurement deliberately carries **no BOQ
 or BCS value** — only when to order and when it must land on site.
@@ -56,14 +63,35 @@ back-scheduled from the site activity it releases; each package shows the design
 gates it and the activity it feeds.
 
 **New project intake.** Point the engine at a project folder — pick it off this machine, or
-paste a Drive link once OAuth is configured → it scans → lists every document against the
-required-input checklist → asks permission before reading anything → then puts questions to the
-project head and refuses to plan until the blocking ones are answered.
+paste a Drive link once OAuth is configured → **What is in Drive** lists every document against
+the required-input checklist and shows, per file, whether the engine actually turned it into
+numbers → then puts questions to the project head and refuses to plan until the blocking ones
+are answered.
+
+**What is in Drive** exists to answer one question: *is the engine reading all my input data?*
+It separates two outcomes that a plain "read" badge would blur:
+
+| Badge | Means |
+|---|---|
+| **READ** | Structurally extracted — its numbers are in the plan (`4 packages · 14,905 sft · ₹5.70 Cr`) |
+| **EVIDENCE ONLY** | Bytes were opened, but there is no extractor for this format. Nothing reached the plan |
+| **NOT READ** | Untouched. The amber tile counts the ones the engine *could* parse but has not |
+| **DROPPED** | Excluded by you. The required input it matched then counts as uncovered |
+
+Per document: **Read now** (parse it), **Prepare by hand** (upload a file to stand in for it),
+**Drop reading** (exclude it). A contract PDF therefore never reads as "READ" — the engine holds
+it as evidence and makes you answer its dates in the questions step.
 
 ## Drive access
 
-Three paths. All three land in the same inventory → permission → queries flow.
+Four paths. All land in the same coverage → queries flow.
 
+- **Paste a folder link (no setup).** A folder shared as *"Anyone with the link"* is scanned
+  with **no Google account, no OAuth client ID and no API key**. The engine reads Drive's own
+  public folder listing and downloads files through the public endpoint. Both are proxied by the
+  dev server (`/gdrive` in `vite.config.ts`) because Drive sends no CORS headers — so this path
+  needs `npm run dev`, not the single-file build. Only a genuinely private folder falls through
+  to OAuth.
 - **Local folder (no setup).** Pick the project folder off this machine. If Google Drive for
   Desktop is running, that folder *is* the Drive folder, so you are reading live Drive contents
   with no Google API involved. File contents are real, so the BOQ is genuinely parsed.

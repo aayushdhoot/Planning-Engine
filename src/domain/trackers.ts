@@ -44,6 +44,75 @@ export interface DesignSummary {
 }
 
 /**
+ * RA milestone tracker — replaces the cashflow module.
+ *
+ * A billing milestone is not a date, it is a list of physical things that must be true on site
+ * before the invoice can go out ("partition marking, frameworks, single-side skinning, civil
+ * wall, plastering…"). The contract states those as prose; each clause becomes a checkable
+ * line here, tied to the site activity that satisfies it, so billing readiness is tracked by
+ * the project team rather than asserted on the due date.
+ */
+export interface RaCheckpoint {
+  id: string;
+  /** the clause text, e.g. "partition line marking" */
+  description: string;
+  /** 'execution' | 'material' | 'order' — the three kinds a milestone clause takes */
+  kind: 'execution' | 'material' | 'order';
+  /** activity whose completion evidences this clause, when one maps */
+  activityId: string | null;
+  activityName: string | null;
+  /** date the linked activity is planned to finish */
+  plannedDate: string | null;
+  actualDate: string | null;
+  status: TrackStatus;
+  responsibility: string;
+  remarks: string;
+}
+
+export interface RaMilestoneRow {
+  id: string;
+  /** RA1, RA2, ADV … */
+  code: string;
+  /** calendar days from contract start */
+  dayOffset: number;
+  /** % of contract value billed at this milestone */
+  percent: number;
+  /** amount, when a contract value is known; null in views where value is withheld */
+  amount: number | null;
+  dueDate: string;
+  revisedDate: string | null;
+  /** the clauses that must be satisfied to raise this bill */
+  checkpoints: RaCheckpoint[];
+  /** 0..100, from checkpoint completion */
+  readiness: number;
+  status: TrackStatus;
+  invoiceNo: string;
+  invoiceDate: string | null;
+  remarks: string;
+}
+
+export interface RaSummary {
+  milestones: number;
+  billed: number;
+  billedPercent: number;
+  /** milestones whose due date has passed but which are not billed */
+  overdue: number;
+  nextDue: RaMilestoneRow | null;
+}
+
+export function summariseRa(rows: RaMilestoneRow[], today: string): RaSummary {
+  const billed = rows.filter((r) => r.status === 'Completed');
+  const pending = rows.filter((r) => r.status !== 'Completed');
+  return {
+    milestones: rows.length,
+    billed: billed.length,
+    billedPercent: Math.round(billed.reduce((s, r) => s + r.percent, 0) * 10) / 10,
+    overdue: pending.filter((r) => (r.revisedDate ?? r.dueDate) < today).length,
+    nextDue: pending.sort((a, b) => ((a.revisedDate ?? a.dueDate) < (b.revisedDate ?? b.dueDate) ? -1 : 1))[0] ?? null,
+  };
+}
+
+/**
  * Procurement tracker — order-by and delivery-required only; no BOQ or BCS value.
  * Category | Sub Category | Criticality | Order By | Delivery Required |
  * Revised Date | Vendor | Order Status | Material Delivery Status | Responsibility | Remarks

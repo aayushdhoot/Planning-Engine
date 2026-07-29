@@ -1,7 +1,7 @@
 // The local-folder path is what makes a new project possible without any Google setup,
 // so it carries the same weight as the Drive API path and is tested the same way.
 import { describe, expect, it } from 'vitest';
-import { LocalFolderDriveService, explainAuthError, explainDriveApiError, folderIdFrom, type PickedFile } from '../src/services/drive';
+import { GoogleDriveService, LocalFolderDriveService, PublicLinkDriveService, explainAuthError, explainDriveApiError, folderIdFrom, listingTitle, parseFolderListing, type PickedFile } from '../src/services/drive';
 import { buildInventory } from '../src/engine/intake';
 
 const picked = (path: string, bytes = 'x', type = ''): PickedFile => ({
@@ -100,5 +100,42 @@ describe('folderIdFrom', () => {
     expect(folderIdFrom('https://drive.google.com/drive/folders/1NVFok5Gk4prjzu-yghgQL')).toBe('1NVFok5Gk4prjzu-yghgQL');
     expect(folderIdFrom('https://drive.google.com/open?id=abc_123')).toBe('abc_123');
     expect(folderIdFrom('  bare-id  ')).toBe('bare-id');
+  });
+});
+
+// ---------------------------------------------------------------- public link
+
+const LISTING = `<!DOCTYPE html><html><head><title>KOHLER OS</title></head><body>
+<div class="flip-entries">
+<div class="flip-entry" id="entry-13XGJ6QH8Ao3VMUWvrUojX5P9GpYENys_" tabindex="0" role="link"><div class="flip-entry-info"><a href="https://drive.google.com/drive/folders/13XGJ6QH8Ao3VMUWvrUojX5P9GpYENys_" target="_blank"><div class="flip-entry-visual"></div><div class="flip-entry-title">01 &#183; Sales &amp; Client</div></a></div></div>
+<div class="flip-entry" id="entry-1qbEHv_HD7lMmi_Qxk9zN7butFezc0gXA" tabindex="0" role="link"><div class="flip-entry-info"><a href="https://drive.google.com/file/d/1qbEHv_HD7lMmi_Qxk9zN7butFezc0gXA/view" target="_blank"><div class="flip-entry-visual"></div><div class="flip-entry-title">KOHLER_PUNE_FS_26TH JUNE_V5.xlsx</div></a></div></div>
+</div></body></html>`;
+
+describe('public link-shared folder listing', () => {
+  it('separates folders from files and decodes the titles', () => {
+    const entries = parseFolderListing(LISTING);
+    expect(entries).toHaveLength(2);
+    expect(entries[0]).toEqual({ id: '13XGJ6QH8Ao3VMUWvrUojX5P9GpYENys_', title: '01 · Sales & Client', isFolder: true });
+    expect(entries[1].isFolder).toBe(false);
+    expect(entries[1].title).toBe('KOHLER_PUNE_FS_26TH JUNE_V5.xlsx');
+  });
+
+  it('is reusable — the regex does not carry lastIndex between calls', () => {
+    expect(parseFolderListing(LISTING)).toHaveLength(2);
+    expect(parseFolderListing(LISTING)).toHaveLength(2);
+  });
+
+  it('reads the folder name from the page title', () => {
+    expect(listingTitle(LISTING)).toBe('KOHLER OS');
+  });
+
+  it('treats a sign-in page as not-public rather than as a folder called "Sign in"', () => {
+    expect(listingTitle('<html><head><title>Sign in - Google Accounts</title></head></html>')).toBeNull();
+    expect(listingTitle('<html><head><title></title></head></html>')).toBeNull();
+  });
+
+  it('needs no credential, unlike the OAuth path', () => {
+    expect(new PublicLinkDriveService().isConfigured()).toBe(true);
+    expect(new GoogleDriveService('').isConfigured()).toBe(false);
   });
 });

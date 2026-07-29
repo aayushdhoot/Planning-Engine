@@ -1,7 +1,10 @@
-// Emirates OS & KOHLER OS — honest degraded-input datasets.
-// The Drive folders contain a structured folder scaffold but no readable BOQ/schedule/contract
-// files (Emirates subfolders hold only .DS_Store; KOHLER is an unresolvable shortcut).
-// The engine must degrade gracefully (T1-DEGRADE): no fabricated numbers.
+// Emirates OS — honest degraded-input dataset, kept as the T1-DEGRADE fixture.
+// The folder holds a structured scaffold but no readable BOQ/schedule/contract files, so the
+// engine must refuse to plan rather than fabricate numbers.
+//
+// KOHLER has since been supplied with real documents and moved to src/data/kohler.ts.
+// `pendingKohler` preserves the degraded shape so the degrade gate still has a project that
+// exercises it independently of whether KOHLER's documents are present.
 import type { ProjectInputs } from '../domain/types';
 
 export const emirates: ProjectInputs = {
@@ -23,9 +26,10 @@ export const emirates: ProjectInputs = {
   dlpMonths: null,
 };
 
-export const kohler: ProjectInputs = {
+/** A project whose folder has no readable inputs — the T1-DEGRADE fixture. */
+export const pendingKohler: ProjectInputs = {
   ...emirates,
-  id: 'kohler',
-  name: 'KOHLER OS',
+  id: 'kohler-pending',
+  name: 'KOHLER OS (no inputs)',
   client: 'Kohler',
 };

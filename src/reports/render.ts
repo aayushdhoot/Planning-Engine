@@ -92,7 +92,7 @@ function clientReport(plan: Plan): string {
 
   <h2>Billing schedule</h2>
   <table><thead><tr><th>Period</th><th>Billing</th><th>Cumulative</th></tr></thead><tbody>
-  ${plan.modules.cashflow.rows.map((r) => `<tr><td>${r.period}</td><td>${inr(r.inflow)}</td><td>${inr(r.cumulativeInflow)}</td></tr>`).join('')}
+  ${plan.modules.raMilestones.map((r) => `<tr><td>${r.code}</td><td>${r.dueDate}</td><td>${r.percent}%</td></tr>`).join('')}
   </tbody></table>
 
   ${plan.assumptions.length ? `<h2>Notes</h2><ul>${plan.assumptions.map((a) => `<li>${esc(a.text)}</li>`).join('')}</ul>` : ''}
@@ -113,9 +113,7 @@ function internalReport(plan: Plan): string {
 
   const acts = plan.modules.timeline.activities;
   const cp = acts.filter((a) => a.critical);
-  const out = plan.modules.cashflow.rows.reduce((s, r) => s + (r.outflow ?? 0), 0);
-  const inflow = plan.modules.cashflow.rows.reduce((s, r) => s + r.inflow, 0);
-  const worstNet = Math.min(...plan.modules.cashflow.rows.map((r) => r.cumulativeInflow - (r.cumulativeOutflow ?? 0)));
+  const clauses = plan.modules.raMilestones.reduce((s, m) => s + m.checkpoints.length, 0);
 
   return shell(`${p.name} — Internal Execution Plan`, '#c1121f', `
   <div class="cover">
@@ -130,8 +128,8 @@ function internalReport(plan: Plan): string {
     <div class="kpi"><div class="k">Buffer</div><div class="v">${plan.ieInvariant.bufferCalendarDays}d</div><div class="s">${plan.ieInvariant.holds ? 'invariant holds' : 'BREACH'}</div></div>
     <div class="kpi"><div class="k">Critical activities</div><div class="v">${cp.length} / ${acts.length}</div></div>
     <div class="kpi"><div class="k">Peak manpower</div><div class="v">${plan.modules.manpower.peak}</div><div class="s">${plan.modules.manpower.peakDate}</div></div>
-    <div class="kpi"><div class="k">Margin</div><div class="v">${plan.modules.cashflow.margin ? plan.modules.cashflow.margin.value + '%' : '—'}</div><div class="s">contract vs BCS</div></div>
-    <div class="kpi"><div class="k">Worst net cash</div><div class="v ${worstNet < 0 ? 'crit' : ''}">${inr(worstNet)}</div><div class="s">peak funding need</div></div>
+    <div class="kpi"><div class="k">Margin</div><div class="v">${plan.margin ? plan.margin.value + '%' : '—'}</div><div class="s">${clauses} RA clauses tracked</div></div>
+    <div class="kpi"><div class="k">Contract value</div><div class="v">${plan.project.contractValue ? inr(plan.project.contractValue.value) : '—'}</div></div>
   </div>
 
   <h2>Critical path (${cp.length} activities — zero float)</h2>
@@ -164,10 +162,9 @@ function internalReport(plan: Plan): string {
   ${plan.modules.resources.map((r) => `<tr><td>${esc(r.role)}</td><td>${r.count.value}</td><td class="src">${esc(r.count.source)}</td></tr>`).join('')}
   </tbody></table>
 
-  <h2>Cashflow — inflow vs outflow</h2>
-  <table><thead><tr><th>Period</th><th>Inflow</th><th>Outflow</th><th>Cum. in</th><th>Cum. out</th><th>Net position</th></tr></thead><tbody>
-  ${plan.modules.cashflow.rows.map((r) => { const net = r.cumulativeInflow - (r.cumulativeOutflow ?? 0); return `<tr><td>${r.period}</td><td>${inr(r.inflow)}</td><td>${inr(r.outflow ?? 0)}</td><td>${inr(r.cumulativeInflow)}</td><td>${inr(r.cumulativeOutflow ?? 0)}</td><td class="${net < 0 ? 'crit' : ''}">${inr(net)}</td></tr>`; }).join('')}
-  <tr><th>Total</th><th>${inr(inflow)}</th><th>${inr(out)}</th><th colspan="3"></th></tr>
+  <h2>RA billing milestones</h2>
+  <table><thead><tr><th>RA</th><th>Due</th><th>%</th><th>Amount</th><th>Clauses</th><th>Status</th></tr></thead><tbody>
+  ${plan.modules.raMilestones.map((m) => `<tr><td>${m.code}</td><td>${m.dueDate}</td><td>${m.percent}%</td><td>${m.amount == null ? '—' : inr(m.amount)}</td><td>${m.checkpoints.length}</td><td>${m.status}</td></tr>`).join('')}
   </tbody></table>
 
   <h2>To-do list — next 21 days</h2>

@@ -26,7 +26,14 @@ describe('parseScheduleDate', () => {
     expect(parseScheduleDate('7-Jul-26')).toBe('2026-07-07');
     expect(parseScheduleDate('07-July-2026')).toBe('2026-07-07');
     expect(parseScheduleDate('2026-07-07')).toBe('2026-07-07');
-    expect(parseScheduleDate(new Date(Date.UTC(2026, 6, 7)))).toBe('2026-07-07');
+    // SheetJS hands back local-time dates, so this must survive any host timezone
+    expect(parseScheduleDate(new Date(2026, 6, 7))).toBe('2026-07-07');
+  });
+
+  it('reads a local-time date cell as the day it displays, in any timezone', () => {
+    // east of UTC, toISOString() on a local midnight yields the previous day — the bug this pins
+    expect(parseScheduleDate(new Date(2026, 0, 1))).toBe('2026-01-01');
+    expect(parseScheduleDate(new Date(2026, 11, 31))).toBe('2026-12-31');
   });
   it('returns null rather than a wrong date for day numbers and junk', () => {
     expect(parseScheduleDate('30')).toBeNull();

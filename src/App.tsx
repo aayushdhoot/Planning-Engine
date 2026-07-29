@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import type { CalendarConfig, EngineConfig, ProjectInputs, Traced } from './domain/types';
 import type { DesignRow, TodoRow, TrackStatus } from './domain/trackers';
 import { TRACK_STATUSES, delayDays } from './domain/trackers';
@@ -7,11 +7,13 @@ import { auditTrace, canonicalJson, validatePlan } from './engine/schema';
 import { buildPertFromPlan } from './engine/pert-build';
 import { skf } from './data/skf';
 import { emirates } from './data/emirates';
-import { kohler } from './data/others';
+import { pendingKohler } from './data/others';
+import { kohler } from './data/kohler';
 import { buildEmiratesPert } from './data/emirates-pert';
 import normsData from './norms/norms-v1.json';
 import { Gantt } from './ui/Gantt';
 import { Pert } from './ui/Pert';
+import type { PertTree } from './domain/pert';
 import { Intake } from './ui/Intake';
 import { BoqIngestionService, type IngestedBoq } from './services/ingestion';
 import { FilePersistence } from './services/persistence';
@@ -19,10 +21,10 @@ import { readDriveClientId, writeDriveClientId } from './services/settings-store
 import { renderReport } from './reports/render';
 import { buildDeck } from './reports/deck';
 
-const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler];
+const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
-const TABS = ['Overview', 'PERT', 'Gantt', 'Manpower', 'Resources', 'Design', 'Procurement', 'To-do', 'Dependencies', 'Cashflow', 'New project', 'Settings', 'JSON'] as const;
+const TABS = ['Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'To-do', 'Dependencies', 'RA Milestones', 'New project', 'Settings'] as const;
 type Tab = (typeof TABS)[number];
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -126,15 +128,13 @@ export default function App() {
         )}
 
         {tab === 'Overview' && <Overview plan={plan} view={view} />}
-        {tab === 'PERT' && <Pert tree={pert} today={today} />}
-        {tab === 'Gantt' && <GanttTab plan={plan} view={view} />}
+        {tab === 'PERT' && <PertSection tree={pert} today={today} plan={plan} view={view} />}
         {tab === 'Manpower' && <Manpower plan={plan} />}
-        {tab === 'Resources' && <Resources plan={plan} />}
         {tab === 'Design' && <Design plan={plan} edit={edit} val={val} />}
         {tab === 'Procurement' && <Procurement plan={plan} view={view} edit={edit} val={val} />}
         {tab === 'To-do' && <Todos plan={plan} edit={edit} val={val} />}
         {tab === 'Dependencies' && <Dependencies plan={plan} today={today} edit={edit} val={val} />}
-        {tab === 'Cashflow' && <Cashflow plan={plan} view={view} />}
+        {tab === 'RA Milestones' && <RaMilestones plan={plan} view={view} today={today} edit={edit} val={val} />}
         {tab === 'New project' && (
           <Intake
             clientId={clientId}
@@ -161,9 +161,9 @@ export default function App() {
               setOverrides({ ...overrides, [project.id]: ingestion.applyToProject(project, boq, file) });
             }}
             onSaveWorkspace={() => persistence.save({ savedAt: new Date().toISOString(), normsVersion: normsData.version, projects: PROJECTS, config: cfg })}
+            plan={plan}
           />
         )}
-        {tab === 'JSON' && <pre className="json">{canonicalJson(plan)}</pre>}
       </main>
     </div>
   );
@@ -273,7 +273,30 @@ function Overview({ plan, view }: { plan: Plan; view: string }) {
   );
 }
 
-function GanttTab({ plan, view }: { plan: Plan; view: string }) {
+/**
+ * PERT is the schedule section; the Gantt is a way of looking at the same programme rather than
+ * a separate module, so it lives here behind a toggle instead of on its own tab.
+ */
+function PertSection({ tree, today, plan, view }: { tree: PertTree; today: string; plan: Plan; view: string }) {
+  const [showGantt, setShowGantt] = useState(false);
+  const acts = plan.modules.timeline.activities;
+  return (
+    <>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <div className="seg">
+          <button className={!showGantt ? 'on' : ''} onClick={() => setShowGantt(false)}>PERT network</button>
+          <button className={showGantt ? 'on' : ''} onClick={() => setShowGantt(true)} disabled={!acts.length}>Gantt chart</button>
+        </div>
+        <span className="muted" style={{ fontSize: 12 }}>
+          {showGantt ? 'Same programme, drawn against the calendar.' : 'MS-Project columns, collapsible by section.'}
+        </span>
+      </div>
+      {!showGantt ? <Pert tree={tree} today={today} /> : <GanttView plan={plan} view={view} />}
+    </>
+  );
+}
+
+function GanttView({ plan, view }: { plan: Plan; view: string }) {
   const acts = plan.modules.timeline.activities;
   if (!acts.length) return <p className="muted">No schedule — inputs pending.</p>;
   return (
@@ -571,39 +594,132 @@ function Dependencies({ plan, today, edit, val }: { plan: Plan; today: string; e
   );
 }
 
-function Cashflow({ plan, view }: { plan: Plan; view: string }) {
-  const rows = plan.modules.cashflow.rows;
-  if (!rows.length) return <p className="muted">No cashflow — inputs pending.</p>;
-  const maxAbs = Math.max(...rows.map((r) => Math.max(r.cumulativeInflow, r.cumulativeOutflow ?? 0)), 1);
+/**
+ * RA billing milestones — replaces the cashflow curve.
+ *
+ * The point is that a milestone is only billable when the physical work named in the contract
+ * clause is actually done, so each clause is a row the project team ticks off. Readiness is
+ * computed from those ticks, never from the date having arrived.
+ */
+function RaMilestones({
+  plan, view, today, edit, val,
+}: {
+  plan: Plan; view: string; today: string;
+  edit: (id: string, f: string, v: string) => void;
+  val: <T,>(id: string, f: string, fallback: T) => T | string;
+}) {
+  const rows = plan.modules.raMilestones;
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  if (!rows.length) return <p className="muted">No billing milestones — the contract payment terms have not been read yet.</p>;
+
+  const statusOf = (r: (typeof rows)[number]) => String(val(r.id, 'status', r.status)) as TrackStatus;
+  const cpStatusOf = (c: { id: string; status: TrackStatus }) => String(val(c.id, 'status', c.status)) as TrackStatus;
+  const readinessOf = (r: (typeof rows)[number]) =>
+    r.checkpoints.length
+      ? Math.round((r.checkpoints.filter((c) => cpStatusOf(c) === 'Completed').length / r.checkpoints.length) * 100)
+      : 0;
+
+  const billed = rows.filter((r) => statusOf(r) === 'Completed');
+  const billedPct = Math.round(billed.reduce((s, r) => s + r.percent, 0) * 10) / 10;
+  const overdue = rows.filter((r) => statusOf(r) !== 'Completed' && String(val(r.id, 'revisedDate', r.revisedDate ?? r.dueDate)) < today);
+  const next = rows.filter((r) => statusOf(r) !== 'Completed')[0];
+
   return (
     <>
       <div className="cards">
-        <div className="card"><div className="k">Total inflow</div><div className="v">{inr(rows.reduce((s, r) => s + r.inflow, 0))}</div><div className="s">contract milestones</div></div>
-        {view === 'internal' && <div className="card"><div className="k">Total outflow</div><div className="v">{inr(rows.reduce((s, r) => s + (r.outflow ?? 0), 0))}</div><div className="s">BCS over execution</div></div>}
-        {view === 'internal' && plan.modules.cashflow.margin && <div className="card"><div className="k">Margin</div><div className="v">{plan.modules.cashflow.margin.value}%</div><P t={plan.modules.cashflow.margin} /></div>}
+        <div className="card"><div className="k">Milestones</div><div className="v">{rows.length}</div><div className="s">from the contract payment terms</div></div>
+        <div className="card"><div className="k">Billed</div><div className="v" style={{ color: 'var(--ok)' }}>{billedPct}%</div><div className="s">{billed.length} of {rows.length} raised</div></div>
+        <div className="card" style={overdue.length ? { borderColor: 'var(--crit)', background: 'var(--crit-soft)' } : undefined}>
+          <div className="k">Overdue</div>
+          <div className="v" style={{ color: overdue.length ? 'var(--crit)' : undefined }}>{overdue.length}</div>
+          <div className="s">past due and not billed</div>
+        </div>
+        <div className="card">
+          <div className="k">Next due</div>
+          <div className="v" style={{ fontSize: 16 }}>{next ? next.code : '—'}</div>
+          <div className="s">{next ? `${next.dueDate} · ${readinessOf(next)}% ready` : 'all billed'}</div>
+        </div>
       </div>
-      <h2>{view === 'external' ? 'Billing schedule' : 'Monthly cashflow'}</h2>
+
+      <h2>RA milestone tracker</h2>
+      <p className="muted" style={{ marginTop: -6, maxWidth: 820 }}>
+        Each milestone expands into the clauses the contract requires before it can be billed. Tick a clause when
+        site confirms it; readiness is the share of clauses complete, so a milestone never reads as ready just
+        because its date arrived.
+      </p>
       <div className="tblwrap">
         <table>
-          <thead><tr><th>Period</th><th>Inflow</th>{view === 'internal' && <th>Outflow</th>}<th>Cum. inflow</th>{view === 'internal' && <><th>Cum. outflow</th><th>Net position</th></>}</tr></thead>
-          <tbody>{rows.map((r) => {
-            const net = r.cumulativeInflow - (r.cumulativeOutflow ?? 0);
-            return (
-              <tr key={r.period}>
-                <td className="mono">{r.period}</td>
-                <td className="mono">{inr(r.inflow)}</td>
-                {view === 'internal' && <td className="mono">{inr(r.outflow ?? 0)}</td>}
-                <td className="mono">{inr(r.cumulativeInflow)}</td>
-                {view === 'internal' && <>
-                  <td className="mono">{inr(r.cumulativeOutflow ?? 0)}</td>
-                  <td className="mono" style={{ color: net >= 0 ? 'var(--ok)' : 'var(--crit)' }}>
-                    {inr(net)}
-                    <div className="bar" style={{ marginTop: 4 }}><div style={{ width: `${(Math.abs(net) / maxAbs) * 100}%`, background: net >= 0 ? 'var(--ok)' : 'var(--crit)' }} /></div>
-                  </td>
-                </>}
-              </tr>
-            );
-          })}</tbody>
+          <thead>
+            <tr>
+              <th style={{ width: 28 }} /><th>RA</th><th>Due</th><th>Revised</th><th>%</th>
+              {view === 'internal' && <th>Amount</th>}
+              <th>Readiness</th><th>Status</th><th>Invoice no.</th><th>Invoice date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const isOpen = open.has(r.id);
+              const ready = readinessOf(r);
+              return (
+                <Fragment key={r.id}>
+                  <tr>
+                    <td>
+                      <button
+                        style={{ padding: '0 6px', boxShadow: 'none' }}
+                        onClick={() => setOpen((p) => { const n = new Set(p); if (n.has(r.id)) n.delete(r.id); else n.add(r.id); return n; })}
+                      >
+                        {isOpen ? '▾' : '▸'}
+                      </button>
+                    </td>
+                    <td><strong>{r.code}</strong><div className="faint" style={{ fontSize: 11 }}>day {r.dayOffset}</div></td>
+                    <td className="mono">{r.dueDate}</td>
+                    <td><input type="date" value={String(val(r.id, 'revisedDate', r.revisedDate ?? ''))} onChange={(e) => edit(r.id, 'revisedDate', e.target.value)} /></td>
+                    <td className="mono">{r.percent}%</td>
+                    {view === 'internal' && <td className="mono">{r.amount == null ? '—' : inr(r.amount)}</td>}
+                    <td style={{ minWidth: 110 }}>
+                      <div className="bar"><div style={{ width: `${ready}%`, background: ready === 100 ? 'var(--ok)' : 'var(--accent)' }} /></div>
+                      <span className="faint" style={{ fontSize: 11 }}>{ready}% · {r.checkpoints.length} clauses</span>
+                    </td>
+                    <td>
+                      <select value={statusOf(r)} onChange={(e) => edit(r.id, 'status', e.target.value)}>
+                        {TRACK_STATUSES.map((x) => <option key={x} value={x}>{x}</option>)}
+                      </select>
+                    </td>
+                    <td><input value={String(val(r.id, 'invoiceNo', r.invoiceNo))} onChange={(e) => edit(r.id, 'invoiceNo', e.target.value)} style={{ width: 110 }} /></td>
+                    <td><input type="date" value={String(val(r.id, 'invoiceDate', r.invoiceDate ?? ''))} onChange={(e) => edit(r.id, 'invoiceDate', e.target.value)} /></td>
+                  </tr>
+                  {isOpen && r.checkpoints.map((c) => (
+                    <tr key={c.id} style={{ background: 'var(--panel2)' }}>
+                      <td />
+                      <td colSpan={2} style={{ paddingLeft: 18 }}>
+                        <span className={`tag ${c.kind === 'execution' ? 'info' : c.kind === 'material' ? 'warn' : 'ext'}`}>{c.kind}</span>{' '}
+                        {c.description}
+                        {c.activityName && <div className="faint" style={{ fontSize: 11 }}>evidenced by: {c.activityName}</div>}
+                      </td>
+                      <td className="mono">{c.plannedDate ?? '—'}</td>
+                      <td colSpan={view === 'internal' ? 2 : 1} />
+                      <td>
+                        <input type="date" value={String(val(c.id, 'actualDate', c.actualDate ?? ''))} onChange={(e) => edit(c.id, 'actualDate', e.target.value)} />
+                      </td>
+                      <td>
+                        <select value={cpStatusOf(c)} onChange={(e) => edit(c.id, 'status', e.target.value)}>
+                          {TRACK_STATUSES.map((x) => <option key={x} value={x}>{x}</option>)}
+                        </select>
+                      </td>
+                      <td colSpan={2} className="muted" style={{ fontSize: 11.5 }}>
+                        {view === 'internal' ? c.responsibility : ''}
+                      </td>
+                    </tr>
+                  ))}
+                  {isOpen && !r.checkpoints.length && (
+                    <tr style={{ background: 'var(--panel2)' }}>
+                      <td /><td colSpan={9} className="muted" style={{ fontSize: 12 }}>{r.remarks}</td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
+          </tbody>
         </table>
       </div>
     </>
@@ -617,6 +733,7 @@ function Settings(p: {
   buffer: number; setBuffer: (v: number) => void;
   leadOverrides: Record<string, number>; setLeadOverrides: (v: Record<string, number>) => void;
   clientId: string; setClientId: (v: string) => void;
+  plan: Plan;
   project: ProjectInputs;
   ingestResult: { boq: IngestedBoq; file: string } | null;
   onParsed: (boq: IngestedBoq, file: string) => void;
@@ -694,7 +811,22 @@ function Settings(p: {
         )}
       </div>
 
-      <h2>Upload a priced BOQ into “{p.project.name}”</h2>
+      <h2>Project resource plan</h2>
+      <p className="muted" style={{ marginTop: -6, maxWidth: 780 }}>
+        Role slots scaled from project area by the norms. This drives who is staffed on the project, so it is a
+        setting rather than a daily tracker.
+      </p>
+      <Resources plan={p.plan} />
+
+      <h2 style={{ marginTop: 26 }}>Canonical JSON</h2>
+      <details>
+        <summary className="muted" style={{ cursor: 'pointer', fontSize: 13 }}>
+          Show the key-sorted plan document ({canonicalJson(p.plan).length.toLocaleString()} bytes)
+        </summary>
+        <pre className="json" style={{ marginTop: 10, maxHeight: '50vh', overflow: 'auto' }}>{canonicalJson(p.plan)}</pre>
+      </details>
+
+      <h2 style={{ marginTop: 26 }}>Upload a priced BOQ into “{p.project.name}”</h2>
       <div className="row">
         <input type="file" accept=".xlsx,.xls,.csv,.tsv,.txt" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handle(f); }} />
         <button onClick={p.onSaveWorkspace}>Save workspace (JSON)</button>

@@ -104,82 +104,15 @@
     "end": "2026-02-22",
     "start": "2025-06-23"
   },
+  "margin": {
+    "provenance": "computed",
+    "source": "(contractValue − bcsValue)/contractValue from [INT] EMIRATES BOM CC - BOQ_BCS R1.xlsx · SUMMARY · TOTAL (EXCLUSIVE OF TAXES)* after special discount",
+    "value": 47.3
+  },
   "missingInputs": [
     "Make list"
   ],
   "modules": {
-    "cashflow": {
-      "margin": {
-        "provenance": "computed",
-        "source": "(contractValue − bcsValue)/contractValue from [INT] EMIRATES BOM CC - BOQ_BCS R1.xlsx · SUMMARY · TOTAL (EXCLUSIVE OF TAXES)* after special discount",
-        "value": 47.3
-      },
-      "rows": [
-        {
-          "cumulativeInflow": 0,
-          "cumulativeOutflow": 657445,
-          "inflow": 0,
-          "outflow": 657445,
-          "period": "2025-06"
-        },
-        {
-          "cumulativeInflow": 0,
-          "cumulativeOutflow": 3364675,
-          "inflow": 0,
-          "outflow": 2707230,
-          "period": "2025-07"
-        },
-        {
-          "cumulativeInflow": 35925000,
-          "cumulativeOutflow": 6324658,
-          "inflow": 35925000,
-          "outflow": 2959983,
-          "period": "2025-08"
-        },
-        {
-          "cumulativeInflow": 35925000,
-          "cumulativeOutflow": 11768983,
-          "inflow": 0,
-          "outflow": 5444325,
-          "period": "2025-09"
-        },
-        {
-          "cumulativeInflow": 83825000,
-          "cumulativeOutflow": 33768911,
-          "inflow": 47900000,
-          "outflow": 21999928,
-          "period": "2025-10"
-        },
-        {
-          "cumulativeInflow": 143700000,
-          "cumulativeOutflow": 63354311,
-          "inflow": 59875000,
-          "outflow": 29585401,
-          "period": "2025-11"
-        },
-        {
-          "cumulativeInflow": 143700000,
-          "cumulativeOutflow": 95594126,
-          "inflow": 0,
-          "outflow": 32239815,
-          "period": "2025-12"
-        },
-        {
-          "cumulativeInflow": 203575000,
-          "cumulativeOutflow": 129151722,
-          "inflow": 59875000,
-          "outflow": 33557596,
-          "period": "2026-01"
-        },
-        {
-          "cumulativeInflow": 239500000,
-          "cumulativeOutflow": 146181543,
-          "inflow": 35925000,
-          "outflow": 17029821,
-          "period": "2026-02"
-        }
-      ]
-    },
     "dependencies": [
       {
         "actualDate": null,
@@ -4707,6 +4640,392 @@
         "revisedDate": null,
         "subCategory": "default",
         "vendor": ""
+      }
+    ],
+    "raMilestones": [
+      {
+        "amount": 0,
+        "checkpoints": [
+          {
+            "activityId": "e131",
+            "activityName": "Mobilisation Period",
+            "actualDate": null,
+            "description": "Mobilisation",
+            "id": "RA1-c1",
+            "kind": "execution",
+            "plannedDate": "2025-07-26",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Kick-off",
+            "id": "RA1-c2",
+            "kind": "execution",
+            "plannedDate": "2025-06-23",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "PO release",
+            "id": "RA1-c3",
+            "kind": "execution",
+            "plannedDate": "2025-06-23",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA1",
+        "dayOffset": 0,
+        "dueDate": "2025-06-23",
+        "id": "ra-1",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 0,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 35925000,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Design freeze",
+            "id": "RA2-c1",
+            "kind": "execution",
+            "plannedDate": "2025-08-22",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Liaisoning approvals (BMC",
+            "id": "RA2-c2",
+            "kind": "execution",
+            "plannedDate": "2025-08-22",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e157",
+            "activityName": "Delivery of Fire Rated Metal Doors",
+            "actualDate": null,
+            "description": "Fire NOC)",
+            "id": "RA2-c3",
+            "kind": "execution",
+            "plannedDate": "2026-01-07",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e131",
+            "activityName": "Mobilisation Period",
+            "actualDate": null,
+            "description": "Site mobilisation",
+            "id": "RA2-c4",
+            "kind": "execution",
+            "plannedDate": "2025-07-26",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA2",
+        "dayOffset": 60,
+        "dueDate": "2025-08-22",
+        "id": "ra-2",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 15,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 47900000,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Civil",
+            "id": "RA3-c1",
+            "kind": "execution",
+            "plannedDate": "2025-10-11",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e152",
+            "activityName": "Delivery of Modular Glazed Partitions glass",
+            "actualDate": null,
+            "description": "Dry-wall partitions",
+            "id": "RA3-c2",
+            "kind": "execution",
+            "plannedDate": "2025-12-01",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "MEP first fix",
+            "id": "RA3-c3",
+            "kind": "execution",
+            "plannedDate": "2025-10-11",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e334",
+            "activityName": "Conduiting & Installation of raceways (ACS)",
+            "actualDate": null,
+            "description": "Raceways",
+            "id": "RA3-c4",
+            "kind": "execution",
+            "plannedDate": "2025-12-02",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e254",
+            "activityName": "Conduiting for Raw Power, UPS, lighting, IT",
+            "actualDate": null,
+            "description": "Conduiting",
+            "id": "RA3-c5",
+            "kind": "execution",
+            "plannedDate": "2025-11-02",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA3",
+        "dayOffset": 110,
+        "dueDate": "2025-10-11",
+        "id": "ra-3",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 20,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 59875000,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Ceilings",
+            "id": "RA4-c1",
+            "kind": "execution",
+            "plannedDate": "2025-11-30",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e138",
+            "activityName": "Modifoam Flooring",
+            "actualDate": null,
+            "description": "Flooring",
+            "id": "RA4-c2",
+            "kind": "execution",
+            "plannedDate": "2025-10-30",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e150",
+            "activityName": "Second side single skinning",
+            "actualDate": null,
+            "description": "Second fix MEP",
+            "id": "RA4-c3",
+            "kind": "execution",
+            "plannedDate": "2025-10-27",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e152",
+            "activityName": "Delivery of Modular Glazed Partitions glass",
+            "actualDate": null,
+            "description": "Glass partitions",
+            "id": "RA4-c4",
+            "kind": "execution",
+            "plannedDate": "2025-12-01",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA4",
+        "dayOffset": 160,
+        "dueDate": "2025-11-30",
+        "id": "ra-4",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 25,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 59875000,
+        "checkpoints": [
+          {
+            "activityId": "e317",
+            "activityName": "Enamel painting of pipes",
+            "actualDate": null,
+            "description": "Painting",
+            "id": "RA5-c1",
+            "kind": "execution",
+            "plannedDate": "2025-11-20",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e216",
+            "activityName": "Wall paper base preparation",
+            "actualDate": null,
+            "description": "Wall finishes",
+            "id": "RA5-c2",
+            "kind": "execution",
+            "plannedDate": "2025-11-21",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e152",
+            "activityName": "Delivery of Modular Glazed Partitions glass",
+            "actualDate": null,
+            "description": "Modular furniture",
+            "id": "RA5-c3",
+            "kind": "execution",
+            "plannedDate": "2025-12-01",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e249",
+            "activityName": "Testing & Commissioning of Plumbing Line",
+            "actualDate": null,
+            "description": "Commissioning",
+            "id": "RA5-c4",
+            "kind": "execution",
+            "plannedDate": "2025-11-19",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA5",
+        "dayOffset": 205,
+        "dueDate": "2026-01-14",
+        "id": "ra-5",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 25,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 35925000,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Snagging",
+            "id": "RA6-c1",
+            "kind": "execution",
+            "plannedDate": "2026-02-23",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": "e392",
+            "activityName": "Deep Cleaning",
+            "actualDate": null,
+            "description": "Deep cleaning",
+            "id": "RA6-c2",
+            "kind": "execution",
+            "plannedDate": "2026-02-22",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Handover",
+            "id": "RA6-c3",
+            "kind": "execution",
+            "plannedDate": "2026-02-23",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Close-out documents",
+            "id": "RA6-c4",
+            "kind": "execution",
+            "plannedDate": "2026-02-23",
+            "remarks": "",
+            "responsibility": "Site",
+            "status": "Delayed"
+          }
+        ],
+        "code": "RA6",
+        "dayOffset": 245,
+        "dueDate": "2026-02-23",
+        "id": "ra-6",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 15,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
       }
     ],
     "resources": [

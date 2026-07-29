@@ -1,11 +1,5 @@
 {
-  "assumptions": [
-    {
-      "area": "inputs",
-      "internalOnly": false,
-      "text": "Mandatory inputs missing (Project BOQ (priced); Project Contract / PO; Project Layout…). No plan generated — the engine does not fabricate numbers. Provide a priced BOQ and contract to generate the baseline."
-    }
-  ],
+  "assumptions": [],
   "audience": "client",
   "buffer": {
     "internalBufferDays": 0,
@@ -18,45 +12,1177 @@
     "workModeFactor": 1
   },
   "confidence": {
-    "basis": "No mandatory inputs present.",
-    "score": 0.05
+    "basis": "9/9 inputs provided; 1/19 packages unmapped; buffer 1d.",
+    "score": 0.98
   },
   "engine": {
     "name": "DnB Planning Engine",
     "normsVersion": "norms-v1",
     "version": "1.0.0"
   },
-  "external": null,
+  "external": {
+    "end": "2026-11-04",
+    "milestones": [
+      {
+        "code": "ADV",
+        "date": "2026-07-07",
+        "description": "Project mobilisation.",
+        "percent": 30
+      },
+      {
+        "code": "RA1",
+        "date": "2026-08-21",
+        "description": "Execution: Demolition, partition line marking, frameworks, single-side skinning, civil wall, plastering, plumbing, ceiling and wall electrical conduiting, floor raceway laying. Material delivery: gypsum frames, gypsum sheets, electrical conduits and raceway, siporex blocks. Key order closures: HVAC, fire alarm system, carpentry.",
+        "percent": 20
+      },
+      {
+        "code": "RA2",
+        "date": "2026-09-15",
+        "description": "Execution: closing of partitions from double side, electrical wiring, fire sprinkler piping, FAS wiring. Material delivery: duct material, wires/cables, ply for carpentry items, vitrified tiles. Key order closures: modular furniture, chairs, carpets, glass.",
+        "percent": 15
+      },
+      {
+        "code": "RA3",
+        "date": "2026-09-30",
+        "description": "Execution: painting base-coat preparation, glass channel, HVAC duct installation, false ceiling framing. Material delivery: carpets, sanitary fittings and fixtures, doors, DB/MCB. Key order closures: decorative elements, glass films, wallpapers, canvas frames, branding.",
+        "percent": 15
+      },
+      {
+        "code": "RA4",
+        "date": "2026-10-25",
+        "description": "Execution: electrical switches/sockets, sanitary fixtures, carpentry structures ready, flush doors, first coat of paint, false ceiling, before HVAC final commissioning and before LV commissioning. Material delivery: modular furniture on site, carpet on site and before chair delivery. Key order closure: deep cleaning.",
+        "percent": 15
+      },
+      {
+        "code": "RA5",
+        "date": "2026-11-04",
+        "description": "Release against unconditional bank guarantee of equal amount, valid for 6 months Defects Liability Period.",
+        "percent": 5
+      }
+    ],
+    "start": "2026-07-07"
+  },
   "ieInvariant": {
     "bufferCalendarDays": null,
-    "externalEnd": null,
+    "externalEnd": "2026-11-04",
     "holds": true,
     "internalEnd": null
   },
   "internal": null,
-  "missingInputs": [
-    "Project BOQ (priced)",
-    "Project Contract / PO",
-    "Project Layout",
-    "Drawings",
-    "Day 0 site images",
-    "3D design",
-    "Sales KT / email thread",
-    "Make list",
-    "Payment terms"
-  ],
+  "margin": null,
+  "missingInputs": [],
   "modules": {
-    "cashflow": {
-      "margin": null,
-      "rows": []
-    },
-    "dependencies": [],
+    "dependencies": [
+      {
+        "actualDate": null,
+        "area": "Kick Off",
+        "blocks": null,
+        "description": "Site kick-off meeting and pooja",
+        "id": "x1",
+        "planDate": "2026-07-07",
+        "remarks": "Project set-up item.",
+        "responsibility": "Client/FS",
+        "sr": 1,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Commercial",
+        "blocks": null,
+        "description": "Project PO / signed agreement",
+        "id": "x2",
+        "planDate": "2026-07-07",
+        "remarks": "Project set-up item.",
+        "responsibility": "Client",
+        "sr": 2,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Commercial",
+        "blocks": null,
+        "description": "Project advance payment",
+        "id": "x3",
+        "planDate": "2026-07-14",
+        "remarks": "Project set-up item.",
+        "responsibility": "Client",
+        "sr": 3,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "Existing condition / dilapidation survey",
+        "description": "Layout approval",
+        "id": "x4",
+        "planDate": "2026-07-04",
+        "remarks": "Blocks \"Existing condition / dilapidation survey\" starting 2026-07-14.",
+        "responsibility": "Client",
+        "sr": 4,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": null,
+        "description": "3D approvals",
+        "id": "x5",
+        "planDate": "2026-07-17",
+        "remarks": "Project set-up item.",
+        "responsibility": "Client",
+        "sr": 5,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "Self-levelling screed flooring",
+        "description": "Material sampling approval",
+        "id": "x6",
+        "planDate": "2026-08-03",
+        "remarks": "Blocks \"Self-levelling screed flooring\" starting 2026-08-13.",
+        "responsibility": "Client/FS",
+        "sr": 6,
+        "status": "Pending"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "Electrical works - Phase I (conduiting & cabling)",
+        "description": "MEP drawings approval",
+        "id": "x7",
+        "planDate": "2026-08-07",
+        "remarks": "Blocks \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21.",
+        "responsibility": "Client/PMC",
+        "sr": 7,
+        "status": "Pending"
+      },
+      {
+        "actualDate": null,
+        "area": "Design",
+        "blocks": "Electrical works - Phase I (conduiting & cabling)",
+        "description": "Electrical / IT requirement and load confirmation",
+        "id": "x8",
+        "planDate": "2026-08-07",
+        "remarks": "Blocks \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21.",
+        "responsibility": "Client",
+        "sr": 8,
+        "status": "Pending"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Existing condition / dilapidation survey",
+        "description": "Builder permissions and mobilisation clearance",
+        "id": "x9",
+        "planDate": "2026-07-07",
+        "remarks": "Blocks \"Existing condition / dilapidation survey\" starting 2026-07-14.",
+        "responsibility": "FS/Builder",
+        "sr": 9,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Existing condition / dilapidation survey",
+        "description": "Mathadi clearance",
+        "id": "x10",
+        "planDate": "2026-07-07",
+        "remarks": "Blocks \"Existing condition / dilapidation survey\" starting 2026-07-14.",
+        "responsibility": "FS",
+        "sr": 10,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "FLSS works - Phase I (sprinkler piping & rough-in)",
+        "description": "Fire NOC / CFO approval",
+        "id": "x11",
+        "planDate": "2026-08-07",
+        "remarks": "Blocks \"FLSS works - Phase I (sprinkler piping & rough-in)\" starting 2026-08-21.",
+        "responsibility": "FS/Builder",
+        "sr": 11,
+        "status": "Pending"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Existing condition / dilapidation survey",
+        "description": "BMC / statutory approval",
+        "id": "x12",
+        "planDate": "2026-06-30",
+        "remarks": "Blocks \"Existing condition / dilapidation survey\" starting 2026-07-14.",
+        "responsibility": "FS/Builder",
+        "sr": 12,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Electrical works - Phase I (conduiting & cabling)",
+        "description": "Temporary power and water availability",
+        "id": "x13",
+        "planDate": "2026-08-16",
+        "remarks": "Blocks \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21.",
+        "responsibility": "Builder",
+        "sr": 13,
+        "status": "Pending"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Existing condition / dilapidation survey",
+        "description": "Lift availability for material movement",
+        "id": "x14",
+        "planDate": "2026-07-11",
+        "remarks": "Blocks \"Existing condition / dilapidation survey\" starting 2026-07-14.",
+        "responsibility": "Builder",
+        "sr": 14,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Existing condition / dilapidation survey",
+        "description": "Work hours clarity in building",
+        "id": "x15",
+        "planDate": "2026-07-11",
+        "remarks": "Blocks \"Existing condition / dilapidation survey\" starting 2026-07-14.",
+        "responsibility": "Builder",
+        "sr": 15,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "HVAC works - Phase I (ducting & piping)",
+        "description": "Heat load approval / CFM availability",
+        "id": "x16",
+        "planDate": "2026-08-07",
+        "remarks": "Blocks \"HVAC works - Phase I (ducting & piping)\" starting 2026-08-21.",
+        "responsibility": "Builder",
+        "sr": 16,
+        "status": "Pending"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Passive networking - Phase I (cable laying)",
+        "description": "Wi-Fi and access point locations",
+        "id": "x17",
+        "planDate": "2026-08-26",
+        "remarks": "Blocks \"Passive networking - Phase I (cable laying)\" starting 2026-09-05.",
+        "responsibility": "Client",
+        "sr": 17,
+        "status": "Pending"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": null,
+        "description": "Modular vendor closure for site marking",
+        "id": "x18",
+        "planDate": "2026-07-21",
+        "remarks": "Project set-up item.",
+        "responsibility": "Client",
+        "sr": 18,
+        "status": "Delayed"
+      },
+      {
+        "actualDate": null,
+        "area": "Design/Operation",
+        "blocks": "Passive networking - Phase I (cable laying)",
+        "description": "Client-supplied items (IT / AV) delivery",
+        "id": "x19",
+        "planDate": "2026-08-26",
+        "remarks": "Blocks \"Passive networking - Phase I (cable laying)\" starting 2026-09-05.",
+        "responsibility": "Client",
+        "sr": 19,
+        "status": "Pending"
+      },
+      {
+        "actualDate": null,
+        "area": "Operation",
+        "blocks": "Existing condition / dilapidation survey",
+        "description": "Store space and debris removal area",
+        "id": "x20",
+        "planDate": "2026-07-11",
+        "remarks": "Blocks \"Existing condition / dilapidation survey\" starting 2026-07-14.",
+        "responsibility": "Builder",
+        "sr": 20,
+        "status": "Delayed"
+      }
+    ],
     "design": {
-      "rows": [],
+      "rows": [
+        {
+          "basis": "back-scheduled from \"Existing condition / dilapidation survey\" starting 2026-07-14, less 5d approval and 10d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Base Build Layout",
+          "endDateClient": "2026-07-13",
+          "endDateInt": "2026-07-08",
+          "id": "d1",
+          "releases": [
+            "Existing condition / dilapidation survey"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-06-28",
+          "statusClient": "Delayed",
+          "statusInt": "Delayed",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "no dependent site activity found in the programme",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Furniture Layout",
+          "endDateClient": null,
+          "endDateInt": null,
+          "id": "d2",
+          "releases": [],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": null,
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "no dependent site activity found in the programme",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Furniture Dimensions Layout",
+          "endDateClient": null,
+          "endDateInt": null,
+          "id": "d3",
+          "releases": [],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": null,
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "no dependent site activity found in the programme",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Partition Layout",
+          "endDateClient": null,
+          "endDateInt": null,
+          "id": "d4",
+          "releases": [],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": null,
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Self-levelling screed flooring\" starting 2026-08-13, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Flooring Layout",
+          "endDateClient": "2026-08-12",
+          "endDateInt": "2026-08-07",
+          "id": "d5",
+          "releases": [
+            "Self-levelling screed flooring"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-26",
+          "statusClient": "WIP",
+          "statusInt": "WIP",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Self-levelling screed flooring\" starting 2026-08-13, less 4d approval and 10d preparation",
+          "category": "GFC",
+          "criticality": "Medium",
+          "drawingName": "Floor Marking Layout",
+          "endDateClient": "2026-08-12",
+          "endDateInt": "2026-08-08",
+          "id": "d6",
+          "releases": [
+            "Self-levelling screed flooring"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-29",
+          "statusClient": "WIP",
+          "statusInt": "WIP",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Self-levelling screed flooring\" starting 2026-08-13, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Raised Flooring Layout",
+          "endDateClient": "2026-08-12",
+          "endDateInt": "2026-08-07",
+          "id": "d7",
+          "releases": [
+            "Self-levelling screed flooring"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-26",
+          "statusClient": "WIP",
+          "statusInt": "WIP",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Reception, display & water-body joinery\" starting 2026-09-25, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Door Schedule Layout",
+          "endDateClient": "2026-09-24",
+          "endDateInt": "2026-09-19",
+          "id": "d8",
+          "releases": [
+            "Reception, display & water-body joinery"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-09-07",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Painting works - primer & first coat\" starting 2026-09-08, less 5d approval and 12d preparation",
+          "category": "GFC",
+          "criticality": "High",
+          "drawingName": "Wall Finishes Layout",
+          "endDateClient": "2026-09-07",
+          "endDateInt": "2026-09-02",
+          "id": "d9",
+          "releases": [
+            "Painting works - primer & first coat"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-21",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "no dependent site activity found in the programme",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Modular Layout",
+          "endDateClient": null,
+          "endDateInt": null,
+          "id": "d10",
+          "releases": [],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": null,
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum board Partition & ceiling - framing\" starting 2026-08-25, less 7d approval and 14d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "RCP Layout",
+          "endDateClient": "2026-08-24",
+          "endDateInt": "2026-08-17",
+          "id": "d11",
+          "releases": [
+            "Gypsum board Partition & ceiling - framing"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-03",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 7d approval and 14d preparation",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "Lighting Layout (with dimensions)",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-13",
+          "id": "d12",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-30",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "GFC"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum plaster & POP punning\" starting 2026-08-21, less 5d approval and 10d preparation",
+          "category": "GFC",
+          "criticality": "Low",
+          "drawingName": "Wallpaper & Graphics",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d13",
+          "releases": [
+            "Gypsum plaster & POP punning"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-05",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "GENERAL"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum plaster & POP punning\" starting 2026-08-21, less 5d approval and 8d preparation",
+          "category": "GFC",
+          "criticality": "Medium",
+          "drawingName": "Fire Evacuation Plan",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d14",
+          "releases": [
+            "Gypsum plaster & POP punning"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-07",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "GENERAL"
+        },
+        {
+          "basis": "no dependent site activity found in the programme",
+          "category": "GFC",
+          "criticality": "Very Critical",
+          "drawingName": "3D Views — Detailed & Client Approval",
+          "endDateClient": null,
+          "endDateInt": null,
+          "id": "d15",
+          "releases": [],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": null,
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "3D"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 5d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Electrical DBR",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d16",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-01",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Electrical SLD Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-13",
+          "id": "d17",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-30",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Electrical Load Calculation",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-13",
+          "id": "d18",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-30",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Power, Data & Switch Board Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-13",
+          "id": "d19",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-30",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Raceway Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d20",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-03",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "Cable Tray Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d21",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-03",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "Lighting Looping Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d22",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-03",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "Panel & DB Position Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d23",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-03",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "UPS Calculation & Specification",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-13",
+          "id": "d24",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-30",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"HVAC works - Phase I (ducting & piping)\" starting 2026-08-21, less 5d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "HVAC DBR",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d25",
+          "releases": [
+            "HVAC works - Phase I (ducting & piping)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-01",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"HVAC works - Phase I (ducting & piping)\" starting 2026-08-21, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "HVAC Heat Load",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-13",
+          "id": "d26",
+          "releases": [
+            "HVAC works - Phase I (ducting & piping)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-30",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"HVAC works - Phase I (ducting & piping)\" starting 2026-08-21, less 7d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "HVAC Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-13",
+          "id": "d27",
+          "releases": [
+            "HVAC works - Phase I (ducting & piping)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-30",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"PHE works - Phase I (drainage & water lines)\" starting 2026-08-21, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "PHE DBR & Plumbing Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d28",
+          "releases": [
+            "PHE works - Phase I (drainage & water lines)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-03",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"FLSS works - Phase I (sprinkler piping & rough-in)\" starting 2026-08-21, less 10d approval and 14d preparation",
+          "category": "MEP",
+          "criticality": "Very Critical",
+          "drawingName": "Fire Sprinkler Layout",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-10",
+          "id": "d29",
+          "releases": [
+            "FLSS works - Phase I (sprinkler piping & rough-in)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-27",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Passive networking - Phase I (cable laying)\" starting 2026-09-05, less 7d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "FA / PA System Layout",
+          "endDateClient": "2026-09-04",
+          "endDateInt": "2026-08-28",
+          "id": "d30",
+          "releases": [
+            "Passive networking - Phase I (cable laying)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-16",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Passive networking - Phase I (cable laying)\" starting 2026-09-05, less 7d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "ACS / CCTV / WiFi Layout",
+          "endDateClient": "2026-09-04",
+          "endDateInt": "2026-08-28",
+          "id": "d31",
+          "releases": [
+            "Passive networking - Phase I (cable laying)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-16",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Passive networking - Phase I (cable laying)\" starting 2026-09-05, less 5d approval and 12d preparation",
+          "category": "MEP",
+          "criticality": "High",
+          "drawingName": "LV DBR",
+          "endDateClient": "2026-09-04",
+          "endDateInt": "2026-08-30",
+          "id": "d32",
+          "releases": [
+            "Passive networking - Phase I (cable laying)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-18",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Self-levelling screed flooring\" starting 2026-08-13, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Floor and Dado Tiles",
+          "endDateClient": "2026-08-12",
+          "endDateInt": "2026-08-07",
+          "id": "d33",
+          "releases": [
+            "Self-levelling screed flooring"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-28",
+          "statusClient": "WIP",
+          "statusInt": "WIP",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Reception, display & water-body joinery\" starting 2026-09-25, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpentry Laminates & Veneer Shades",
+          "endDateClient": "2026-09-24",
+          "endDateInt": "2026-09-19",
+          "id": "d34",
+          "releases": [
+            "Reception, display & water-body joinery"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-09-09",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Painting works - primer & first coat\" starting 2026-09-08, less 5d approval and 8d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Paint Shades",
+          "endDateClient": "2026-09-07",
+          "endDateInt": "2026-09-02",
+          "id": "d35",
+          "releases": [
+            "Painting works - primer & first coat"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-25",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Self-levelling screed flooring\" starting 2026-08-13, less 7d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Carpet / SPC Flooring",
+          "endDateClient": "2026-08-12",
+          "endDateInt": "2026-08-05",
+          "id": "d36",
+          "releases": [
+            "Self-levelling screed flooring"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-07-26",
+          "statusClient": "WIP",
+          "statusInt": "WIP",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Modular glass partitions & doors installation\" starting 2026-09-25, less 7d approval and 12d preparation",
+          "category": "SAMPLING",
+          "criticality": "Very Critical",
+          "drawingName": "Demountable Glass Partition",
+          "endDateClient": "2026-09-24",
+          "endDateInt": "2026-09-17",
+          "id": "d37",
+          "releases": [
+            "Modular glass partitions & doors installation"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-09-05",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "Partitions"
+        },
+        {
+          "basis": "back-scheduled from \"Modular glass partitions & doors installation\" starting 2026-09-25, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Backpainted Glass",
+          "endDateClient": "2026-09-24",
+          "endDateInt": "2026-09-19",
+          "id": "d38",
+          "releases": [
+            "Modular glass partitions & doors installation"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-09-09",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "Partitions"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum board Partition & ceiling - framing\" starting 2026-08-25, less 7d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Grid & Stretch Ceiling",
+          "endDateClient": "2026-08-24",
+          "endDateInt": "2026-08-17",
+          "id": "d39",
+          "releases": [
+            "Gypsum board Partition & ceiling - framing"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-07",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "Ceiling"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum board Partition & ceiling - framing\" starting 2026-08-25, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Acoustics / Fluted Panel",
+          "endDateClient": "2026-08-24",
+          "endDateInt": "2026-08-19",
+          "id": "d40",
+          "releases": [
+            "Gypsum board Partition & ceiling - framing"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-09",
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "Ceiling"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 5d approval and 8d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Switch Sockets",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d41",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-07",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"Electrical works - Phase I (conduiting & cabling)\" starting 2026-08-21, less 7d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Decorative Lights",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-13",
+          "id": "d42",
+          "releases": [
+            "Electrical works - Phase I (conduiting & cabling)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-03",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "back-scheduled from \"PHE works - Phase I (drainage & water lines)\" starting 2026-08-21, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Sanitary Fixtures",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d43",
+          "releases": [
+            "PHE works - Phase I (drainage & water lines)"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-05",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "MEP"
+        },
+        {
+          "basis": "no dependent site activity found in the programme",
+          "category": "SAMPLING",
+          "criticality": "High",
+          "drawingName": "Chairs & Loose Furniture",
+          "endDateClient": null,
+          "endDateInt": null,
+          "id": "d44",
+          "releases": [],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": null,
+          "statusClient": "Not Started",
+          "statusInt": "Not Started",
+          "subCategory": "Furniture"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum plaster & POP punning\" starting 2026-08-21, less 5d approval and 10d preparation",
+          "category": "SAMPLING",
+          "criticality": "Medium",
+          "drawingName": "Blinds",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-15",
+          "id": "d45",
+          "releases": [
+            "Gypsum plaster & POP punning"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-05",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "Finishes"
+        },
+        {
+          "basis": "back-scheduled from \"Gypsum plaster & POP punning\" starting 2026-08-21, less 4d approval and 8d preparation",
+          "category": "SAMPLING",
+          "criticality": "Low",
+          "drawingName": "Skirting & T Profile",
+          "endDateClient": "2026-08-20",
+          "endDateInt": "2026-08-16",
+          "id": "d46",
+          "releases": [
+            "Gypsum plaster & POP punning"
+          ],
+          "revisedEndDateClient": null,
+          "revisedEndDateInt": null,
+          "revision": "R0",
+          "startDate": "2026-08-08",
+          "statusClient": "Not Started",
+          "statusInt": "WIP",
+          "subCategory": "Finishes"
+        }
+      ],
       "summary": {
         "approved": 0,
-        "drawings": 0,
-        "pending": 0,
+        "drawings": 46,
+        "pending": 46,
         "percentComplete": 0
       }
     },
@@ -70,22 +1196,3385 @@
       "trades": [],
       "warnings": []
     },
-    "procurement": [],
+    "procurement": [
+      {
+        "basis": "",
+        "category": "Civil Works",
+        "criticality": "Low",
+        "deliveryRequired": "2026-07-12",
+        "deliveryStatus": "Not Started",
+        "feeds": "Existing condition / dilapidation survey (2026-07-14)",
+        "gatedBy": "Base Build Layout (client approval 2026-07-13)",
+        "id": "p1",
+        "orderBy": "2026-07-05",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Civil consumables",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Interior Works",
+        "criticality": "Low",
+        "deliveryRequired": "2026-08-06",
+        "deliveryStatus": "Not Started",
+        "feeds": "Gypsum partition framing & ply backing (2026-08-08)",
+        "gatedBy": null,
+        "id": "p2",
+        "orderBy": "2026-07-25",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Interior boards/ply (Gyproc/ply norms)",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Modular Glass Partitions & Doors",
+        "criticality": "Very Critical",
+        "deliveryRequired": "2026-09-23",
+        "deliveryStatus": "Not Started",
+        "feeds": "Modular glass partitions & doors installation (2026-09-25)",
+        "gatedBy": "Demountable Glass Partition (client approval 2026-09-24)",
+        "id": "p3",
+        "orderBy": "2026-08-09",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Glass partitions (partition glass norm)",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Signages",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-09-25",
+        "deliveryStatus": "Not Started",
+        "feeds": "Signage & wayfinding installation (2026-09-27)",
+        "gatedBy": null,
+        "id": "p4",
+        "orderBy": "2026-09-04",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Signages",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Graphics & Films",
+        "criticality": "Very Critical",
+        "deliveryRequired": "2026-10-05",
+        "deliveryStatus": "Not Started",
+        "feeds": "Graphics & films application (2026-10-07)",
+        "gatedBy": null,
+        "id": "p5",
+        "orderBy": "2026-08-16",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Graphics & films (frosting norm)",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Blinds",
+        "criticality": "High",
+        "deliveryRequired": "2026-09-27",
+        "deliveryStatus": "Not Started",
+        "feeds": "Blinds installation (2026-09-29)",
+        "gatedBy": null,
+        "id": "p6",
+        "orderBy": "2026-08-28",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Blinds",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Planters",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-09-25",
+        "deliveryStatus": "Not Started",
+        "feeds": "Planters installation (2026-09-27)",
+        "gatedBy": null,
+        "id": "p7",
+        "orderBy": "2026-09-04",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Planters",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Toilet Works",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-08-25",
+        "deliveryStatus": "Not Started",
+        "feeds": "Toilet works (cubicles, cladding, ceiling & sanitaryware) (2026-08-27)",
+        "gatedBy": null,
+        "id": "p8",
+        "orderBy": "2026-08-04",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "default",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Carpet Flooring",
+        "criticality": "High",
+        "deliveryRequired": "2026-08-11",
+        "deliveryStatus": "Not Started",
+        "feeds": "Self-levelling screed flooring (2026-08-13)",
+        "gatedBy": "Flooring Layout (client approval 2026-08-12)",
+        "id": "p9",
+        "orderBy": "2026-07-02",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Carpet flooring",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Modular Furniture",
+        "criticality": "Very Critical",
+        "deliveryRequired": "2026-09-25",
+        "deliveryStatus": "Not Started",
+        "feeds": "Modular furniture installation (2026-09-27)",
+        "gatedBy": null,
+        "id": "p10",
+        "orderBy": "2026-08-11",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Modular furniture",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Loose Furniture & Chairs",
+        "criticality": "Very Critical",
+        "deliveryRequired": "2026-10-08",
+        "deliveryStatus": "Not Started",
+        "feeds": "Loose furniture & chairs installation (2026-10-10)",
+        "gatedBy": null,
+        "id": "p11",
+        "orderBy": "2026-08-24",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Loose furniture & chairs",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Electrical Works",
+        "criticality": "High",
+        "deliveryRequired": "2026-08-19",
+        "deliveryStatus": "Not Started",
+        "feeds": "Electrical works - Phase I (conduiting & cabling) (2026-08-21)",
+        "gatedBy": "Lighting Layout (with dimensions) (client approval 2026-08-20)",
+        "id": "p12",
+        "orderBy": "2026-07-20",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Electrical switchgear/cabling",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Light Fixtures",
+        "criticality": "High",
+        "deliveryRequired": "2026-10-03",
+        "deliveryStatus": "Not Started",
+        "feeds": "Electrical works - Phase II (fixtures, switches & light fixtures) (2026-10-05)",
+        "gatedBy": null,
+        "id": "p13",
+        "orderBy": "2026-08-29",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "Light fixtures",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "HVAC",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-08-19",
+        "deliveryStatus": "Not Started",
+        "feeds": "HVAC works - Phase I (ducting & piping) (2026-08-21)",
+        "gatedBy": "HVAC DBR (client approval 2026-08-20)",
+        "id": "p14",
+        "orderBy": "2026-07-29",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "default",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Passive Networking",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-09-03",
+        "deliveryStatus": "Not Started",
+        "feeds": "Passive networking - Phase I (cable laying) (2026-09-05)",
+        "gatedBy": "FA / PA System Layout (client approval 2026-09-04)",
+        "id": "p15",
+        "orderBy": "2026-08-13",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "default",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Plumbing Works",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-08-19",
+        "deliveryStatus": "Not Started",
+        "feeds": "PHE works - Phase I (drainage & water lines) (2026-08-21)",
+        "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-08-20)",
+        "id": "p16",
+        "orderBy": "2026-07-29",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "default",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "FLSS Works",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-08-19",
+        "deliveryStatus": "Not Started",
+        "feeds": "FLSS works - Phase I (sprinkler piping & rough-in) (2026-08-21)",
+        "gatedBy": "Fire Sprinkler Layout (client approval 2026-08-20)",
+        "id": "p17",
+        "orderBy": "2026-07-29",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "default",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Dishwash Area",
+        "criticality": "Medium",
+        "deliveryRequired": "2026-08-19",
+        "deliveryStatus": "Not Started",
+        "feeds": "Waterproofing - wet areas (2026-08-21)",
+        "gatedBy": null,
+        "id": "p18",
+        "orderBy": "2026-07-29",
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "default",
+        "vendor": ""
+      },
+      {
+        "basis": "",
+        "category": "Kitchen Equipments & Others",
+        "criticality": "Medium",
+        "deliveryRequired": null,
+        "deliveryStatus": "Not Started",
+        "feeds": null,
+        "gatedBy": null,
+        "id": "p19",
+        "orderBy": null,
+        "orderStatus": "Open",
+        "remarks": "",
+        "responsibility": "Procurement",
+        "revisedDate": null,
+        "subCategory": "default",
+        "vendor": ""
+      }
+    ],
+    "raMilestones": [
+      {
+        "amount": 17101200,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Project mobilisation",
+            "id": "ADV-c1",
+            "kind": "execution",
+            "plannedDate": "2026-07-09",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          }
+        ],
+        "code": "ADV",
+        "dayOffset": 0,
+        "dueDate": "2026-07-07",
+        "id": "ra-1",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 30,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Delayed"
+      },
+      {
+        "amount": 11400800,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Demolition",
+            "id": "RA1-c1",
+            "kind": "execution",
+            "plannedDate": "2026-07-29",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Partition line marking",
+            "id": "RA1-c2",
+            "kind": "execution",
+            "plannedDate": "2026-08-08",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Frameworks",
+            "id": "RA1-c3",
+            "kind": "execution",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Single-side skinning",
+            "id": "RA1-c4",
+            "kind": "execution",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Civil wall",
+            "id": "RA1-c5",
+            "kind": "execution",
+            "plannedDate": "2026-07-29",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Plastering",
+            "id": "RA1-c6",
+            "kind": "execution",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Plumbing",
+            "id": "RA1-c7",
+            "kind": "execution",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Ceiling",
+            "id": "RA1-c8",
+            "kind": "execution",
+            "plannedDate": "2026-07-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Wall electrical conduiting",
+            "id": "RA1-c9",
+            "kind": "execution",
+            "plannedDate": "2026-09-09",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Floor raceway laying",
+            "id": "RA1-c10",
+            "kind": "execution",
+            "plannedDate": "2026-08-03",
+            "remarks": "",
+            "responsibility": "",
+            "status": "WIP"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Gypsum frames",
+            "id": "RA1-c11",
+            "kind": "material",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Gypsum sheets",
+            "id": "RA1-c12",
+            "kind": "material",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Electrical conduits",
+            "id": "RA1-c13",
+            "kind": "material",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Raceway",
+            "id": "RA1-c14",
+            "kind": "material",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Siporex blocks",
+            "id": "RA1-c15",
+            "kind": "material",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "HVAC",
+            "id": "RA1-c16",
+            "kind": "order",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Fire alarm system",
+            "id": "RA1-c17",
+            "kind": "order",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Carpentry",
+            "id": "RA1-c18",
+            "kind": "order",
+            "plannedDate": "2026-08-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          }
+        ],
+        "code": "RA1",
+        "dayOffset": 45,
+        "dueDate": "2026-08-21",
+        "id": "ra-2",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 20,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Not Started"
+      },
+      {
+        "amount": 8550600,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Closing of partitions from double side",
+            "id": "RA2-c1",
+            "kind": "execution",
+            "plannedDate": "2026-07-27",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Electrical wiring",
+            "id": "RA2-c2",
+            "kind": "execution",
+            "plannedDate": "2026-09-09",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Fire sprinkler piping",
+            "id": "RA2-c3",
+            "kind": "execution",
+            "plannedDate": "2026-09-03",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "FAS wiring",
+            "id": "RA2-c4",
+            "kind": "execution",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Duct material",
+            "id": "RA2-c5",
+            "kind": "material",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Wires/cables",
+            "id": "RA2-c6",
+            "kind": "material",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Ply for carpentry items",
+            "id": "RA2-c7",
+            "kind": "material",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Vitrified tiles",
+            "id": "RA2-c8",
+            "kind": "material",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Modular furniture",
+            "id": "RA2-c9",
+            "kind": "order",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Chairs",
+            "id": "RA2-c10",
+            "kind": "order",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Carpets",
+            "id": "RA2-c11",
+            "kind": "order",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Glass",
+            "id": "RA2-c12",
+            "kind": "order",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          }
+        ],
+        "code": "RA2",
+        "dayOffset": 70,
+        "dueDate": "2026-09-15",
+        "id": "ra-3",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 15,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Not Started"
+      },
+      {
+        "amount": 8550600,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Painting base-coat preparation",
+            "id": "RA3-c1",
+            "kind": "execution",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Glass channel",
+            "id": "RA3-c2",
+            "kind": "execution",
+            "plannedDate": "2026-10-04",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "HVAC duct installation",
+            "id": "RA3-c3",
+            "kind": "execution",
+            "plannedDate": "2026-07-24",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "False ceiling framing",
+            "id": "RA3-c4",
+            "kind": "execution",
+            "plannedDate": "2026-07-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Carpets",
+            "id": "RA3-c5",
+            "kind": "material",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Sanitary fittings",
+            "id": "RA3-c6",
+            "kind": "material",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Fixtures",
+            "id": "RA3-c7",
+            "kind": "material",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Doors",
+            "id": "RA3-c8",
+            "kind": "material",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "DB/MCB",
+            "id": "RA3-c9",
+            "kind": "material",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Decorative elements",
+            "id": "RA3-c10",
+            "kind": "order",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Glass films",
+            "id": "RA3-c11",
+            "kind": "order",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Wallpapers",
+            "id": "RA3-c12",
+            "kind": "order",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Canvas frames",
+            "id": "RA3-c13",
+            "kind": "order",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Branding",
+            "id": "RA3-c14",
+            "kind": "order",
+            "plannedDate": "2026-09-30",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          }
+        ],
+        "code": "RA3",
+        "dayOffset": 85,
+        "dueDate": "2026-09-30",
+        "id": "ra-4",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 15,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Not Started"
+      },
+      {
+        "amount": 8550600,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Electrical switches/sockets",
+            "id": "RA4-c1",
+            "kind": "execution",
+            "plannedDate": "2026-10-16",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Sanitary fixtures",
+            "id": "RA4-c2",
+            "kind": "execution",
+            "plannedDate": "2026-07-19",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Carpentry structures ready",
+            "id": "RA4-c3",
+            "kind": "execution",
+            "plannedDate": "2026-10-25",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Flush doors",
+            "id": "RA4-c4",
+            "kind": "execution",
+            "plannedDate": "2026-07-27",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "First coat of paint",
+            "id": "RA4-c5",
+            "kind": "execution",
+            "plannedDate": "2026-09-15",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "False ceiling",
+            "id": "RA4-c6",
+            "kind": "execution",
+            "plannedDate": "2026-07-21",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Delayed"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Before HVAC final commissioning",
+            "id": "RA4-c7",
+            "kind": "execution",
+            "plannedDate": "2026-09-17",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Before LV commissioning",
+            "id": "RA4-c8",
+            "kind": "execution",
+            "plannedDate": "2026-09-29",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Modular furniture on site",
+            "id": "RA4-c9",
+            "kind": "material",
+            "plannedDate": "2026-10-25",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Carpet on site",
+            "id": "RA4-c10",
+            "kind": "material",
+            "plannedDate": "2026-10-25",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Before chair delivery",
+            "id": "RA4-c11",
+            "kind": "material",
+            "plannedDate": "2026-10-25",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Deep cleaning",
+            "id": "RA4-c12",
+            "kind": "order",
+            "plannedDate": "2026-10-25",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          }
+        ],
+        "code": "RA4",
+        "dayOffset": 110,
+        "dueDate": "2026-10-25",
+        "id": "ra-5",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 15,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Not Started"
+      },
+      {
+        "amount": 2850200,
+        "checkpoints": [
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Release against unconditional bank guarantee of equal amount",
+            "id": "RA5-c1",
+            "kind": "execution",
+            "plannedDate": "2026-11-04",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          },
+          {
+            "activityId": null,
+            "activityName": null,
+            "actualDate": null,
+            "description": "Valid for 6 months Defects Liability Period",
+            "id": "RA5-c2",
+            "kind": "execution",
+            "plannedDate": "2026-11-04",
+            "remarks": "",
+            "responsibility": "",
+            "status": "Not Started"
+          }
+        ],
+        "code": "RA5",
+        "dayOffset": 120,
+        "dueDate": "2026-11-04",
+        "id": "ra-6",
+        "invoiceDate": null,
+        "invoiceNo": "",
+        "percent": 5,
+        "readiness": 0,
+        "remarks": "",
+        "revisedDate": null,
+        "status": "Not Started"
+      }
+    ],
     "resources": [],
     "timeline": {
-      "activities": [],
+      "activities": [
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 5 (Dur Days)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-07-09",
+          "es": 0,
+          "id": "1.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Site mobilisation & access setup",
+          "phase": "Mobilisation",
+          "startDate": "2026-07-07",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 6 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-12",
+          "es": 0,
+          "id": "1.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Hoarding, barricading & signages",
+          "phase": "Mobilisation",
+          "startDate": "2026-07-11",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 7 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-15",
+          "es": 0,
+          "id": "1.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "HSE setup, permits & site induction",
+          "phase": "Mobilisation",
+          "startDate": "2026-07-14",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 10 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-18",
+          "es": 0,
+          "id": "1.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Temporary power, water & lighting arrangement",
+          "phase": "Mobilisation",
+          "startDate": "2026-07-17",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 8 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-15",
+          "es": 0,
+          "id": "2.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Existing condition / dilapidation survey",
+          "packageCode": "A1",
+          "phase": "Survey & Make-Safe",
+          "startDate": "2026-07-14",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 9 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-15",
+          "es": 0,
+          "id": "2.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Existing services mapping & tagging",
+          "packageCode": "A1",
+          "phase": "Survey & Make-Safe",
+          "startDate": "2026-07-14",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 11 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-19",
+          "es": 0,
+          "id": "2.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Hazardous material check & clearance",
+          "packageCode": "A1",
+          "phase": "Survey & Make-Safe",
+          "startDate": "2026-07-18",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 12 (Dur Days)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-07-23",
+          "es": 0,
+          "id": "2.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Disconnection & isolation of existing services",
+          "packageCode": "A1",
+          "phase": "Survey & Make-Safe",
+          "startDate": "2026-07-21",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 13 (Dur Days)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-07-21",
+          "es": 0,
+          "id": "3.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Dismantling of false ceiling & services below",
+          "packageCode": "A1",
+          "phase": "Demolition & Dismantling",
+          "startDate": "2026-07-17",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 14 (Dur Days)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-07-27",
+          "es": 0,
+          "id": "3.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Dismantling of partitions, glazing & doors",
+          "packageCode": "A1",
+          "phase": "Demolition & Dismantling",
+          "startDate": "2026-07-23",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 16 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-08-03",
+          "es": 0,
+          "id": "3.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Removal of existing flooring & floor chipping",
+          "packageCode": "A1",
+          "phase": "Demolition & Dismantling",
+          "startDate": "2026-07-31",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 17 (Dur Days)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-07-19",
+          "es": 0,
+          "id": "3.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Dismantling of joinery, pantry & fixtures",
+          "packageCode": "A1",
+          "phase": "Demolition & Dismantling",
+          "startDate": "2026-07-17",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 18 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-07-24",
+          "es": 0,
+          "id": "3.5",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Dismantling of existing services (cable, duct, pipe)",
+          "packageCode": "A1",
+          "phase": "Demolition & Dismantling",
+          "startDate": "2026-07-21",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 19 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-07-29",
+          "es": 0,
+          "id": "3.6",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Civil breaking / hard demolition",
+          "packageCode": "A1",
+          "phase": "Demolition & Dismantling",
+          "startDate": "2026-07-26",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 15 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-07-29",
+          "es": 0,
+          "id": "4.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Debris segregation & stacking",
+          "packageCode": "A1",
+          "phase": "Debris Removal",
+          "startDate": "2026-07-24",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 20 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-07-29",
+          "es": 0,
+          "id": "4.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Debris removal & disposal",
+          "packageCode": "A1",
+          "phase": "Debris Removal",
+          "startDate": "2026-07-28",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 21 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-08-03",
+          "es": 0,
+          "id": "5.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "PCC & self-levelling screed preparation",
+          "phase": "Site Clearance & Handover",
+          "startDate": "2026-07-31",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 22 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-08-08",
+          "es": 0,
+          "id": "5.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Site deep cleaning & dust clearance",
+          "phase": "Site Clearance & Handover",
+          "startDate": "2026-08-05",
+          "totalFloat": 0,
+          "trade": "cleaning"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 23 (Dur Days)",
+            "value": 1
+          },
+          "ef": 0,
+          "endDate": "2026-08-05",
+          "es": 0,
+          "id": "5.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Joint survey of cleared shell",
+          "phase": "Site Clearance & Handover",
+          "startDate": "2026-08-05",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 24 (Dur Days)",
+            "value": 0
+          },
+          "ef": 0,
+          "endDate": "2026-08-05",
+          "es": 0,
+          "id": "5.4",
+          "isMilestone": true,
+          "lf": 0,
+          "ls": 0,
+          "name": "Cleared shell handover - Phase 1 completion",
+          "phase": "Milestone",
+          "startDate": "2026-08-05",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 26 (Dur Days)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-08-08",
+          "es": 0,
+          "id": "6.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Setting out & marking as per layout",
+          "packageCode": "A1",
+          "phase": "Civil Works",
+          "startDate": "2026-08-06",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 28 (Dur Days)",
+            "value": 9
+          },
+          "ef": 0,
+          "endDate": "2026-08-17",
+          "es": 0,
+          "id": "6.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "AAC block masonry work",
+          "packageCode": "A1",
+          "phase": "Civil Works",
+          "startDate": "2026-08-09",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 27 (Dur Days)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-08-19",
+          "es": 0,
+          "id": "6.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Gypsum partition framing & ply backing",
+          "packageCode": "A2",
+          "phase": "Civil Works",
+          "startDate": "2026-08-08",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 29 (Dur Days)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-08-20",
+          "es": 0,
+          "id": "6.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Self-levelling screed flooring",
+          "packageCode": "B1",
+          "phase": "Civil Works",
+          "startDate": "2026-08-13",
+          "totalFloat": 0,
+          "trade": "flooring"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 34 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-08-24",
+          "es": 0,
+          "id": "6.5",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Waterproofing - wet areas",
+          "packageCode": "H1",
+          "phase": "Civil Works",
+          "startDate": "2026-08-21",
+          "totalFloat": 0,
+          "trade": "civil"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 30 (Dur Days)",
+            "value": 28
+          },
+          "ef": 0,
+          "endDate": "2026-09-17",
+          "es": 0,
+          "id": "7.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "HVAC works - Phase I (ducting & piping)",
+          "packageCode": "D1",
+          "phase": "Services - Phase I",
+          "startDate": "2026-08-21",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 31 (Dur Days)",
+            "value": 20
+          },
+          "ef": 0,
+          "endDate": "2026-09-09",
+          "es": 0,
+          "id": "7.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Electrical works - Phase I (conduiting & cabling)",
+          "packageCode": "C1",
+          "phase": "Services - Phase I",
+          "startDate": "2026-08-21",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 32 (Dur Days)",
+            "value": 14
+          },
+          "ef": 0,
+          "endDate": "2026-09-03",
+          "es": 0,
+          "id": "7.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "FLSS works - Phase I (sprinkler piping & rough-in)",
+          "packageCode": "G",
+          "phase": "Services - Phase I",
+          "startDate": "2026-08-21",
+          "totalFloat": 0,
+          "trade": "sprinkler"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 35 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-08-26",
+          "es": 0,
+          "id": "7.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "PHE works - Phase I (drainage & water lines)",
+          "packageCode": "F1",
+          "phase": "Services - Phase I",
+          "startDate": "2026-08-21",
+          "totalFloat": 0,
+          "trade": "plumbing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 33 (Dur Days)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-09-16",
+          "es": 0,
+          "id": "7.5",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Passive networking - Phase I (cable laying)",
+          "packageCode": "E1",
+          "phase": "Services - Phase I",
+          "startDate": "2026-09-05",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 37 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-09-11",
+          "es": 0,
+          "id": "7.7",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Services Phase-I inspection & sign-off",
+          "phase": "Services - Phase I",
+          "startDate": "2026-09-10",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 39 (Dur Days)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-09-01",
+          "es": 0,
+          "id": "8.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Gypsum board Partition & ceiling - framing",
+          "packageCode": "A2",
+          "phase": "Ceiling Works",
+          "startDate": "2026-08-25",
+          "totalFloat": 0,
+          "trade": "ceiling"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 40 (Dur Days)",
+            "value": 9
+          },
+          "ef": 0,
+          "endDate": "2026-09-06",
+          "es": 0,
+          "id": "8.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Gypsum board ceiling - boarding & services integration",
+          "packageCode": "A2",
+          "phase": "Ceiling Works",
+          "startDate": "2026-08-29",
+          "totalFloat": 0,
+          "trade": "ceiling"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 41 (Dur Days)",
+            "value": 2
+          },
+          "ef": 0,
+          "endDate": "2026-09-07",
+          "es": 0,
+          "id": "8.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Ceiling close-out inspection",
+          "packageCode": "A2",
+          "phase": "Ceiling Works",
+          "startDate": "2026-09-06",
+          "totalFloat": 0,
+          "trade": "ceiling"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 43 (Dur Days)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-09-25",
+          "es": 0,
+          "id": "11.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "HVAC works - Phase II (indoor units & diffusers)",
+          "packageCode": "D1",
+          "phase": "Services - Phase II",
+          "startDate": "2026-09-18",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 44 (Dur Days)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-09-24",
+          "es": 0,
+          "id": "11.5",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Passive networking - Phase II (termination & racks)",
+          "packageCode": "E1",
+          "phase": "Services - Phase II",
+          "startDate": "2026-09-17",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 55 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-09-29",
+          "es": 0,
+          "id": "12.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Active networking & IT commissioning",
+          "packageCode": "E1",
+          "phase": "IT, AV & Signage",
+          "startDate": "2026-09-24",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 57 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-10-01",
+          "es": 0,
+          "id": "14.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "HVAC testing & balancing",
+          "packageCode": "D1",
+          "phase": "Testing & Handover",
+          "startDate": "2026-09-26",
+          "totalFloat": 0,
+          "trade": "hvac"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 38 (Dur Days)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-08-28",
+          "es": 0,
+          "id": "9.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Gypsum plaster & POP punning",
+          "packageCode": "A2",
+          "phase": "Finishes",
+          "startDate": "2026-08-21",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 45 (Dur Days)",
+            "value": 25
+          },
+          "ef": 0,
+          "endDate": "2026-10-19",
+          "es": 0,
+          "id": "9.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Flooring works - tile, marble, wooden & carpet",
+          "packageCode": "B1",
+          "phase": "Finishes",
+          "startDate": "2026-09-25",
+          "totalFloat": 0,
+          "trade": "flooring"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 49 (Dur Days)",
+            "value": 18
+          },
+          "ef": 0,
+          "endDate": "2026-10-12",
+          "es": 0,
+          "id": "10.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Reception, display & water-body joinery",
+          "packageCode": "A2",
+          "phase": "Joinery",
+          "startDate": "2026-09-25",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 50 (Dur Days)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-10-06",
+          "es": 0,
+          "id": "10.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Cafeteria & pantry joinery",
+          "packageCode": "H1",
+          "phase": "Joinery",
+          "startDate": "2026-09-25",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 51 (Dur Days)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-10-02",
+          "es": 0,
+          "id": "11.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "FLSS works - Phase II (heads, detectors & PA system)",
+          "packageCode": "G",
+          "phase": "Services - Phase II",
+          "startDate": "2026-09-25",
+          "totalFloat": 0,
+          "trade": "sprinkler"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 52 (Dur Days)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-09-22",
+          "es": 0,
+          "id": "11.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "PHE works - Phase II (sanitaryware & fixtures)",
+          "packageCode": "F1",
+          "phase": "Services - Phase II",
+          "startDate": "2026-09-18",
+          "totalFloat": 0,
+          "trade": "plumbing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 60 (Dur Days)",
+            "value": 11
+          },
+          "ef": 0,
+          "endDate": "2026-10-04",
+          "es": 0,
+          "id": "12.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "AV system installation",
+          "packageCode": "E1",
+          "phase": "IT, AV & Signage",
+          "startDate": "2026-09-24",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 66 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-10-15",
+          "es": 0,
+          "id": "14.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "AV & IT integration testing",
+          "packageCode": "E1",
+          "phase": "Testing & Handover",
+          "startDate": "2026-10-10",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 46 (Dur Days)",
+            "value": 10
+          },
+          "ef": 0,
+          "endDate": "2026-10-04",
+          "es": 0,
+          "id": "9.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Modular glass partitions & doors installation",
+          "packageCode": "A3",
+          "phase": "Finishes",
+          "startDate": "2026-09-25",
+          "totalFloat": 0,
+          "trade": "glass"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 59 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-09-30",
+          "es": 0,
+          "id": "10.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Doors & ironmongery installation",
+          "packageCode": "A3",
+          "phase": "Joinery",
+          "startDate": "2026-09-25",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 61 (Dur Days)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-10-03",
+          "es": 0,
+          "id": "12.5",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Blinds installation",
+          "packageCode": "A6",
+          "phase": "IT, AV & Signage",
+          "startDate": "2026-09-29",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 42 (Dur Days)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-09-15",
+          "es": 0,
+          "id": "9.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Painting works - primer & first coat",
+          "phase": "Finishes",
+          "startDate": "2026-09-08",
+          "totalFloat": 0,
+          "trade": "painting"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 47 (Dur Days)",
+            "value": 12
+          },
+          "ef": 0,
+          "endDate": "2026-10-16",
+          "es": 0,
+          "id": "11.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Electrical works - Phase II (fixtures, switches & light fixtures)",
+          "packageCode": "C2",
+          "phase": "Services - Phase II",
+          "startDate": "2026-10-05",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 53 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-09-29",
+          "es": 0,
+          "id": "12.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Access control & CCTV installation",
+          "packageCode": "E1",
+          "phase": "IT, AV & Signage",
+          "startDate": "2026-09-24",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 64 (Dur Days)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-10-09",
+          "es": 0,
+          "id": "14.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Electrical testing & commissioning",
+          "packageCode": "C1",
+          "phase": "Testing & Handover",
+          "startDate": "2026-10-05",
+          "totalFloat": 0,
+          "trade": "electrical"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 62 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-10-02",
+          "es": 0,
+          "id": "14.3",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Fire & life-safety system testing",
+          "packageCode": "G",
+          "phase": "Testing & Handover",
+          "startDate": "2026-09-29",
+          "totalFloat": 0,
+          "trade": "sprinkler"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 67 (Dur Days)",
+            "value": 7
+          },
+          "ef": 0,
+          "endDate": "2026-10-16",
+          "es": 0,
+          "id": "14.6",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Integrated systems commissioning",
+          "phase": "Testing & Handover",
+          "startDate": "2026-10-10",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 70 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-11-03",
+          "es": 0,
+          "id": "14.9",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Handover documentation & training",
+          "phase": "Testing & Handover",
+          "startDate": "2026-10-31",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 48 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-10-12",
+          "es": 0,
+          "id": "9.5",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Graphics & films application",
+          "packageCode": "A5",
+          "phase": "Finishes",
+          "startDate": "2026-10-07",
+          "totalFloat": 0,
+          "trade": "finishing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 54 (Dur Days)",
+            "value": 4
+          },
+          "ef": 0,
+          "endDate": "2026-09-30",
+          "es": 0,
+          "id": "10.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Planters installation",
+          "packageCode": "A7",
+          "phase": "Joinery",
+          "startDate": "2026-09-27",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 56 (Dur Days)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-10-01",
+          "es": 0,
+          "id": "12.4",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Signage & wayfinding installation",
+          "packageCode": "A4",
+          "phase": "IT, AV & Signage",
+          "startDate": "2026-09-27",
+          "totalFloat": 0,
+          "trade": "lv"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 58 (Dur Days)",
+            "value": 5
+          },
+          "ef": 0,
+          "endDate": "2026-09-28",
+          "es": 0,
+          "id": "9.6",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Painting works - final coat",
+          "phase": "Finishes",
+          "startDate": "2026-09-24",
+          "totalFloat": 0,
+          "trade": "painting"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 63 (Dur Days)",
+            "value": 8
+          },
+          "ef": 0,
+          "endDate": "2026-10-04",
+          "es": 0,
+          "id": "13.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Modular furniture installation",
+          "packageCode": "B2",
+          "phase": "Furniture",
+          "startDate": "2026-09-27",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 65 (Dur Days)",
+            "value": 6
+          },
+          "ef": 0,
+          "endDate": "2026-10-15",
+          "es": 0,
+          "id": "13.2",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Loose furniture & chairs installation",
+          "packageCode": "B3",
+          "phase": "Furniture",
+          "startDate": "2026-10-10",
+          "totalFloat": 0,
+          "trade": "carpentry"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 36 (Dur Days)",
+            "value": 22
+          },
+          "ef": 0,
+          "endDate": "2026-09-17",
+          "es": 0,
+          "id": "TW.1",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Toilet works (cubicles, cladding, ceiling & sanitaryware)",
+          "packageCode": "A8",
+          "phase": "Toilet Works",
+          "startDate": "2026-08-27",
+          "totalFloat": 0,
+          "trade": "plumbing"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 68 (Dur Days)",
+            "value": 11
+          },
+          "ef": 0,
+          "endDate": "2026-10-27",
+          "es": 0,
+          "id": "14.7",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Snagging & de-snagging",
+          "phase": "Testing & Handover",
+          "startDate": "2026-10-17",
+          "totalFloat": 0,
+          "trade": "general"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 69 (Dur Days)",
+            "value": 3
+          },
+          "ef": 0,
+          "endDate": "2026-10-30",
+          "es": 0,
+          "id": "14.8",
+          "isMilestone": false,
+          "lf": 0,
+          "ls": 0,
+          "name": "Final cleaning",
+          "phase": "Testing & Handover",
+          "startDate": "2026-10-28",
+          "totalFloat": 0,
+          "trade": "cleaning"
+        },
+        {
+          "crew": {
+            "provenance": "computed",
+            "source": "withheld from client view",
+            "value": 0
+          },
+          "critical": false,
+          "deps": [],
+          "duration": {
+            "provenance": "input",
+            "source": "Kohler_Pune_Project_Schedule_V2.xlsx · Project Schedule · row 71 (Dur Days)",
+            "value": 0
+          },
+          "ef": 0,
+          "endDate": "2026-11-03",
+          "es": 0,
+          "id": "14.10",
+          "isMilestone": true,
+          "lf": 0,
+          "ls": 0,
+          "name": "Project handover - Phase 2 completion",
+          "phase": "Milestone",
+          "startDate": "2026-11-03",
+          "totalFloat": 0,
+          "trade": "general"
+        }
+      ],
       "criticalPath": [],
-      "phases": []
+      "phases": [
+        {
+          "critical": false,
+          "end": "2026-07-18",
+          "name": "Mobilisation",
+          "start": "2026-07-07"
+        },
+        {
+          "critical": false,
+          "end": "2026-07-23",
+          "name": "Survey & Make-Safe",
+          "start": "2026-07-14"
+        },
+        {
+          "critical": false,
+          "end": "2026-08-03",
+          "name": "Demolition & Dismantling",
+          "start": "2026-07-17"
+        },
+        {
+          "critical": false,
+          "end": "2026-07-29",
+          "name": "Debris Removal",
+          "start": "2026-07-24"
+        },
+        {
+          "critical": false,
+          "end": "2026-08-08",
+          "name": "Site Clearance & Handover",
+          "start": "2026-07-31"
+        },
+        {
+          "critical": false,
+          "end": "2026-11-03",
+          "name": "Milestone",
+          "start": "2026-08-05"
+        },
+        {
+          "critical": false,
+          "end": "2026-08-24",
+          "name": "Civil Works",
+          "start": "2026-08-06"
+        },
+        {
+          "critical": false,
+          "end": "2026-09-17",
+          "name": "Services - Phase I",
+          "start": "2026-08-21"
+        },
+        {
+          "critical": false,
+          "end": "2026-09-07",
+          "name": "Ceiling Works",
+          "start": "2026-08-25"
+        },
+        {
+          "critical": false,
+          "end": "2026-10-16",
+          "name": "Services - Phase II",
+          "start": "2026-09-17"
+        },
+        {
+          "critical": false,
+          "end": "2026-10-04",
+          "name": "IT, AV & Signage",
+          "start": "2026-09-24"
+        },
+        {
+          "critical": false,
+          "end": "2026-11-03",
+          "name": "Testing & Handover",
+          "start": "2026-09-26"
+        },
+        {
+          "critical": false,
+          "end": "2026-10-19",
+          "name": "Finishes",
+          "start": "2026-08-21"
+        },
+        {
+          "critical": false,
+          "end": "2026-10-12",
+          "name": "Joinery",
+          "start": "2026-09-25"
+        },
+        {
+          "critical": false,
+          "end": "2026-10-15",
+          "name": "Furniture",
+          "start": "2026-09-27"
+        },
+        {
+          "critical": false,
+          "end": "2026-09-17",
+          "name": "Toilet Works",
+          "start": "2026-08-27"
+        }
+      ]
     },
-    "todos": []
+    "todos": [
+      {
+        "category": "design",
+        "description": "Issue for approval: Base Build Layout",
+        "endDate": "2026-07-08",
+        "id": "t26",
+        "notes": "Releases: Existing condition / dilapidation survey",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-06-28",
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Carpet / SPC Flooring",
+        "endDate": "2026-08-05",
+        "id": "t49",
+        "notes": "Releases: Self-levelling screed flooring",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-26",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Flooring Layout",
+        "endDate": "2026-08-07",
+        "id": "t27",
+        "notes": "Releases: Self-levelling screed flooring",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-26",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Raised Flooring Layout",
+        "endDate": "2026-08-07",
+        "id": "t29",
+        "notes": "Releases: Self-levelling screed flooring",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-26",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor and Dado Tiles",
+        "endDate": "2026-08-07",
+        "id": "t48",
+        "notes": "Releases: Self-levelling screed flooring",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-28",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Floor Marking Layout",
+        "endDate": "2026-08-08",
+        "id": "t28",
+        "notes": "Releases: Self-levelling screed flooring",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-29",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Fire Sprinkler Layout",
+        "endDate": "2026-08-10",
+        "id": "t47",
+        "notes": "Releases: FLSS works - Phase I (sprinkler piping & rough-in)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-27",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Lighting Layout (with dimensions)",
+        "endDate": "2026-08-13",
+        "id": "t31",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-30",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical SLD Layout",
+        "endDate": "2026-08-13",
+        "id": "t35",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-30",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical Load Calculation",
+        "endDate": "2026-08-13",
+        "id": "t36",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-30",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Power, Data & Switch Board Layout",
+        "endDate": "2026-08-13",
+        "id": "t37",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-30",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: UPS Calculation & Specification",
+        "endDate": "2026-08-13",
+        "id": "t42",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-30",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: HVAC Heat Load",
+        "endDate": "2026-08-13",
+        "id": "t44",
+        "notes": "Releases: HVAC works - Phase I (ducting & piping)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-30",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: HVAC Layout",
+        "endDate": "2026-08-13",
+        "id": "t45",
+        "notes": "Releases: HVAC works - Phase I (ducting & piping)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-07-30",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Decorative Lights",
+        "endDate": "2026-08-13",
+        "id": "t52",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-03",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Wallpaper & Graphics",
+        "endDate": "2026-08-15",
+        "id": "t32",
+        "notes": "Releases: Gypsum plaster & POP punning",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-05",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Fire Evacuation Plan",
+        "endDate": "2026-08-15",
+        "id": "t33",
+        "notes": "Releases: Gypsum plaster & POP punning",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-07",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical DBR",
+        "endDate": "2026-08-15",
+        "id": "t34",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-01",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Raceway Layout",
+        "endDate": "2026-08-15",
+        "id": "t38",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-03",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Cable Tray Layout",
+        "endDate": "2026-08-15",
+        "id": "t39",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-03",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Lighting Looping Layout",
+        "endDate": "2026-08-15",
+        "id": "t40",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-03",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Panel & DB Position Layout",
+        "endDate": "2026-08-15",
+        "id": "t41",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-03",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: HVAC DBR",
+        "endDate": "2026-08-15",
+        "id": "t43",
+        "notes": "Releases: HVAC works - Phase I (ducting & piping)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-01",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: PHE DBR & Plumbing Layout",
+        "endDate": "2026-08-15",
+        "id": "t46",
+        "notes": "Releases: PHE works - Phase I (drainage & water lines)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-03",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Switch Sockets",
+        "endDate": "2026-08-15",
+        "id": "t51",
+        "notes": "Releases: Electrical works - Phase I (conduiting & cabling)",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-07",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Sanitary Fixtures",
+        "endDate": "2026-08-15",
+        "id": "t53",
+        "notes": "Releases: PHE works - Phase I (drainage & water lines)",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-05",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Blinds",
+        "endDate": "2026-08-15",
+        "id": "t54",
+        "notes": "Releases: Gypsum plaster & POP punning",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-05",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Skirting & T Profile",
+        "endDate": "2026-08-16",
+        "id": "t55",
+        "notes": "Releases: Gypsum plaster & POP punning",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-08",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: RCP Layout",
+        "endDate": "2026-08-17",
+        "id": "t30",
+        "notes": "Releases: Gypsum board Partition & ceiling - framing",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-03",
+        "status": "WIP"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Grid & Stretch Ceiling",
+        "endDate": "2026-08-17",
+        "id": "t50",
+        "notes": "Releases: Gypsum board Partition & ceiling - framing",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "startDate": "2026-08-07",
+        "status": "WIP"
+      }
+    ]
   },
   "project": {
-    "areaSft": null,
-    "client": "Kohler",
-    "contractValue": null,
+    "areaSft": {
+      "provenance": "input",
+      "source": "KOHLER_PUNE_FS_26TH JUNE_V5.xlsx · FINAL SUMMARY · PROJECT AREA (SFT)",
+      "value": 14905
+    },
+    "client": "Kohler India Corporation Pvt. Ltd.",
+    "contractValue": {
+      "provenance": "input",
+      "source": "KOHLER_PUNE_FS_26TH JUNE_V5.xlsx · FINAL SUMMARY · GRAND TOTAL (EXCLUSIVE OF TAXES)",
+      "value": 57003999.7
+    },
     "id": "kohler",
-    "location": "—",
-    "name": "KOHLER OS",
-    "status": "pending_inputs"
+    "location": "7th Floor (7A), ITC, Pune",
+    "name": "KOHLER OS, Pune",
+    "status": "planned"
   }
 }

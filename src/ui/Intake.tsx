@@ -1,51 +1,77 @@
-import { useMemo, useState } from 'react';
-import type { ProjectInputs } from '../domain/types';
+import { useMemo, useRef, useState } from 'react';
+import type { Activity, ProjectInputs } from '../domain/types';
 import type { DriveFile, DriveScan, DriveService, PickedFile } from '../services/drive';
-import { GoogleDriveService, LocalFolderDriveService, ManifestDriveService } from '../services/drive';
+import { DriveFolderNotPublic, GoogleDriveService, LocalFolderDriveService, ManifestDriveService, PublicLinkDriveService } from '../services/drive';
 import { BoqIngestionService } from '../services/ingestion';
+import { ScheduleIngestionService } from '../services/schedule-ingestion';
 import { buildInventory, buildQueries, unansweredBlocking, type IntakeQuery } from '../engine/intake';
+import { extractorFor, noExtractorReason, type DocStates } from '../engine/coverage';
+import { DriveCoverage } from './DriveCoverage';
 
-type Step = 'link' | 'inventory' | 'permission' | 'queries' | 'done';
+type Step = 'link' | 'drive' | 'queries' | 'done';
 const ingestion = new BoqIngestionService();
+const scheduleIngestion = new ScheduleIngestionService();
 
 const kb = (n: number | null) => (n == null ? '—' : n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
 export function Intake({ clientId, existingIds, onCreate }: { clientId: string; existingIds: string[]; onCreate: (p: ProjectInputs) => void }) {
   const [step, setStep] = useState<Step>('link');
   const [folderUrl, setFolderUrl] = useState('');
   const [busy, setBusy] = useState(false);
+  const [reading, setReading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scan, setScan] = useState<DriveScan | null>(null);
-  const [mode, setMode] = useState<'google' | 'manifest' | 'local'>('local');
-  const [approved, setApproved] = useState<Set<string>>(new Set());
+  const [mode, setMode] = useState<'google' | 'manifest' | 'local' | 'public'>('local');
+  const [docStates, setDocStates] = useState<DocStates>({});
   const [readLog, setReadLog] = useState<string[]>([]);
   const [queries, setQueries] = useState<IntakeQuery[]>([]);
   const [projectName, setProjectName] = useState('');
+  const [draftActivities, setDraftActivities] = useState<Activity[]>([]);
+  const [scheduleStart, setScheduleStart] = useState<string | null>(null);
   const manifestSvc = useMemo(() => new ManifestDriveService(), []);
   const localSvc = useMemo(() => new LocalFolderDriveService(), []);
+  const publicSvc = useMemo(() => new PublicLinkDriveService(), []);
+  // "Prepare by hand": the Drive file the user is substituting a local upload for
+  const byHandFor = useRef<DriveFile | null>(null);
+  const byHandInput = useRef<HTMLInputElement | null>(null);
 
   const inventory = useMemo(() => (scan ? buildInventory(scan) : null), [scan]);
 
   const service = (m: typeof mode = mode): DriveService =>
-    m === 'google' ? new GoogleDriveService(clientId) : m === 'local' ? localSvc : manifestSvc;
+    m === 'google' ? new GoogleDriveService(clientId) : m === 'public' ? publicSvc : m === 'local' ? localSvc : manifestSvc;
 
+  /**
+   * Scan a pasted folder link. A folder shared as "anyone with the link" needs no credential
+   * at all, so that is tried first and OAuth is only reached for genuinely private folders —
+   * the previous behaviour demanded a client ID before it had established that it needed one.
+   */
   const doScan = async () => {
-    if (!clientId) {
-      setError(
-        'Live scanning needs a Google OAuth client ID, which is not configured yet — see the setup steps ' +
-          'below. Option A above reads the same folder off this computer with no Google setup at all.'
-      );
-      return;
-    }
     setBusy(true);
     setError(null);
-    // scanning by link is always the Google path, whatever was used before
-    setMode('google');
-    try {
-      const s = await service('google').scanFolder(folderUrl);
+    const accept = (s: DriveScan, m: typeof mode) => {
+      setMode(m);
       setScan(s);
       setProjectName((n) => n || s.folderName);
-      setStep('inventory');
+      setStep('drive');
+    };
+    try {
+      try {
+        accept(await publicSvc.scanFolder(folderUrl), 'public');
+        return;
+      } catch (e) {
+        // Only a private folder genuinely needs a signed-in account. Anything else — no proxy,
+        // a bad link — is reported as itself rather than as "you need an OAuth client ID".
+        if (!(e instanceof DriveFolderNotPublic) || !clientId) {
+          setError(
+            `${e instanceof Error ? e.message : String(e)}${
+              e instanceof DriveFolderNotPublic ? ' You can also pick the folder off this computer below.' : ''
+            }`,
+          );
+          return;
+        }
+      }
+      accept(await service('google').scanFolder(folderUrl), 'google');
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -60,7 +86,7 @@ export function Intake({ clientId, existingIds, onCreate }: { clientId: string; 
       setMode('local');
       setScan(s);
       setProjectName((n) => n || s.folderName);
-      setStep('inventory');
+      setStep('drive');
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -73,50 +99,126 @@ export function Intake({ clientId, existingIds, onCreate }: { clientId: string; 
       setMode('manifest');
       setScan(s);
       setProjectName((n) => n || s.folderName);
-      setStep('inventory');
+      setStep('drive');
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
   };
 
-  const readApproved = async () => {
+  const [draftInputs, setDraftInputs] = useState<Partial<ProjectInputs>>({});
+
+  const mark = (id: string, state: DocStates[string]['state'], detail?: string) =>
+    setDocStates((prev) => ({ ...prev, [id]: { state, detail } }));
+
+  /**
+   * Apply the right structural parser to one document's bytes. Anything without an extractor
+   * is marked `logged`, never `extracted` — the distinction is the point of the whole screen.
+   */
+  const applyBytes = (name: string, data: ArrayBuffer | string, id: string, extractor: ReturnType<typeof extractorFor>, viaHand: boolean) => {
+    const suffix = viaHand ? ' (supplied by hand)' : '';
+    if (extractor === 'boq') {
+      const parsed = ingestion.parseBoq({ name, data });
+      if (!parsed.packages.length) {
+        mark(id, 'logged', `Opened, but no priced package rows were recognised${suffix}. Check it is the summary sheet.`);
+        return `✗ ${name} — no packages recognised`;
+      }
+      setDraftInputs({
+        boqPackages: parsed.packages,
+        areaSft: parsed.areaSft,
+        contractValue: parsed.contractValue,
+        bcsValue: parsed.bcsValue,
+      });
+      const bits = [
+        `${parsed.packages.length} packages`,
+        parsed.areaSft ? `${parsed.areaSft.value.toLocaleString('en-IN')} sft` : null,
+        parsed.contractValue ? inr(parsed.contractValue.value) : null,
+        parsed.bcsValue ? 'BCS present' : 'no BCS column',
+      ].filter(Boolean);
+      mark(id, 'extracted', bits.join(' · ') + suffix);
+      return `✓ ${name} — ${bits.join(' · ')}`;
+    }
+    if (extractor === 'schedule') {
+      const parsed = scheduleIngestion.parse({ name, data });
+      if (!parsed.activities.length) {
+        mark(id, 'logged', `Opened, but no activity rows were recognised${suffix}. ${parsed.warnings[0] ?? ''}`);
+        return `✗ ${name} — no activities recognised`;
+      }
+      setDraftActivities(parsed.activities);
+      setScheduleStart(parsed.projectStart);
+      const bits = [
+        `${parsed.activities.length} activities`,
+        `start ${parsed.projectStart}`,
+        parsed.durationDays ? `${parsed.durationDays} days` : null,
+        parsed.logicConflicts.length ? `${parsed.logicConflicts.length} logic conflicts` : null,
+      ].filter(Boolean);
+      mark(id, 'extracted', bits.join(' · ') + suffix);
+      return `✓ ${name} — ${bits.join(' · ')}`;
+    }
+    const size = typeof data === 'string' ? data.length : data.byteLength;
+    mark(id, 'logged', `Opened (${kb(size)}). ${noExtractorReason({ name } as DriveFile)}`);
+    return `• ${name} — evidence only (${kb(size)})`;
+  };
+
+  /** Read one or many Drive documents. */
+  const readFiles = async (files: DriveFile[]) => {
     if (!scan) return;
-    setBusy(true);
     setError(null);
     const log: string[] = [];
-    let boqApplied = false;
-    let draft: Partial<ProjectInputs> = {};
-    try {
-      for (const f of scan.files.filter((x) => approved.has(x.id))) {
-        try {
-          const data = await service().readFile(f);
-          if (/\.(xlsx|xls|csv)$/i.test(f.name) && /boq|bcs|bom|submission/i.test(f.name) && !boqApplied) {
-            const parsed = ingestion.parseBoq({ name: f.name, data });
-            draft = {
-              boqPackages: parsed.packages,
-              areaSft: parsed.areaSft,
-              contractValue: parsed.contractValue,
-              bcsValue: parsed.bcsValue,
-            };
-            boqApplied = true;
-            log.push(`✓ ${f.name} — parsed ${parsed.packages.length} packages${parsed.warnings.length ? `; ${parsed.warnings.length} parser note(s)` : ''}`);
-          } else {
-            log.push(`• ${f.name} — read (${kb(data.byteLength)}), no structured extractor for this type yet`);
-          }
-        } catch (e) {
-          log.push(`✗ ${f.name} — ${e instanceof Error ? e.message : String(e)}`);
-        }
+    for (const f of files) {
+      setReading(files.length === 1 ? f.id : 'all');
+      try {
+        const data = await service().readFile(f);
+        log.push(applyBytes(f.name, data, f.id, extractorFor(f), false));
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        mark(f.id, 'pending', `Could not read: ${msg}`);
+        log.push(`✗ ${f.name} — ${msg}`);
       }
-      setReadLog(log);
-      setDraftInputs(draft);
-      setQueries(buildQueries(buildInventory(scan)));
-      setStep('queries');
+    }
+    setReading(null);
+    setReadLog((prev) => [...prev, ...log]);
+  };
+
+  /** "Prepare by hand" — substitute a local upload for a Drive document the engine cannot fetch or parse. */
+  const prepareByHand = (f: DriveFile) => {
+    byHandFor.current = f;
+    byHandInput.current?.click();
+  };
+
+  const onByHandFile = async (file: File) => {
+    const target = byHandFor.current;
+    if (!target) return;
+    setError(null);
+    setReading(target.id);
+    try {
+      const isText = /\.(csv|tsv|txt)$/i.test(file.name);
+      const data = isText ? await file.text() : await file.arrayBuffer();
+      // classify by what the user actually uploaded, not by the Drive file it replaces
+      const extractor = extractorFor({ ...target, name: file.name });
+      setReadLog((prev) => [...prev, applyBytes(file.name, data, target.id, extractor, true)]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setBusy(false);
+      setReading(null);
+      byHandFor.current = null;
     }
   };
 
-  const [draftInputs, setDraftInputs] = useState<Partial<ProjectInputs>>({});
+  const goToQueries = () => {
+    if (!scan) return;
+    setQueries((qs) => {
+      if (qs.length) return qs;
+      // Prefill what the documents actually established, so the project head confirms a figure
+      // rather than retyping it. Anything not extracted stays blank and still blocks.
+      const prefill: Record<string, string> = {};
+      if (scheduleStart) prefill.q_start = scheduleStart;
+      if (draftInputs.areaSft) prefill.q_area = String(draftInputs.areaSft.value);
+      return buildQueries(buildInventory(scan)).map((q) =>
+        prefill[q.id] ? { ...q, answer: prefill[q.id], foundHint: q.foundHint ?? 'read from the documents' } : q,
+      );
+    });
+    setStep('queries');
+  };
 
   const answer = (id: string, v: string) => setQueries((qs) => qs.map((q) => (q.id === id ? { ...q, answer: v } : q)));
   const blocking = unansweredBlocking(queries);
@@ -139,13 +241,14 @@ export function Intake({ clientId, existingIds, onCreate }: { clientId: string; 
       client: projectName || '—',
       location: scan?.folderName ?? '—',
       areaSft: area ? { value: area, provenance: 'input', source: src } : null,
-      contractStart: get('q_start') || null,
+      // an ingested programme carries its own commencement date; the answer only fills the gap
+      contractStart: get('q_start') || scheduleStart,
       contractDurationCalDays: dur ? { value: dur, provenance: 'input', source: src } : null,
       contractValue: draftInputs.contractValue ?? null,
       bcsValue: draftInputs.bcsValue ?? null,
       milestones: [],
       boqPackages: draftInputs.boqPackages ?? [],
-      scheduleActivities: [],
+      scheduleActivities: draftActivities,
       provided: {
         boq: (draftInputs.boqPackages?.length ?? 0) > 0,
         contract: !!get('q_start'),
@@ -167,22 +270,52 @@ export function Intake({ clientId, existingIds, onCreate }: { clientId: string; 
   return (
     <>
       <div className="row" style={{ marginBottom: 16 }}>
-        {(['link', 'inventory', 'permission', 'queries'] as Step[]).map((s, i) => (
-          <span key={s} className={`tag ${step === s ? 'info' : ''}`}>{i + 1}. {s === 'link' ? 'Link Drive' : s === 'inventory' ? 'Document inventory' : s === 'permission' ? 'Read permission' : 'Project queries'}</span>
+        {(['link', 'drive', 'queries'] as Step[]).map((s, i) => (
+          <span key={s} className={`tag ${step === s ? 'info' : ''}`}>{i + 1}. {s === 'link' ? 'Link Drive' : s === 'drive' ? 'What is in Drive' : 'Project queries'}</span>
         ))}
       </div>
 
       {error && <div className="banner">{error}</div>}
 
+      {/* hidden input backing every row's "Prepare by hand" */}
+      <input
+        ref={byHandInput}
+        type="file"
+        accept=".xlsx,.xls,.csv,.tsv,.txt"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = '';
+          if (f) void onByHandFile(f);
+        }}
+      />
+
       {step === 'link' && (
         <>
           <h2>Link a Google Drive folder</h2>
-          <p className="muted" style={{ maxWidth: 760, marginTop: -4 }}>
-            The engine scans the folder first and lists what it found against the required-input checklist.
-            Nothing is read until you approve it, and no plan is produced until the project head has answered
-            the intake questions.
+          <p className="muted" style={{ maxWidth: 780, marginTop: -4 }}>
+            The engine scans the folder, lists every document against the required-input checklist, and shows you
+            exactly what it could and could not read. No plan is produced until the project head has answered the
+            intake questions.
           </p>
-          <h3 style={{ marginTop: 18 }}>Option A — read the folder from this computer (works right now)</h3>
+
+          <h3 style={{ marginTop: 18 }}>Paste the project folder link</h3>
+          <div className="row">
+            <div className="field" style={{ minWidth: 460 }}>
+              <label>Drive folder link or ID</label>
+              <input value={folderUrl} onChange={(e) => setFolderUrl(e.target.value)} placeholder="https://drive.google.com/drive/folders/…" />
+            </div>
+            <button className="primary" disabled={busy || !folderUrl.trim()} onClick={() => void doScan()}>
+              {busy ? 'Scanning…' : 'Scan Drive folder'}
+            </button>
+          </div>
+          <div className="banner ok" style={{ marginTop: 12, maxWidth: 900 }}>
+            A folder shared as <strong>“Anyone with the link”</strong> needs no Google account, no OAuth client ID and
+            no API key — paste it and scan. Only a genuinely private folder needs the sign-in below.
+            {clientId ? ' An OAuth client ID is configured, so private folders work too.' : ''}
+          </div>
+
+          <h3 style={{ marginTop: 22 }}>Or read the folder from this computer</h3>
           <div className="row">
             <input
               type="file"
@@ -194,134 +327,68 @@ export function Intake({ clientId, existingIds, onCreate }: { clientId: string; 
               onChange={(e) => { const fs = Array.from(e.target.files ?? []); if (fs.length) loadLocalFolder(fs); }}
             />
             <span className="muted" style={{ fontSize: 12, maxWidth: 620 }}>
-              Pick the project folder. If you run <strong>Google Drive for Desktop</strong>, your Drive folder is
-              already on this Mac (under <code>~/Google Drive</code> or <code>~/Library/CloudStorage/…</code>) — pick
-              it there and you are reading the live Drive folder. Otherwise open the folder in Drive and
-              <strong> Download</strong> it first. Contents stay on this machine; nothing is uploaded.
+              If you run <strong>Google Drive for Desktop</strong>, your Drive folder is already on this Mac — picking
+              it there reads the live folder. Contents stay on this machine; nothing is uploaded.
             </span>
           </div>
 
-          <h3 style={{ marginTop: 22 }}>Option B — paste a Drive link (needs a one-time Google setup)</h3>
-          <div className="row">
-            <div className="field" style={{ minWidth: 440 }}>
-              <label>Drive folder link or ID</label>
-              <input value={folderUrl} onChange={(e) => setFolderUrl(e.target.value)} placeholder="https://drive.google.com/drive/folders/…" />
+          <details style={{ marginTop: 22 }}>
+            <summary className="muted" style={{ cursor: 'pointer', fontSize: 13 }}>
+              Private folders — one-time Google sign-in setup {clientId ? '(configured)' : '(not configured)'}
+            </summary>
+            <div className={`banner ${clientId ? 'ok' : 'info'}`} style={{ marginTop: 10 }}>
+              {clientId ? (
+                <>OAuth client ID configured. Private folders can be scanned once you approve access.</>
+              ) : (
+                <>
+                  <p style={{ margin: '0 0 6px' }}>
+                    Only needed for folders that are <em>not</em> shared by link. Google requires a client ID for any
+                    app that reads private Drive files; it is free and one-time:
+                  </p>
+                  <ol style={{ margin: '0 0 6px 18px', padding: 0, lineHeight: 1.7 }}>
+                    <li>Open <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noreferrer">console.cloud.google.com</a> and create a project.</li>
+                    <li><a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noreferrer">Enable the Google Drive API</a>.</li>
+                    <li><strong><a href="https://console.cloud.google.com/auth/branding" target="_blank" rel="noreferrer">Google Auth Platform → Branding</a></strong> → app name + support email.</li>
+                    <li><strong><a href="https://console.cloud.google.com/auth/audience" target="_blank" rel="noreferrer">Audience</a></strong> → <em>Internal</em> for a Workspace account, else <em>External</em> + yourself under <strong>Test users</strong>.</li>
+                    <li><strong><a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noreferrer">Clients → Create client</a> → Web application</strong>.</li>
+                    <li><strong>Authorised JavaScript origins</strong> → <code>{typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'}</code></li>
+                    <li>Paste the client ID into <strong>Settings → Google Drive access</strong>.</li>
+                  </ol>
+                  <span className="muted">Scope is <code>drive.readonly</code> — list and read, never write or delete.</span>
+                </>
+              )}
             </div>
-            <button
-              className="primary"
-              disabled={busy || !folderUrl.trim()}
-              title={!clientId ? 'No Google OAuth client ID configured yet — click to see what to do' : undefined}
-              onClick={() => void doScan()}
-            >
-              {busy ? 'Scanning…' : 'Scan Drive folder'}
-            </button>
-          </div>
+          </details>
 
-          {!clientId ? (
-            <div className="banner info" style={{ marginTop: 14 }}>
-              <strong>Live scanning is off — no Google OAuth client ID configured.</strong>
-              <p style={{ margin: '8px 0 6px' }}>
-                Google requires a client ID for any app that reads private Drive files. It is a one-time,
-                five-minute setup and costs nothing:
-              </p>
-              <ol style={{ margin: '0 0 6px 18px', padding: 0, lineHeight: 1.7 }}>
-                <li>Open <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noreferrer">console.cloud.google.com</a> and create a project (or pick an existing one).</li>
-                <li><a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noreferrer">Enable the Google Drive API</a> on that project.</li>
-                <li><strong><a href="https://console.cloud.google.com/auth/branding" target="_blank" rel="noreferrer">Google Auth Platform → Branding</a></strong> → app name + support email. (This replaced the old “OAuth consent screen” page.)</li>
-                <li><strong><a href="https://console.cloud.google.com/auth/audience" target="_blank" rel="noreferrer">Audience</a></strong> → <em>Internal</em> if you sign in with a Flipspaces Workspace account, otherwise <em>External</em> and add your own Google address under <strong>Test users</strong>.</li>
-                <li><strong><a href="https://console.cloud.google.com/auth/clients" target="_blank" rel="noreferrer">Clients → Create client</a> → Web application</strong>.</li>
-                <li>Under <strong>Authorised JavaScript origins</strong> add exactly: <code>{typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'}</code></li>
-                <li>Copy the client ID (ends in <code>.apps.googleusercontent.com</code>) and paste it into <strong>Settings → Google Drive access</strong>.</li>
-              </ol>
-              <p style={{ margin: '6px 0 0' }} className="muted">
-                Scope requested is <code>drive.readonly</code> — the engine can list and read, never write or delete.
-                Google classes it as restricted, so an <em>External</em> app in Testing mode shows an “unverified app”
-                warning: click <strong>Advanced → Go to…</strong>. No Google review is needed while it stays in Testing.
-                If you open this app from a file (<code>file://</code>), Google will reject the origin; run <code>npm run dev</code> instead.
-              </p>
+          <details style={{ marginTop: 12 }}>
+            <summary className="muted" style={{ cursor: 'pointer', fontSize: 13 }}>Import a folder manifest (JSON)</summary>
+            <div className="row" style={{ marginTop: 10 }}>
+              <input type="file" accept=".json" onChange={(e) => { const f = e.target.files?.[0]; if (f) void loadManifest(f); }} />
+              <span className="muted" style={{ fontSize: 12, maxWidth: 620 }}>
+                Lists documents but carries no contents, so nothing can be parsed from it.
+              </span>
             </div>
-          ) : (
-            <div className="banner ok" style={{ marginTop: 14 }}>
-              OAuth client ID configured. Paste a folder link above and the engine will scan it live.
-            </div>
-          )}
-
-          <h3 style={{ marginTop: 22 }}>Option C — import a folder manifest</h3>
-          <div className="row">
-            <input type="file" accept=".json" onChange={(e) => { const f = e.target.files?.[0]; if (f) void loadManifest(f); }} />
-            <span className="muted" style={{ fontSize: 12, maxWidth: 620 }}>
-              A JSON file with a <code>files[]</code> array of {'{ id, name, mimeType, sizeBytes, path }'}. Lists the
-              documents but carries no contents, so the BOQ cannot be parsed — use Option A if you have the files.
-            </span>
-          </div>
+          </details>
         </>
       )}
 
-      {step === 'inventory' && inventory && (
+      {step === 'drive' && scan && (
         <>
-          <h2>Documents found in “{scan!.folderName}”</h2>
-          {(scan!.notes ?? []).map((n, i) => (
+          {(scan.notes ?? []).map((n, i) => (
             <div key={i} className="banner" style={{ marginBottom: 12 }}>{n}</div>
           ))}
-          <div className="cards">
-            <div className="card"><div className="k">Files</div><div className="v">{scan!.files.length}</div></div>
-            <div className="card"><div className="k">Checklist matched</div><div className="v">{inventory.slots.filter((s) => s.present).length} / {inventory.slots.length}</div></div>
-            <div className="card"><div className="k">Mandatory missing</div><div className="v" style={{ color: inventory.mandatoryMissing.length ? 'var(--crit)' : 'var(--ok)' }}>{inventory.mandatoryMissing.length}</div></div>
-            <div className="card"><div className="k">Unclassified</div><div className="v">{inventory.unmatched.length}</div></div>
-          </div>
-
-          <div className="tblwrap">
-            <table>
-              <thead><tr><th style={{ width: 30 }}></th><th>Required input</th><th>Mandatory</th><th>Matched documents</th></tr></thead>
-              <tbody>{inventory.slots.map((s) => (
-                <tr key={s.slot.key}>
-                  <td>{s.present ? <span className="tag ok">✓</span> : s.slot.mandatory ? <span className="tag crit">!</span> : <span className="faint">—</span>}</td>
-                  <td><strong>{s.slot.label}</strong><div className="faint" style={{ fontSize: 11.5 }}>{s.slot.hint}</div></td>
-                  <td>{s.slot.mandatory ? <span className="tag warn">Mandatory</span> : <span className="tag">Optional</span>}</td>
-                  <td className="muted" style={{ fontSize: 12 }}>{s.matches.length ? s.matches.map((m) => m.name).join(' · ') : <span className="faint">not found</span>}</td>
-                </tr>
-              ))}</tbody>
-            </table>
-          </div>
-
-          <div className="row" style={{ marginTop: 16 }}>
-            <button onClick={() => setStep('link')}>Back</button>
-            <button className="primary" onClick={() => { setApproved(new Set(scan!.files.filter((f) => /\.(xlsx|xls|csv|pdf)$/i.test(f.name)).map((f) => f.id))); setStep('permission'); }}>
-              Continue to read permission
-            </button>
-            {mode === 'google' && <button onClick={() => void doScan()} disabled={busy}>Rescan folder</button>}
-          </div>
-        </>
-      )}
-
-      {step === 'permission' && scan && (
-        <>
-          <h2>Approve which files the engine may read</h2>
-          <p className="muted" style={{ marginTop: -4, maxWidth: 760 }}>
-            Scanning only listed names. Reading opens file contents. Approve the documents you want parsed —
-            spreadsheets are extracted structurally, other formats are recorded as evidence.
-          </p>
-          <div className="row" style={{ margin: '12px 0' }}>
-            <button onClick={() => setApproved(new Set(scan.files.map((f) => f.id)))}>Select all</button>
-            <button onClick={() => setApproved(new Set())}>Select none</button>
-            <span className="muted" style={{ fontSize: 12 }}>{approved.size} of {scan.files.length} approved</span>
-          </div>
-          <div style={{ maxHeight: '50vh', overflow: 'auto' }}>
-            {scan.files.map((f: DriveFile) => (
-              <label key={f.id} className="filebar">
-                <input type="checkbox" style={{ width: 16, boxShadow: 'none' }} checked={approved.has(f.id)}
-                  onChange={(e) => setApproved((prev) => { const n = new Set(prev); if (e.target.checked) n.add(f.id); else n.delete(f.id); return n; })} />
-                <span className="nm">{f.name}<div className="faint" style={{ fontSize: 11 }}>{f.path}</div></span>
-                <span className="faint mono" style={{ fontSize: 11.5 }}>{kb(f.sizeBytes)}</span>
-              </label>
-            ))}
-          </div>
-          <div className="row" style={{ marginTop: 16 }}>
-            <button onClick={() => setStep('inventory')}>Back</button>
-            <button className="primary" disabled={busy || approved.size === 0} onClick={() => void readApproved()}>
-              {busy ? 'Reading…' : `Read ${approved.size} file(s) and generate queries`}
-            </button>
-          </div>
+          <DriveCoverage
+            scan={scan}
+            states={docStates}
+            busy={reading}
+            onRead={(files) => void readFiles(files)}
+            onPrepareByHand={prepareByHand}
+            onDrop={(f) => mark(f.id, 'dropped', 'Excluded by you. It will not be read, and the required input it matched now counts as uncovered.')}
+            onUndrop={(f) => setDocStates((prev) => { const n = { ...prev }; delete n[f.id]; return n; })}
+            onRescan={mode === 'google' ? () => void doScan() : null}
+            onContinue={goToQueries}
+            onBack={() => setStep('link')}
+          />
         </>
       )}
 
@@ -370,7 +437,7 @@ export function Intake({ clientId, existingIds, onCreate }: { clientId: string; 
           ))}
 
           <div className="row" style={{ marginTop: 16 }}>
-            <button onClick={() => setStep('permission')}>Back</button>
+            <button onClick={() => setStep('drive')}>Back</button>
             <button className="primary" disabled={blocking.length > 0} onClick={create}>Create project</button>
             {blocking.length > 0 && <span className="muted" style={{ fontSize: 12 }}>Answer the blocking questions to continue.</span>}
           </div>

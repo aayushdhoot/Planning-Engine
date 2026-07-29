@@ -126,8 +126,8 @@ export function clientDeck(plan: Plan): Pptx {
   tableSlides(pptx, 'Procurement — delivery dates required on site', ['Package', 'Criticality', 'Delivery required'],
     plan.modules.procurement.map((i) => [i.category, i.criticality, i.deliveryRequired ?? '—']), brand, [7, 2.6, 2.7], 14);
 
-  tableSlides(pptx, 'Billing schedule', ['Period', 'Billing', 'Cumulative'],
-    plan.modules.cashflow.rows.map((r) => [r.period, inr(r.inflow), inr(r.cumulativeInflow)]), brand, [4, 4.2, 4.1], 14);
+  tableSlides(pptx, 'Billing milestones', ['RA', 'Due', '%', 'Status'],
+    plan.modules.raMilestones.map((m) => [m.code, m.dueDate, `${m.percent}%`, m.status]), brand, [2, 3.4, 2.4, 4.5], 14);
 
   return pptx;
 }
@@ -140,7 +140,6 @@ export function internalDeck(plan: Plan): Pptx {
   cover(pptx, plan, 'internal');
   const acts = plan.modules.timeline.activities;
   const cp = acts.filter((a) => a.critical);
-  const worstNet = Math.min(...plan.modules.cashflow.rows.map((r) => r.cumulativeInflow - (r.cumulativeOutflow ?? 0)));
 
   const s = pptx.addSlide();
   titleBar(s, 'Position', brand);
@@ -150,7 +149,7 @@ export function internalDeck(plan: Plan): Pptx {
     ['Buffer', `${plan.ieInvariant.bufferCalendarDays}d`, plan.ieInvariant.holds ? 'invariant holds' : 'BREACH'],
     ['Critical', `${cp.length} / ${acts.length}`, 'zero float'],
     ['Peak manpower', String(plan.modules.manpower.peak), plan.modules.manpower.peakDate ?? ''],
-    ['Margin', plan.modules.cashflow.margin ? `${plan.modules.cashflow.margin.value}%` : '—'],
+    ['Margin', plan.margin ? `${plan.margin.value}%` : '—', `${plan.modules.raMilestones.length} RA milestones`],
   ], brand);
   s.addText(`Confidence basis: ${plan.confidence.basis}`, { x: 0.5, y: 2.3, w: 12.3, h: 0.3, fontSize: 10, color: MUTED });
   tableOn(s, ['Phase', 'Start', 'End', 'On critical path'],
@@ -178,18 +177,20 @@ export function internalDeck(plan: Plan): Pptx {
     plan.modules.manpower.trades.map((t) => [t.trade, t.start, t.end, String(t.activeDays), String(t.manDays), String(t.coreCrew.value), String(t.peakCrew)]),
     brand, [2.6, 1.9, 1.9, 1.3, 1.6, 1.6, 1.4], 16);
 
-  const cash = pptx.addSlide();
-  titleBar(cash, 'Cashflow — inflow vs outflow', brand);
-  kpis(cash, [
-    ['Total inflow', inr(plan.modules.cashflow.rows.reduce((a, r) => a + r.inflow, 0))],
-    ['Total outflow', inr(plan.modules.cashflow.rows.reduce((a, r) => a + (r.outflow ?? 0), 0))],
-    ['Worst net position', inr(worstNet), 'peak funding need'],
+  const ra = pptx.addSlide();
+  titleBar(ra, 'RA billing milestones — readiness against site progress', brand);
+  kpis(ra, [
+    ['Milestones', String(plan.modules.raMilestones.length)],
+    ['Clauses tracked', String(plan.modules.raMilestones.reduce((a, m) => a + m.checkpoints.length, 0))],
+    ['Contract value', plan.project.contractValue ? inr(plan.project.contractValue.value) : '—'],
   ], brand);
-  tableOn(cash, ['Period', 'Inflow', 'Outflow', 'Cum. in', 'Cum. out', 'Net'],
-    plan.modules.cashflow.rows.slice(0, 12).map((r) => {
-      const net = r.cumulativeInflow - (r.cumulativeOutflow ?? 0);
-      return [r.period, inr(r.inflow), inr(r.outflow ?? 0), inr(r.cumulativeInflow), inr(r.cumulativeOutflow ?? 0), inr(net)];
-    }), 2.4);
+  tableOn(ra, ['RA', 'Due', '%', 'Amount', 'Clauses', 'Status'],
+    plan.modules.raMilestones.map((m) => [m.code, m.dueDate, `${m.percent}%`, m.amount == null ? '—' : inr(m.amount), String(m.checkpoints.length), m.status]), 2.4);
+
+  tableSlides(pptx, 'RA milestone clauses — what must be true before billing',
+    ['RA', 'Kind', 'Clause', 'Planned', 'Status'],
+    plan.modules.raMilestones.flatMap((m) => m.checkpoints.map((c) => [m.code, c.kind, c.description, c.plannedDate ?? '—', c.status])),
+    brand, [1.0, 1.4, 6.2, 1.9, 1.8], 16);
 
   tableSlides(pptx, 'Resource plan', ['Role', 'Count', 'Basis'],
     plan.modules.resources.map((r) => [r.role, String(r.count.value), r.count.source]), brand, [3.4, 1.0, 7.9], 12);

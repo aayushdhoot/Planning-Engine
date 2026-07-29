@@ -5,7 +5,7 @@ import { buildPlan, clientView } from '../src/engine/planner';
 import { auditTrace, canonicalJson, validatePlan } from '../src/engine/schema';
 import { workdayToDate, workingDaysBetween } from '../src/engine/calendar';
 import { skf } from '../src/data/skf';
-import { emirates, kohler } from '../src/data/others';
+import { emirates, pendingKohler } from '../src/data/others';
 import norms from '../src/norms/norms-v1.json';
 
 const cal7: CalendarConfig = { weeklyOffDays: [], holidays: [], workModeFactor: 1 };
@@ -78,7 +78,7 @@ describe('T1-SCHEMA — canonical output validates', () => {
     expect(v.ok).toBe(true);
   });
   it('degraded plans also validate', () => {
-    for (const p of [emirates, kohler]) {
+    for (const p of [emirates, pendingKohler]) {
       const v = validatePlan(buildPlan(p, cfg, TODAY));
       expect(v.ok).toBe(true);
     }
@@ -112,8 +112,7 @@ describe('T1-IE — internal/external invariant', () => {
   it('client view never leaks internal-only data', () => {
     const c = clientView(buildPlan(skf, cfg, TODAY));
     expect(c.internal).toBeNull();
-    expect(c.modules.cashflow.margin).toBeNull();
-    expect(c.modules.cashflow.rows.every((r) => r.outflow === null)).toBe(true);
+    expect(c.modules.raMilestones.every((m) => m.checkpoints.every((k) => !k.responsibility && !k.activityId))).toBe(true);
     expect(c.modules.procurement.every((x) => x.vendor === '' && x.remarks === '')).toBe(true);
     expect(c.assumptions.every((a) => !a.internalOnly)).toBe(true);
     const s = canonicalJson(c);
@@ -133,7 +132,7 @@ describe('T1-DETERMINISM — byte-identical output across runs', () => {
 
 describe('T1-DEGRADE — missing inputs handled without crashing', () => {
   it('Emirates/KOHLER produce pending_inputs plans with explicit missing lists', () => {
-    for (const p of [emirates, kohler]) {
+    for (const p of [emirates, pendingKohler]) {
       const plan = buildPlan(p, cfg, TODAY);
       expect(plan.project.status).toBe('pending_inputs');
       expect(plan.missingInputs.length).toBeGreaterThan(5);
@@ -163,17 +162,17 @@ describe('Module sanity (Tier-2 support)', () => {
     expect(m.design.rows.length).toBeGreaterThan(30);
     expect(m.todos.length).toBeGreaterThan(0);
     expect(m.dependencies.length).toBe(20);
-    expect(m.cashflow.rows.length).toBeGreaterThan(1);
+    expect(m.raMilestones.length).toBe(6);
   });
-  it('cashflow inflow totals the contract value', () => {
-    const totalIn = plan.modules.cashflow.rows.reduce((s, r) => s + r.inflow, 0);
-    expect(totalIn).toBe(skf.contractValue!.value);
+  it('RA milestone amounts total the contract value', () => {
+    const total = plan.modules.raMilestones.reduce((s, m) => s + (m.amount ?? 0), 0);
+    expect(total).toBe(skf.contractValue!.value);
   });
   it('every package is ordered before the delivery date the programme needs', () => {
     for (const pr of plan.modules.procurement)
       if (pr.orderBy && pr.deliveryRequired) expect(pr.orderBy < pr.deliveryRequired).toBe(true);
   });
   it('margin matches BOQ summary (27.48%)', () => {
-    expect(plan.modules.cashflow.margin!.value).toBeCloseTo(27.5, 1);
+    expect(plan.margin!.value).toBeCloseTo(27.5, 1);
   });
 });

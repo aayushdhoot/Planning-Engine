@@ -1,0 +1,206 @@
+// "What is in Drive" — the audit screen. Its whole job is to make it obvious whether the
+// engine actually turned each input document into numbers, or merely opened it.
+import { useMemo, useState } from 'react';
+import type { DriveFile, DriveScan } from '../services/drive';
+import { buildCoverage, coverageRank, type CoverageRow, type DocStates, type ReadState } from '../engine/coverage';
+
+const kb = (n: number | null) => (n == null ? '—' : n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+
+const STATE_TAG: Record<ReadState, { label: string; cls: string }> = {
+  extracted: { label: 'READ', cls: 'ok' },
+  logged: { label: 'EVIDENCE ONLY', cls: 'warn' },
+  pending: { label: 'NOT READ', cls: 'crit' },
+  dropped: { label: 'DROPPED', cls: '' },
+};
+
+export function DriveCoverage({
+  scan,
+  states,
+  busy,
+  onRead,
+  onPrepareByHand,
+  onDrop,
+  onUndrop,
+  onRescan,
+  onContinue,
+  onBack,
+}: {
+  scan: DriveScan;
+  states: DocStates;
+  busy: string | null;
+  onRead: (files: DriveFile[]) => void;
+  onPrepareByHand: (file: DriveFile) => void;
+  onDrop: (file: DriveFile) => void;
+  onUndrop: (file: DriveFile) => void;
+  onRescan: (() => void) | null;
+  onContinue: () => void;
+  onBack: () => void;
+}) {
+  const [showAll, setShowAll] = useState(false);
+  const cov = useMemo(() => buildCoverage(scan, states), [scan, states]);
+
+  const visible = cov.rows
+    .filter((r) => showAll || r.slot || r.extractor)
+    .sort((a, b) => coverageRank(a) - coverageRank(b) || a.file.name.localeCompare(b.file.name));
+
+  const readable = cov.rows.filter((r) => r.extractor && r.state === 'pending').map((r) => r.file);
+  const scannedAt = new Date(scan.scannedAt);
+
+  return (
+    <>
+      <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+        <div>
+          <h2 style={{ marginBottom: 2 }}>What is in Drive</h2>
+          <div className="muted" style={{ fontSize: 12 }}>
+            “{scan.folderName}” · {cov.documents} files · {cov.extracted} read · {cov.extractableNotRead} readable but not read ·
+            scanned {Number.isNaN(scannedAt.getTime()) ? '—' : scannedAt.toLocaleTimeString()}
+          </div>
+        </div>
+        <div className="row" style={{ gap: 8 }}>
+          {readable.length > 0 && (
+            <button className="primary" disabled={!!busy} onClick={() => onRead(readable)}>
+              {busy ? 'Reading…' : `Read all ${readable.length} readable`}
+            </button>
+          )}
+          {onRescan && <button disabled={!!busy} onClick={onRescan}>Scan Drive now</button>}
+        </div>
+      </div>
+
+      <div className="cards">
+        <div className="card">
+          <div className="k">Files in Drive</div>
+          <div className="v">{cov.documents}</div>
+          <div className="s">{cov.required} match a required input</div>
+        </div>
+        <div className="card">
+          <div className="k">Read into the plan</div>
+          <div className="v" style={{ color: 'var(--ok)' }}>{cov.extracted}</div>
+          <div className="s">structurally extracted</div>
+        </div>
+        <div className="card">
+          <div className="k">Evidence only</div>
+          <div className="v" style={{ color: cov.loggedOnly ? 'var(--warn)' : undefined }}>{cov.loggedOnly}</div>
+          <div className="s">opened, but nothing extractable</div>
+        </div>
+        <div className="card" style={cov.extractableNotRead ? { borderColor: 'var(--warn)', background: 'var(--warn-soft)' } : undefined}>
+          <div className="k">Readable but never read</div>
+          <div className="v" style={{ color: cov.extractableNotRead ? 'var(--warn)' : undefined }}>{cov.extractableNotRead}</div>
+          <div className="s">the engine can parse these — it has not</div>
+        </div>
+      </div>
+
+      {cov.evidenceOnlyMandatory.length > 0 && (
+        <div className="banner" style={{ marginBottom: 14 }}>
+          <strong>Held as evidence, not as input:</strong> {cov.evidenceOnlyMandatory.join(', ')}. Documents are present, but the
+          engine cannot turn these formats into numbers — anything they contain must be answered in the questions step, or the plan
+          will record an assumption instead.
+        </div>
+      )}
+      {cov.missingMandatory.length > 0 && (
+        <div className="banner" style={{ marginBottom: 14 }}>
+          <strong>Not in the folder at all:</strong> {cov.missingMandatory.join(', ')}.
+        </div>
+      )}
+
+      <div className="row" style={{ margin: '0 0 10px' }}>
+        <div className="seg">
+          <button className={!showAll ? 'on' : ''} onClick={() => setShowAll(false)}>Input documents ({cov.rows.filter((r) => r.slot || r.extractor).length})</button>
+          <button className={showAll ? 'on' : ''} onClick={() => setShowAll(true)}>Everything ({cov.documents})</button>
+        </div>
+      </div>
+
+      <div className="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Required input</th>
+              <th>Size</th>
+              <th>Engine read</th>
+              <th>What the engine got</th>
+              <th style={{ textAlign: 'right' }}>Do</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((r) => (
+              <Row
+                key={r.file.id}
+                r={r}
+                busy={busy}
+                onRead={() => onRead([r.file])}
+                onPrepareByHand={() => onPrepareByHand(r.file)}
+                onDrop={() => onDrop(r.file)}
+                onUndrop={() => onUndrop(r.file)}
+              />
+            ))}
+            {visible.length === 0 && (
+              <tr><td colSpan={6} className="muted">No documents matched the required-input checklist. Switch to “Everything” to see the whole folder.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="row" style={{ marginTop: 16 }}>
+        <button onClick={onBack}>Back</button>
+        <button className="primary" onClick={onContinue}>Continue to project queries</button>
+        {cov.extractableNotRead > 0 && (
+          <span className="muted" style={{ fontSize: 12 }}>
+            {cov.extractableNotRead} readable document(s) still unread — the plan will be built without them.
+          </span>
+        )}
+      </div>
+    </>
+  );
+}
+
+function Row({
+  r,
+  busy,
+  onRead,
+  onPrepareByHand,
+  onDrop,
+  onUndrop,
+}: {
+  r: CoverageRow;
+  busy: string | null;
+  onRead: () => void;
+  onPrepareByHand: () => void;
+  onDrop: () => void;
+  onUndrop: () => void;
+}) {
+  const tag = STATE_TAG[r.state];
+  // the gap this screen exists to expose: parseable, and nobody has parsed it
+  const highlight = r.extractor && r.state === 'pending';
+  return (
+    <tr style={highlight ? { background: 'var(--warn-soft)' } : r.state === 'dropped' ? { opacity: 0.5 } : undefined}>
+      <td>
+        <strong style={{ fontSize: 12.5 }}>{r.file.name}</strong>
+        <div className="faint" style={{ fontSize: 11 }}>{r.file.path}</div>
+      </td>
+      <td>{r.slot ? <span className={`tag ${r.slot.mandatory ? 'info' : ''}`}>{r.slot.label}</span> : <span className="faint">—</span>}</td>
+      <td className="faint mono" style={{ fontSize: 11.5, whiteSpace: 'nowrap' }}>{kb(r.file.sizeBytes)}</td>
+      <td><span className={`tag ${tag.cls}`}>{tag.label}</span></td>
+      <td className="muted" style={{ fontSize: 11.5, maxWidth: 320 }}>{r.detail}</td>
+      <td>
+        <div className="row" style={{ gap: 6, justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
+          {r.state === 'dropped' ? (
+            <button onClick={onUndrop}>Restore</button>
+          ) : (
+            <>
+              <button
+                className={r.extractor ? 'primary' : ''}
+                disabled={!r.extractor || !!busy}
+                title={r.extractor ? 'Parse this file into engine inputs' : 'No structural extractor for this file — use Prepare by hand'}
+                onClick={onRead}
+              >
+                {busy === r.file.id ? 'Reading…' : r.state === 'extracted' ? 'Re-read' : 'Read now'}
+              </button>
+              <button onClick={onPrepareByHand} title="Supply this document's contents yourself">Prepare by hand</button>
+              <button onClick={onDrop} title="Exclude this document from the plan">Drop reading</button>
+            </>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+}

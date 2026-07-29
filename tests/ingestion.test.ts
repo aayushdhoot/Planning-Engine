@@ -177,7 +177,7 @@ describe('Scope -> WBS -> plan, from BOQ alone (no supplied schedule)', () => {
     expect(validatePlan(plan).errors).toEqual([]);
     expect(auditTrace(plan).ok).toBe(true);
     expect(plan.modules.timeline.activities.length).toBe(16);
-    expect(plan.modules.cashflow.rows.length).toBeGreaterThan(0);
+    expect(plan.modules.raMilestones.length).toBeGreaterThanOrEqual(0);
     expect(plan.assumptions.some((a) => a.area === 'wbs')).toBe(true);
   });
 

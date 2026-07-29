@@ -1,7 +1,7 @@
 // Generate the four trackers from the schedule. Dates are back-scheduled from the
 // site activities they gate, so design -> procurement -> execution stay linked.
 import type { ProjectInputs, ScheduledActivity } from '../domain/types';
-import type { Criticality, DependencyRow, DesignRow, ProcurementRow, TodoRow } from '../domain/trackers';
+import type { Criticality, DependencyRow, DesignRow, ProcurementRow, RaCheckpoint, RaMilestoneRow, TodoRow } from '../domain/trackers';
 import { addCalendarDays } from './calendar';
 import norms from '../norms/norms-v1.json';
 
@@ -258,6 +258,113 @@ export function buildDependencyTracker(acts: ScheduledActivity[], today: string,
       status: planDate < today ? 'Delayed' : 'Pending',
       remarks: driver ? `Blocks "${driver.name}" starting ${driver.startDate}.` : 'Project set-up item.',
       blocks: driver ? driver.name : null,
+    };
+  });
+}
+
+// ------------------------------------------------------------ RA milestones
+
+/**
+ * A milestone clause names physical work, not a date. The contract writes them as prose:
+ *
+ *   "Execution: Demolition, partition line marking, frameworks, single-side skinning…
+ *    Material delivery: gypsum frames, gypsum sheets… Key order closures: HVAC, carpentry."
+ *
+ * Each clause becomes a checkpoint so the project team can tick off billing readiness, rather
+ * than the engine asserting a milestone is met because its date arrived.
+ */
+const RA_SECTIONS: [RegExp, RaCheckpoint['kind']][] = [
+  [/key order closures?|order closures?|orders? closed?/i, 'order'],
+  [/material deliver(y|ies)|material/i, 'material'],
+  [/execution|works?/i, 'execution'],
+];
+
+/** Split milestone prose into (kind, clause) pairs. */
+export function parseMilestoneClauses(description: string): { kind: RaCheckpoint['kind']; text: string }[] {
+  const out: { kind: RaCheckpoint['kind']; text: string }[] = [];
+  // labelled form: "Execution: a, b. Material delivery: c."
+  const labelled = [...description.matchAll(/([A-Za-z][A-Za-z ]{2,30}?)\s*:\s*([^:]*?)(?=(?:[.;]\s*[A-Za-z][A-Za-z ]{2,30}?\s*:)|$)/g)];
+  const chunks: { kind: RaCheckpoint['kind']; body: string }[] = [];
+  if (labelled.length) {
+    for (const m of labelled) {
+      const label = m[1].trim();
+      const kind = RA_SECTIONS.find(([re]) => re.test(label))?.[1] ?? 'execution';
+      chunks.push({ kind, body: m[2] });
+    }
+  } else {
+    // unlabelled form: "Partition marking, frameworks … + gypsum/electrical material delivery"
+    for (const part of description.split(/\s+\+\s+/)) {
+      const kind: RaCheckpoint['kind'] = /material|delivery/i.test(part) ? 'material' : /order/i.test(part) ? 'order' : 'execution';
+      chunks.push({ kind, body: part });
+    }
+  }
+  for (const { kind, body } of chunks)
+    for (const raw of body.split(/[,;]|\s+and\s+/)) {
+      const text = raw.replace(/[.\s]+$/, '').replace(/^\s+/, '').trim();
+      if (text.length > 2) out.push({ kind, text });
+    }
+  return out;
+}
+
+const STOPWORDS = new Set(['the', 'and', 'for', 'with', 'from', 'all', 'material', 'delivery', 'works', 'work', 'key', 'closures']);
+const tokens = (s: string) =>
+  s
+    .toLowerCase()
+    .split(/[^a-z]+/)
+    .filter((w) => w.length > 3 && !STOPWORDS.has(w));
+
+/** Best-matching site activity for a clause, by word overlap. Null when nothing matches. */
+function activityForClause(text: string, acts: ScheduledActivity[]): ScheduledActivity | null {
+  const want = tokens(text);
+  if (!want.length) return null;
+  let best: { a: ScheduledActivity; score: number } | null = null;
+  for (const a of acts) {
+    const have = new Set(tokens(a.name));
+    const score = want.filter((w) => have.has(w)).length;
+    if (score > 0 && (!best || score > best.score)) best = { a, score };
+  }
+  return best ? best.a : null;
+}
+
+export function buildRaTracker(
+  p: ProjectInputs,
+  acts: ScheduledActivity[],
+  projectStart: string,
+  today: string,
+): RaMilestoneRow[] {
+  return p.milestones.map((m, i) => {
+    const dueDate = addCalendarDays(projectStart, m.dayOffset);
+    const checkpoints: RaCheckpoint[] = parseMilestoneClauses(m.description).map((c, j) => {
+      const a = c.kind === 'execution' ? activityForClause(c.text, acts) : null;
+      return {
+        id: `${m.code}-c${j + 1}`,
+        description: c.text.charAt(0).toUpperCase() + c.text.slice(1),
+        kind: c.kind,
+        activityId: a?.id ?? null,
+        activityName: a?.name ?? null,
+        // an execution clause is due when its activity finishes; a material or order clause is
+        // due by the milestone itself, since nothing on the programme evidences it
+        plannedDate: a ? a.endDate : dueDate,
+        actualDate: null,
+        status: statusFor(a ? a.endDate : dueDate, today),
+        responsibility: c.kind === 'execution' ? 'Site' : c.kind === 'material' ? 'Procurement' : 'Procurement',
+        remarks: '',
+      };
+    });
+    return {
+      id: `ra-${i + 1}`,
+      code: m.code,
+      dayOffset: m.dayOffset,
+      percent: m.percent,
+      amount: p.contractValue ? Math.round((m.percent / 100) * p.contractValue.value) : null,
+      dueDate,
+      revisedDate: null,
+      checkpoints,
+      readiness: 0, // computed from live edits in the UI; nothing is complete on a fresh plan
+      status: statusFor(dueDate, today),
+      invoiceNo: '',
+      invoiceDate: null,
+      remarks: checkpoints.length ? '' : 'No checkable clauses in the contract wording for this milestone.',
     };
   });
 }

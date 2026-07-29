@@ -16,6 +16,10 @@ export interface InputSlot {
 }
 
 export const INPUT_SLOTS: InputSlot[] = [
+  // Listed before the BOQ so a programme sitting in a "BOQ & Project Plan" folder is
+  // recognised as a programme. Optional: a project can be planned from scope alone, but when
+  // an issued programme exists it is the highest-value input in the folder.
+  { key: 'schedule', label: 'Issued programme / schedule', mandatory: false, match: /schedule|programme|program\b|pert|gantt|baseline/i, hint: 'Activity network with durations — the engine reproduces its dates exactly.' },
   { key: 'boq', label: 'Project BOQ (priced)', mandatory: true, match: /boq|bill of quant|bcs|bom[ _-]?cc|submission/i, hint: 'Priced BOQ with BCS — drives packages, value and cost.' },
   { key: 'layout', label: 'Project Layout', mandatory: true, match: /layout|floor ?plan|furniture layout/i, hint: 'Defines area and zoning.' },
   { key: 'drawings', label: 'Drawings', mandatory: true, match: /gfc|drawing|\.(dwg|dxf)\b|elevation|\brcp\b|shop ?drawing/i, hint: 'GFC set — gates execution.' },

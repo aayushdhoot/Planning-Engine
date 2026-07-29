@@ -49,7 +49,7 @@ const TRADE_BY_KEYWORD: [RegExp, string][] = [
   [/electric|light|ups|lt panel|power/i, 'electrical'],
   [/hvac|duct|vrf|vav|air/i, 'hvac'],
   [/plumb|phe|sanitary|toilet/i, 'plumbing'],
-  [/sprinkler|fire|security|cctv|fas|alarm/i, 'sprinkler'],
+  [/sprinkler|fire|security|cctv|fas|alarm|flss/i, 'sprinkler'],
   [/network|passive|node|data|lv/i, 'lv'],
   [/paint|putty|polish/i, 'painting'],
   [/sign|graphic|blind|planter|misc|gss/i, 'finishing'],
