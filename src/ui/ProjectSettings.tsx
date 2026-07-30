@@ -18,6 +18,7 @@ import {
   type ProjectSite,
 } from '../domain/org';
 import { Intake } from './Intake';
+import { SearchSelect } from './SearchSelect';
 import { approverFor, type ScheduleDatesLike } from '../domain/org';
 
 type Pane = 'drive' | 'site' | 'dates' | 'team';
@@ -172,6 +173,8 @@ function SiteDetails({ site, setSite, project }: { site: ProjectSite; setSite: (
 function ProjectTeam({ org, setOrg, projectId }: { org: OrgState; setOrg: (o: OrgState) => void; projectId: string }) {
   const groups = groupedTeam(org, projectId);
   const assignable = org.employees.filter(isAssignable);
+  // one option list for every slot on the screen — 182 people, so it is built once
+  const options = assignable.map((e) => ({ value: e.code, label: e.name, hint: `${e.designation} · ${departmentLabel(e.department)}` }));
 
   const update = (role: string, index: number, code: string | null) => {
     const team = [...teamFor(org, projectId)];
@@ -219,16 +222,13 @@ function ProjectTeam({ org, setOrg, projectId }: { org: OrgState; setOrg: (o: Or
                     const emp = employeeByCode(org, m.employeeCode);
                     return (
                       <div key={`${r.role}-${i}`} className="row" style={{ gap: 6, marginBottom: 4, flexWrap: 'nowrap' }}>
-                        <select
-                          value={m.employeeCode ?? ''}
-                          onChange={(e) => update(r.role, i, e.target.value || null)}
-                          style={{ flex: 1, minWidth: 0 }}
-                        >
-                          <option value="">N/A</option>
-                          {assignable.map((e) => (
-                            <option key={e.code} value={e.code}>{e.name} · {e.designation}</option>
-                          ))}
-                        </select>
+                        <SearchSelect
+                          value={m.employeeCode}
+                          onChange={(code) => update(r.role, i, code)}
+                          options={options}
+                          placeholder="Search name, role or department…"
+                          minWidth={0}
+                        />
                         {emp && (
                           <span className="tag" style={{ whiteSpace: 'nowrap' }}>
                             {departmentLabel(emp.department)} · {levelFor(emp.designation)}

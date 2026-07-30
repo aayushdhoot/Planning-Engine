@@ -73,6 +73,13 @@ what the plan actually runs on, and `cfg.dates` reads only the latter. `approver
 the project's **BU Head** from the team — with none assigned, Approve is disabled rather than
 letting the change through unsigned.
 
+## Searchable dropdowns
+`src/ui/SearchSelect.tsx` replaces a native `<select>` in place — same controlled `value` /
+`onChange` contract — and adds filtering plus keyboard navigation. `filterOptions()` requires
+**every word** to appear somewhere in the label or the hint, in any order, as a substring: so
+"sabir project" finds "Mohammed Sabir A · Project Manager" and "manager design" narrows to the
+design managers. Use it for any list that can grow past ~20; the employee directory is 182.
+
 ## Project settings (was "New project")
 `src/ui/ProjectSettings.tsx` — three panes over the selected project: Drive & inputs, Site
 details, Project team. Creating a project was only ever the *first* use of that screen; a

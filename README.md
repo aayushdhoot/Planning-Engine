@@ -25,7 +25,7 @@ npm run dev                    # http://localhost:5173
 | Command | What it does |
 |---|---|
 | `npm start` | Builds and serves at http://localhost:4173 **with the Drive proxy**, so link scanning works outside dev |
-| `npm run gates` | The full bar: typecheck → lint → 242 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 250 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -79,7 +79,9 @@ disappearing, so the comparison survives. KPI and exception cards drill through 
 rescan, and every document listed with whether the engine actually read it — re-read any of
 them on demand), **Site details** (project code, floors, carpet area, full address), and
 **Project team** (grouped Sales / Procurement / Snag / Operations / Design, several people per
-role where the role takes several, each badged by department and seniority). Carpet area set
+role where the role takes several, each badged by department and seniority). Every people
+picker is **searchable** — type a surname, a role or a department and it narrows; ↑↓ and Enter
+work. Scrolling 182 names in a native dropdown was not a workflow. Carpet area set
 here overrides the BOQ figure and is recorded as an input from project settings.
 
 **Sections.** Cockpit · Overview · PERT (**PERT network / Gantt / S-curve**) · Manpower · Design ·
