@@ -366,9 +366,7 @@
           "criticality": "Very Critical",
           "drawingName": "Base Build Layout",
           "id": "d1",
-          "issues": [
-            "Readiness target (2025-09-20) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-09-20",
           "releases": [
             "Waterproofing"
@@ -386,9 +384,7 @@
           "criticality": "Very Critical",
           "drawingName": "Furniture Layout",
           "id": "d2",
-          "issues": [
-            "Readiness target (2025-12-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-12-16",
           "releases": [
             "Site Measurement for Modular Cubicle"
@@ -406,9 +402,7 @@
           "criticality": "High",
           "drawingName": "Furniture Dimensions Layout",
           "id": "d3",
-          "issues": [
-            "Readiness target (2025-12-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-12-18",
           "releases": [
             "Site Measurement for Modular Cubicle"
@@ -426,9 +420,7 @@
           "criticality": "Very Critical",
           "drawingName": "Partition Layout",
           "id": "d4",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -446,9 +438,7 @@
           "criticality": "High",
           "drawingName": "Flooring Layout",
           "id": "d5",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -466,9 +456,7 @@
           "criticality": "Medium",
           "drawingName": "Floor Marking Layout",
           "id": "d6",
-          "issues": [
-            "Readiness target (2025-10-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-19",
           "releases": [
             "Modifoam Flooring"
@@ -486,9 +474,7 @@
           "criticality": "High",
           "drawingName": "Raised Flooring Layout",
           "id": "d7",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -506,9 +492,7 @@
           "criticality": "High",
           "drawingName": "Door Schedule Layout",
           "id": "d8",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "Reception Table"
@@ -526,9 +510,7 @@
           "criticality": "High",
           "drawingName": "Wall Finishes Layout",
           "id": "d9",
-          "issues": [
-            "Readiness target (2025-11-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-01",
           "releases": [
             "Putty application (walls)"
@@ -546,9 +528,7 @@
           "criticality": "Very Critical",
           "drawingName": "Modular Layout",
           "id": "d10",
-          "issues": [
-            "Readiness target (2025-12-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-12-16",
           "releases": [
             "Site Measurement for Modular Cubicle"
@@ -566,9 +546,7 @@
           "criticality": "Very Critical",
           "drawingName": "RCP Layout",
           "id": "d11",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "FA Cabling on ceiling"
@@ -586,9 +564,7 @@
           "criticality": "Very Critical",
           "drawingName": "Lighting Layout (with dimensions)",
           "id": "d12",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -606,9 +582,7 @@
           "criticality": "Low",
           "drawingName": "Wallpaper & Graphics",
           "id": "d13",
-          "issues": [
-            "Readiness target (2025-07-03) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-07-03",
           "releases": [],
           "revision": "R0",
@@ -624,9 +598,7 @@
           "criticality": "Medium",
           "drawingName": "Fire Evacuation Plan",
           "id": "d14",
-          "issues": [
-            "Readiness target (2025-07-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-07-01",
           "releases": [],
           "revision": "R0",
@@ -642,9 +614,7 @@
           "criticality": "Very Critical",
           "drawingName": "3D Views — Detailed & Client Approval",
           "id": "d15",
-          "issues": [
-            "Readiness target (2025-09-29) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-09-29",
           "releases": [
             "Single side single skinning"
@@ -662,9 +632,7 @@
           "criticality": "Very Critical",
           "drawingName": "Electrical DBR",
           "id": "d16",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -682,9 +650,7 @@
           "criticality": "Very Critical",
           "drawingName": "Electrical SLD Layout",
           "id": "d17",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -702,9 +668,7 @@
           "criticality": "Very Critical",
           "drawingName": "Electrical Load Calculation",
           "id": "d18",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -722,9 +686,7 @@
           "criticality": "Very Critical",
           "drawingName": "Power, Data & Switch Board Layout",
           "id": "d19",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -742,9 +704,7 @@
           "criticality": "Very Critical",
           "drawingName": "Raceway Layout",
           "id": "d20",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -762,9 +722,7 @@
           "criticality": "High",
           "drawingName": "Cable Tray Layout",
           "id": "d21",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -782,9 +740,7 @@
           "criticality": "High",
           "drawingName": "Lighting Looping Layout",
           "id": "d22",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -802,9 +758,7 @@
           "criticality": "High",
           "drawingName": "Panel & DB Position Layout",
           "id": "d23",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -822,9 +776,7 @@
           "criticality": "High",
           "drawingName": "UPS Calculation & Specification",
           "id": "d24",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -842,9 +794,7 @@
           "criticality": "Very Critical",
           "drawingName": "HVAC DBR",
           "id": "d25",
-          "issues": [
-            "Readiness target (2025-10-25) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-25",
           "releases": [
             "Marking & Support fixing of Ducts"
@@ -862,9 +812,7 @@
           "criticality": "Very Critical",
           "drawingName": "HVAC Heat Load",
           "id": "d26",
-          "issues": [
-            "Readiness target (2025-10-23) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-23",
           "releases": [
             "Marking & Support fixing of Ducts"
@@ -882,9 +830,7 @@
           "criticality": "Very Critical",
           "drawingName": "HVAC Layout",
           "id": "d27",
-          "issues": [
-            "Readiness target (2025-10-23) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-23",
           "releases": [
             "Marking & Support fixing of Ducts"
@@ -902,9 +848,7 @@
           "criticality": "High",
           "drawingName": "PHE DBR & Plumbing Layout",
           "id": "d28",
-          "issues": [
-            "Readiness target (2025-10-08) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-08",
           "releases": [
             "Marking of plumbing lines"
@@ -922,9 +866,7 @@
           "criticality": "Very Critical",
           "drawingName": "Fire Sprinkler Layout",
           "id": "d29",
-          "issues": [
-            "Readiness target (2025-10-02) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-02",
           "releases": [
             "Marking & supports fixing for fire pipes"
@@ -942,9 +884,7 @@
           "criticality": "High",
           "drawingName": "FA / PA System Layout",
           "id": "d30",
-          "issues": [
-            "Readiness target (2025-11-13) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-13",
           "releases": [
             "Cutout for power/data entrys"
@@ -962,9 +902,7 @@
           "criticality": "High",
           "drawingName": "ACS / CCTV / WiFi Layout",
           "id": "d31",
-          "issues": [
-            "Readiness target (2025-11-13) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-13",
           "releases": [
             "Cutout for power/data entrys"
@@ -982,9 +920,7 @@
           "criticality": "High",
           "drawingName": "LV DBR",
           "id": "d32",
-          "issues": [
-            "Readiness target (2025-11-15) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-15",
           "releases": [
             "Cutout for power/data entrys"
@@ -1002,9 +938,7 @@
           "criticality": "High",
           "drawingName": "Floor and Dado Tiles — Reception & Lounge",
           "id": "d33",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -1022,9 +956,7 @@
           "criticality": "High",
           "drawingName": "Floor and Dado Tiles — Workstations",
           "id": "d34",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -1042,9 +974,7 @@
           "criticality": "High",
           "drawingName": "Floor and Dado Tiles — Cabins & Meeting Rooms",
           "id": "d35",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -1062,9 +992,7 @@
           "criticality": "High",
           "drawingName": "Floor and Dado Tiles — Boardroom",
           "id": "d36",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -1082,9 +1010,7 @@
           "criticality": "High",
           "drawingName": "Floor and Dado Tiles — Cafeteria & Pantry",
           "id": "d37",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -1102,9 +1028,7 @@
           "criticality": "High",
           "drawingName": "Floor and Dado Tiles — Toilets",
           "id": "d38",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -1122,9 +1046,7 @@
           "criticality": "High",
           "drawingName": "Floor and Dado Tiles — Support & Server",
           "id": "d39",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Modifoam Flooring"
@@ -1142,9 +1064,7 @@
           "criticality": "High",
           "drawingName": "Carpentry Laminates & Veneer Shades — Reception & Lounge",
           "id": "d40",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "Reception Table"
@@ -1162,9 +1082,7 @@
           "criticality": "High",
           "drawingName": "Carpentry Laminates & Veneer Shades — Workstations",
           "id": "d41",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "Reception Table"
@@ -1182,9 +1100,7 @@
           "criticality": "High",
           "drawingName": "Carpentry Laminates & Veneer Shades — Cabins & Meeting Rooms",
           "id": "d42",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "Reception Table"
@@ -1202,9 +1118,7 @@
           "criticality": "High",
           "drawingName": "Carpentry Laminates & Veneer Shades — Boardroom",
           "id": "d43",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "Reception Table"
@@ -1222,9 +1136,7 @@
           "criticality": "High",
           "drawingName": "Carpentry Laminates & Veneer Shades — Cafeteria & Pantry",
           "id": "d44",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "Reception Table"
@@ -1242,9 +1154,7 @@
           "criticality": "High",
           "drawingName": "Carpentry Laminates & Veneer Shades — Toilets",
           "id": "d45",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "Reception Table"
@@ -1262,9 +1172,7 @@
           "criticality": "High",
           "drawingName": "Carpentry Laminates & Veneer Shades — Support & Server",
           "id": "d46",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "Reception Table"
@@ -1282,9 +1190,7 @@
           "criticality": "Medium",
           "drawingName": "Paint Shades — Reception & Lounge",
           "id": "d47",
-          "issues": [
-            "Readiness target (2025-11-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-01",
           "releases": [
             "Putty application (walls)"
@@ -1302,9 +1208,7 @@
           "criticality": "Medium",
           "drawingName": "Paint Shades — Workstations",
           "id": "d48",
-          "issues": [
-            "Readiness target (2025-11-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-01",
           "releases": [
             "Putty application (walls)"
@@ -1322,9 +1226,7 @@
           "criticality": "Medium",
           "drawingName": "Paint Shades — Cabins & Meeting Rooms",
           "id": "d49",
-          "issues": [
-            "Readiness target (2025-11-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-01",
           "releases": [
             "Putty application (walls)"
@@ -1342,9 +1244,7 @@
           "criticality": "Medium",
           "drawingName": "Paint Shades — Boardroom",
           "id": "d50",
-          "issues": [
-            "Readiness target (2025-11-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-01",
           "releases": [
             "Putty application (walls)"
@@ -1362,9 +1262,7 @@
           "criticality": "Medium",
           "drawingName": "Paint Shades — Cafeteria & Pantry",
           "id": "d51",
-          "issues": [
-            "Readiness target (2025-11-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-01",
           "releases": [
             "Putty application (walls)"
@@ -1382,9 +1280,7 @@
           "criticality": "Medium",
           "drawingName": "Paint Shades — Toilets",
           "id": "d52",
-          "issues": [
-            "Readiness target (2025-11-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-01",
           "releases": [
             "Putty application (walls)"
@@ -1402,9 +1298,7 @@
           "criticality": "Medium",
           "drawingName": "Paint Shades — Support & Server",
           "id": "d53",
-          "issues": [
-            "Readiness target (2025-11-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-11-01",
           "releases": [
             "Putty application (walls)"
@@ -1422,9 +1316,7 @@
           "criticality": "High",
           "drawingName": "Carpet / SPC Flooring — Reception & Lounge",
           "id": "d54",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Modifoam Flooring"
@@ -1442,9 +1334,7 @@
           "criticality": "High",
           "drawingName": "Carpet / SPC Flooring — Workstations",
           "id": "d55",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Modifoam Flooring"
@@ -1462,9 +1352,7 @@
           "criticality": "High",
           "drawingName": "Carpet / SPC Flooring — Cabins & Meeting Rooms",
           "id": "d56",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Modifoam Flooring"
@@ -1482,9 +1370,7 @@
           "criticality": "High",
           "drawingName": "Carpet / SPC Flooring — Boardroom",
           "id": "d57",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Modifoam Flooring"
@@ -1502,9 +1388,7 @@
           "criticality": "High",
           "drawingName": "Carpet / SPC Flooring — Cafeteria & Pantry",
           "id": "d58",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Modifoam Flooring"
@@ -1522,9 +1406,7 @@
           "criticality": "High",
           "drawingName": "Carpet / SPC Flooring — Toilets",
           "id": "d59",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Modifoam Flooring"
@@ -1542,9 +1424,7 @@
           "criticality": "High",
           "drawingName": "Carpet / SPC Flooring — Support & Server",
           "id": "d60",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Modifoam Flooring"
@@ -1562,9 +1442,7 @@
           "criticality": "Very Critical",
           "drawingName": "Demountable Glass Partition",
           "id": "d61",
-          "issues": [
-            "Readiness target (2025-12-30) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-12-30",
           "releases": [
             "Switchable smart glass"
@@ -1582,9 +1460,7 @@
           "criticality": "Medium",
           "drawingName": "Backpainted Glass",
           "id": "d62",
-          "issues": [
-            "Readiness target (2026-01-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-01-01",
           "releases": [
             "Switchable smart glass"
@@ -1602,9 +1478,7 @@
           "criticality": "High",
           "drawingName": "Grid & Stretch Ceiling — Reception & Lounge",
           "id": "d63",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "FA Cabling on ceiling"
@@ -1622,9 +1496,7 @@
           "criticality": "High",
           "drawingName": "Grid & Stretch Ceiling — Workstations",
           "id": "d64",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "FA Cabling on ceiling"
@@ -1642,9 +1514,7 @@
           "criticality": "High",
           "drawingName": "Grid & Stretch Ceiling — Cabins & Meeting Rooms",
           "id": "d65",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "FA Cabling on ceiling"
@@ -1662,9 +1532,7 @@
           "criticality": "High",
           "drawingName": "Grid & Stretch Ceiling — Boardroom",
           "id": "d66",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "FA Cabling on ceiling"
@@ -1682,9 +1550,7 @@
           "criticality": "High",
           "drawingName": "Grid & Stretch Ceiling — Cafeteria & Pantry",
           "id": "d67",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "FA Cabling on ceiling"
@@ -1702,9 +1568,7 @@
           "criticality": "High",
           "drawingName": "Grid & Stretch Ceiling — Toilets",
           "id": "d68",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "FA Cabling on ceiling"
@@ -1722,9 +1586,7 @@
           "criticality": "High",
           "drawingName": "Grid & Stretch Ceiling — Support & Server",
           "id": "d69",
-          "issues": [
-            "Readiness target (2025-10-09) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-09",
           "releases": [
             "FA Cabling on ceiling"
@@ -1742,9 +1604,7 @@
           "criticality": "Medium",
           "drawingName": "Acoustics / Fluted Panel — Reception & Lounge",
           "id": "d70",
-          "issues": [
-            "Readiness target (2025-10-11) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-11",
           "releases": [
             "FA Cabling on ceiling"
@@ -1762,9 +1622,7 @@
           "criticality": "Medium",
           "drawingName": "Acoustics / Fluted Panel — Workstations",
           "id": "d71",
-          "issues": [
-            "Readiness target (2025-10-11) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-11",
           "releases": [
             "FA Cabling on ceiling"
@@ -1782,9 +1640,7 @@
           "criticality": "Medium",
           "drawingName": "Acoustics / Fluted Panel — Cabins & Meeting Rooms",
           "id": "d72",
-          "issues": [
-            "Readiness target (2025-10-11) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-11",
           "releases": [
             "FA Cabling on ceiling"
@@ -1802,9 +1658,7 @@
           "criticality": "Medium",
           "drawingName": "Acoustics / Fluted Panel — Boardroom",
           "id": "d73",
-          "issues": [
-            "Readiness target (2025-10-11) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-11",
           "releases": [
             "FA Cabling on ceiling"
@@ -1822,9 +1676,7 @@
           "criticality": "Medium",
           "drawingName": "Acoustics / Fluted Panel — Cafeteria & Pantry",
           "id": "d74",
-          "issues": [
-            "Readiness target (2025-10-11) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-11",
           "releases": [
             "FA Cabling on ceiling"
@@ -1842,9 +1694,7 @@
           "criticality": "Medium",
           "drawingName": "Acoustics / Fluted Panel — Toilets",
           "id": "d75",
-          "issues": [
-            "Readiness target (2025-10-11) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-11",
           "releases": [
             "FA Cabling on ceiling"
@@ -1862,9 +1712,7 @@
           "criticality": "Medium",
           "drawingName": "Acoustics / Fluted Panel — Support & Server",
           "id": "d76",
-          "issues": [
-            "Readiness target (2025-10-11) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-11",
           "releases": [
             "FA Cabling on ceiling"
@@ -1882,9 +1730,7 @@
           "criticality": "Medium",
           "drawingName": "Switch Sockets",
           "id": "d77",
-          "issues": [
-            "Readiness target (2025-10-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-18",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -1902,9 +1748,7 @@
           "criticality": "High",
           "drawingName": "Decorative Lights",
           "id": "d78",
-          "issues": [
-            "Readiness target (2025-10-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-16",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
@@ -1922,9 +1766,7 @@
           "criticality": "Medium",
           "drawingName": "Sanitary Fixtures",
           "id": "d79",
-          "issues": [
-            "Readiness target (2025-10-08) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-08",
           "releases": [
             "Marking of plumbing lines"
@@ -1942,9 +1784,7 @@
           "criticality": "High",
           "drawingName": "Chairs & Loose Furniture",
           "id": "d80",
-          "issues": [
-            "Readiness target (2025-12-16) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-12-16",
           "releases": [
             "Site Measurement for Modular Cubicle"
@@ -1962,9 +1802,7 @@
           "criticality": "Medium",
           "drawingName": "Blinds",
           "id": "d81",
-          "issues": [
-            "Readiness target (2025-07-03) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-07-03",
           "releases": [],
           "revision": "R0",
@@ -1980,9 +1818,7 @@
           "criticality": "Low",
           "drawingName": "Skirting & T Profile",
           "id": "d82",
-          "issues": [
-            "Readiness target (2025-07-01) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-07-01",
           "releases": [],
           "revision": "R0",
@@ -1998,9 +1834,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Civil & Interior",
           "id": "d83",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -2018,9 +1852,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Soft Cost (furniture & furnishing)",
           "id": "d84",
-          "issues": [
-            "Readiness target (2025-12-18) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-12-18",
           "releases": [
             "Site Measurement for Modular Cubicle"
@@ -2038,9 +1870,7 @@
           "criticality": "High",
           "drawingName": "Elevation — Reception & Lounge",
           "id": "d85",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -2058,9 +1888,7 @@
           "criticality": "High",
           "drawingName": "Elevation — Workstations",
           "id": "d86",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -2078,9 +1906,7 @@
           "criticality": "High",
           "drawingName": "Elevation — Cabins & Meeting Rooms",
           "id": "d87",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -2098,9 +1924,7 @@
           "criticality": "High",
           "drawingName": "Elevation — Boardroom",
           "id": "d88",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -2118,9 +1942,7 @@
           "criticality": "High",
           "drawingName": "Elevation — Cafeteria & Pantry",
           "id": "d89",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -2138,9 +1960,7 @@
           "criticality": "High",
           "drawingName": "Elevation — Toilets",
           "id": "d90",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -2158,9 +1978,7 @@
           "criticality": "High",
           "drawingName": "Elevation — Support & Server",
           "id": "d91",
-          "issues": [
-            "Readiness target (2025-10-04) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2025-10-04",
           "releases": [
             "Single side single skinning"
@@ -13468,7 +13286,7 @@
     },
     "todos": [
       {
-        "category": "site",
+        "category": "general",
         "description": "Project resource allocation confirmed (PM, site engineer, MEP, design, procurement)",
         "endDate": "2025-06-20",
         "id": "t2",
@@ -13481,7 +13299,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Project tool creation — tracker, folder structure and access",
         "endDate": "2025-06-21",
         "id": "t4",
@@ -13494,7 +13312,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Client WhatsApp group creation with the agreed participants",
         "endDate": "2025-06-22",
         "id": "t6",
@@ -13507,7 +13325,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Wispr onboarding for the project team",
         "endDate": "2025-06-23",
         "id": "t5",
@@ -13520,7 +13338,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Welcome email issued to the client with team and escalation matrix",
         "endDate": "2025-06-23",
         "id": "t7",
@@ -13533,7 +13351,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Site verification against the GFC layout",
         "endDate": "2025-06-24",
         "id": "t3",
@@ -13546,7 +13364,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Building permissions, gate pass and work permits obtained",
         "endDate": "2025-06-24",
         "id": "t9",
@@ -13559,7 +13377,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Day-0 site photographs and dilapidation record filed",
         "endDate": "2025-06-24",
         "id": "t12",
@@ -13572,7 +13390,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Site marking completed and signed off",
         "endDate": "2025-06-25",
         "id": "t1",
@@ -13585,7 +13403,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Labour onboarding, ID cards and safety induction",
         "endDate": "2025-06-25",
         "id": "t10",
@@ -13598,7 +13416,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Kick-off meeting with the client and consultants",
         "endDate": "2025-06-26",
         "id": "t8",
@@ -13611,7 +13429,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Temporary power, water and site lighting arranged",
         "endDate": "2025-06-27",
         "id": "t11",
@@ -13641,7 +13459,7 @@
         "description": "Issue for approval: Fire Evacuation Plan",
         "endDate": "2025-07-01",
         "id": "t34",
-        "notes": "Readiness target (2025-07-01) has already passed.",
+        "notes": "",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13654,7 +13472,7 @@
         "description": "Issue for approval: Skirting & T Profile",
         "endDate": "2025-07-01",
         "id": "t102",
-        "notes": "Readiness target (2025-07-01) has already passed.",
+        "notes": "",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13667,7 +13485,7 @@
         "description": "Issue for approval: Wallpaper & Graphics",
         "endDate": "2025-07-03",
         "id": "t33",
-        "notes": "Readiness target (2025-07-03) has already passed.",
+        "notes": "",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13680,7 +13498,7 @@
         "description": "Issue for approval: Blinds",
         "endDate": "2025-07-03",
         "id": "t101",
-        "notes": "Readiness target (2025-07-03) has already passed.",
+        "notes": "",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13719,7 +13537,7 @@
         "description": "Issue for approval: Base Build Layout",
         "endDate": "2025-09-20",
         "id": "t21",
-        "notes": "Releases: Waterproofing · Readiness target (2025-09-20) has already passed.",
+        "notes": "Releases: Waterproofing",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13745,7 +13563,7 @@
         "description": "Issue for approval: 3D Views — Detailed & Client Approval",
         "endDate": "2025-09-29",
         "id": "t35",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-09-29) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13771,7 +13589,7 @@
         "description": "Issue for approval: Fire Sprinkler Layout",
         "endDate": "2025-10-02",
         "id": "t49",
-        "notes": "Releases: Marking & supports fixing for fire pipes · Readiness target (2025-10-02) has already passed.",
+        "notes": "Releases: Marking & supports fixing for fire pipes",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -13784,7 +13602,7 @@
         "description": "Issue for approval: Partition Layout",
         "endDate": "2025-10-04",
         "id": "t24",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13797,7 +13615,7 @@
         "description": "Issue for approval: TD — Civil & Interior",
         "endDate": "2025-10-04",
         "id": "t103",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13810,7 +13628,7 @@
         "description": "Issue for approval: Elevation — Reception & Lounge",
         "endDate": "2025-10-04",
         "id": "t105",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13823,7 +13641,7 @@
         "description": "Issue for approval: Elevation — Workstations",
         "endDate": "2025-10-04",
         "id": "t106",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13836,7 +13654,7 @@
         "description": "Issue for approval: Elevation — Cabins & Meeting Rooms",
         "endDate": "2025-10-04",
         "id": "t107",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13849,7 +13667,7 @@
         "description": "Issue for approval: Elevation — Boardroom",
         "endDate": "2025-10-04",
         "id": "t108",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13862,7 +13680,7 @@
         "description": "Issue for approval: Elevation — Cafeteria & Pantry",
         "endDate": "2025-10-04",
         "id": "t109",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13875,7 +13693,7 @@
         "description": "Issue for approval: Elevation — Toilets",
         "endDate": "2025-10-04",
         "id": "t110",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13888,7 +13706,7 @@
         "description": "Issue for approval: Elevation — Support & Server",
         "endDate": "2025-10-04",
         "id": "t111",
-        "notes": "Releases: Single side single skinning · Readiness target (2025-10-04) has already passed.",
+        "notes": "Releases: Single side single skinning",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13914,7 +13732,7 @@
         "description": "Issue for approval: PHE DBR & Plumbing Layout",
         "endDate": "2025-10-08",
         "id": "t48",
-        "notes": "Releases: Marking of plumbing lines · Readiness target (2025-10-08) has already passed.",
+        "notes": "Releases: Marking of plumbing lines",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -13927,7 +13745,7 @@
         "description": "Issue for approval: Sanitary Fixtures",
         "endDate": "2025-10-08",
         "id": "t99",
-        "notes": "Releases: Marking of plumbing lines · Readiness target (2025-10-08) has already passed.",
+        "notes": "Releases: Marking of plumbing lines",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13940,7 +13758,7 @@
         "description": "Issue for approval: Door Schedule Layout",
         "endDate": "2025-10-09",
         "id": "t28",
-        "notes": "Releases: Reception Table · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: Reception Table",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13953,7 +13771,7 @@
         "description": "Issue for approval: RCP Layout",
         "endDate": "2025-10-09",
         "id": "t31",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13966,7 +13784,7 @@
         "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Reception & Lounge",
         "endDate": "2025-10-09",
         "id": "t60",
-        "notes": "Releases: Reception Table · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: Reception Table",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13979,7 +13797,7 @@
         "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Workstations",
         "endDate": "2025-10-09",
         "id": "t61",
-        "notes": "Releases: Reception Table · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: Reception Table",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -13992,7 +13810,7 @@
         "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Cabins & Meeting Rooms",
         "endDate": "2025-10-09",
         "id": "t62",
-        "notes": "Releases: Reception Table · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: Reception Table",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14005,7 +13823,7 @@
         "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Boardroom",
         "endDate": "2025-10-09",
         "id": "t63",
-        "notes": "Releases: Reception Table · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: Reception Table",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14018,7 +13836,7 @@
         "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Cafeteria & Pantry",
         "endDate": "2025-10-09",
         "id": "t64",
-        "notes": "Releases: Reception Table · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: Reception Table",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14031,7 +13849,7 @@
         "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Toilets",
         "endDate": "2025-10-09",
         "id": "t65",
-        "notes": "Releases: Reception Table · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: Reception Table",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14044,7 +13862,7 @@
         "description": "Issue for approval: Carpentry Laminates & Veneer Shades — Support & Server",
         "endDate": "2025-10-09",
         "id": "t66",
-        "notes": "Releases: Reception Table · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: Reception Table",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14057,7 +13875,7 @@
         "description": "Issue for approval: Grid & Stretch Ceiling — Reception & Lounge",
         "endDate": "2025-10-09",
         "id": "t83",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14070,7 +13888,7 @@
         "description": "Issue for approval: Grid & Stretch Ceiling — Workstations",
         "endDate": "2025-10-09",
         "id": "t84",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14083,7 +13901,7 @@
         "description": "Issue for approval: Grid & Stretch Ceiling — Cabins & Meeting Rooms",
         "endDate": "2025-10-09",
         "id": "t85",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14096,7 +13914,7 @@
         "description": "Issue for approval: Grid & Stretch Ceiling — Boardroom",
         "endDate": "2025-10-09",
         "id": "t86",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14109,7 +13927,7 @@
         "description": "Issue for approval: Grid & Stretch Ceiling — Cafeteria & Pantry",
         "endDate": "2025-10-09",
         "id": "t87",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14122,7 +13940,7 @@
         "description": "Issue for approval: Grid & Stretch Ceiling — Toilets",
         "endDate": "2025-10-09",
         "id": "t88",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14135,7 +13953,7 @@
         "description": "Issue for approval: Grid & Stretch Ceiling — Support & Server",
         "endDate": "2025-10-09",
         "id": "t89",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-09) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14148,7 +13966,7 @@
         "description": "Issue for approval: Acoustics / Fluted Panel — Reception & Lounge",
         "endDate": "2025-10-11",
         "id": "t90",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-11) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14161,7 +13979,7 @@
         "description": "Issue for approval: Acoustics / Fluted Panel — Workstations",
         "endDate": "2025-10-11",
         "id": "t91",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-11) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14174,7 +13992,7 @@
         "description": "Issue for approval: Acoustics / Fluted Panel — Cabins & Meeting Rooms",
         "endDate": "2025-10-11",
         "id": "t92",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-11) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14187,7 +14005,7 @@
         "description": "Issue for approval: Acoustics / Fluted Panel — Boardroom",
         "endDate": "2025-10-11",
         "id": "t93",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-11) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14200,7 +14018,7 @@
         "description": "Issue for approval: Acoustics / Fluted Panel — Cafeteria & Pantry",
         "endDate": "2025-10-11",
         "id": "t94",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-11) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14213,7 +14031,7 @@
         "description": "Issue for approval: Acoustics / Fluted Panel — Toilets",
         "endDate": "2025-10-11",
         "id": "t95",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-11) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14226,7 +14044,7 @@
         "description": "Issue for approval: Acoustics / Fluted Panel — Support & Server",
         "endDate": "2025-10-11",
         "id": "t96",
-        "notes": "Releases: FA Cabling on ceiling · Readiness target (2025-10-11) has already passed.",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14239,7 +14057,7 @@
         "description": "Issue for approval: Lighting Layout (with dimensions)",
         "endDate": "2025-10-16",
         "id": "t32",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14252,7 +14070,7 @@
         "description": "Issue for approval: Electrical SLD Layout",
         "endDate": "2025-10-16",
         "id": "t37",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14265,7 +14083,7 @@
         "description": "Issue for approval: Electrical Load Calculation",
         "endDate": "2025-10-16",
         "id": "t38",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14278,7 +14096,7 @@
         "description": "Issue for approval: Power, Data & Switch Board Layout",
         "endDate": "2025-10-16",
         "id": "t39",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14291,7 +14109,7 @@
         "description": "Issue for approval: UPS Calculation & Specification",
         "endDate": "2025-10-16",
         "id": "t44",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14304,7 +14122,7 @@
         "description": "Issue for approval: Carpet / SPC Flooring — Reception & Lounge",
         "endDate": "2025-10-16",
         "id": "t74",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14317,7 +14135,7 @@
         "description": "Issue for approval: Carpet / SPC Flooring — Workstations",
         "endDate": "2025-10-16",
         "id": "t75",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14330,7 +14148,7 @@
         "description": "Issue for approval: Carpet / SPC Flooring — Cabins & Meeting Rooms",
         "endDate": "2025-10-16",
         "id": "t76",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14343,7 +14161,7 @@
         "description": "Issue for approval: Carpet / SPC Flooring — Boardroom",
         "endDate": "2025-10-16",
         "id": "t77",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14356,7 +14174,7 @@
         "description": "Issue for approval: Carpet / SPC Flooring — Cafeteria & Pantry",
         "endDate": "2025-10-16",
         "id": "t78",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14369,7 +14187,7 @@
         "description": "Issue for approval: Carpet / SPC Flooring — Toilets",
         "endDate": "2025-10-16",
         "id": "t79",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14382,7 +14200,7 @@
         "description": "Issue for approval: Carpet / SPC Flooring — Support & Server",
         "endDate": "2025-10-16",
         "id": "t80",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14395,7 +14213,7 @@
         "description": "Issue for approval: Decorative Lights",
         "endDate": "2025-10-16",
         "id": "t98",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-16) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14408,7 +14226,7 @@
         "description": "Issue for approval: Flooring Layout",
         "endDate": "2025-10-18",
         "id": "t25",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14421,7 +14239,7 @@
         "description": "Issue for approval: Raised Flooring Layout",
         "endDate": "2025-10-18",
         "id": "t27",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14434,7 +14252,7 @@
         "description": "Issue for approval: Electrical DBR",
         "endDate": "2025-10-18",
         "id": "t36",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14447,7 +14265,7 @@
         "description": "Issue for approval: Raceway Layout",
         "endDate": "2025-10-18",
         "id": "t40",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14460,7 +14278,7 @@
         "description": "Issue for approval: Cable Tray Layout",
         "endDate": "2025-10-18",
         "id": "t41",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14473,7 +14291,7 @@
         "description": "Issue for approval: Lighting Looping Layout",
         "endDate": "2025-10-18",
         "id": "t42",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14486,7 +14304,7 @@
         "description": "Issue for approval: Panel & DB Position Layout",
         "endDate": "2025-10-18",
         "id": "t43",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14499,7 +14317,7 @@
         "description": "Issue for approval: Floor and Dado Tiles — Reception & Lounge",
         "endDate": "2025-10-18",
         "id": "t53",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14512,7 +14330,7 @@
         "description": "Issue for approval: Floor and Dado Tiles — Workstations",
         "endDate": "2025-10-18",
         "id": "t54",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14525,7 +14343,7 @@
         "description": "Issue for approval: Floor and Dado Tiles — Cabins & Meeting Rooms",
         "endDate": "2025-10-18",
         "id": "t55",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14538,7 +14356,7 @@
         "description": "Issue for approval: Floor and Dado Tiles — Boardroom",
         "endDate": "2025-10-18",
         "id": "t56",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14551,7 +14369,7 @@
         "description": "Issue for approval: Floor and Dado Tiles — Cafeteria & Pantry",
         "endDate": "2025-10-18",
         "id": "t57",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14564,7 +14382,7 @@
         "description": "Issue for approval: Floor and Dado Tiles — Toilets",
         "endDate": "2025-10-18",
         "id": "t58",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14577,7 +14395,7 @@
         "description": "Issue for approval: Floor and Dado Tiles — Support & Server",
         "endDate": "2025-10-18",
         "id": "t59",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14590,7 +14408,7 @@
         "description": "Issue for approval: Switch Sockets",
         "endDate": "2025-10-18",
         "id": "t97",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT · Readiness target (2025-10-18) has already passed.",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14603,7 +14421,7 @@
         "description": "Issue for approval: Floor Marking Layout",
         "endDate": "2025-10-19",
         "id": "t26",
-        "notes": "Releases: Modifoam Flooring · Readiness target (2025-10-19) has already passed.",
+        "notes": "Releases: Modifoam Flooring",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14616,7 +14434,7 @@
         "description": "Issue for approval: HVAC Heat Load",
         "endDate": "2025-10-23",
         "id": "t46",
-        "notes": "Releases: Marking & Support fixing of Ducts · Readiness target (2025-10-23) has already passed.",
+        "notes": "Releases: Marking & Support fixing of Ducts",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14629,7 +14447,7 @@
         "description": "Issue for approval: HVAC Layout",
         "endDate": "2025-10-23",
         "id": "t47",
-        "notes": "Releases: Marking & Support fixing of Ducts · Readiness target (2025-10-23) has already passed.",
+        "notes": "Releases: Marking & Support fixing of Ducts",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14642,7 +14460,7 @@
         "description": "Issue for approval: HVAC DBR",
         "endDate": "2025-10-25",
         "id": "t45",
-        "notes": "Releases: Marking & Support fixing of Ducts · Readiness target (2025-10-25) has already passed.",
+        "notes": "Releases: Marking & Support fixing of Ducts",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14668,7 +14486,7 @@
         "description": "Issue for approval: Wall Finishes Layout",
         "endDate": "2025-11-01",
         "id": "t29",
-        "notes": "Releases: Putty application (walls) · Readiness target (2025-11-01) has already passed.",
+        "notes": "Releases: Putty application (walls)",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14681,7 +14499,7 @@
         "description": "Issue for approval: Paint Shades — Reception & Lounge",
         "endDate": "2025-11-01",
         "id": "t67",
-        "notes": "Releases: Putty application (walls) · Readiness target (2025-11-01) has already passed.",
+        "notes": "Releases: Putty application (walls)",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14694,7 +14512,7 @@
         "description": "Issue for approval: Paint Shades — Workstations",
         "endDate": "2025-11-01",
         "id": "t68",
-        "notes": "Releases: Putty application (walls) · Readiness target (2025-11-01) has already passed.",
+        "notes": "Releases: Putty application (walls)",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14707,7 +14525,7 @@
         "description": "Issue for approval: Paint Shades — Cabins & Meeting Rooms",
         "endDate": "2025-11-01",
         "id": "t69",
-        "notes": "Releases: Putty application (walls) · Readiness target (2025-11-01) has already passed.",
+        "notes": "Releases: Putty application (walls)",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14720,7 +14538,7 @@
         "description": "Issue for approval: Paint Shades — Boardroom",
         "endDate": "2025-11-01",
         "id": "t70",
-        "notes": "Releases: Putty application (walls) · Readiness target (2025-11-01) has already passed.",
+        "notes": "Releases: Putty application (walls)",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14733,7 +14551,7 @@
         "description": "Issue for approval: Paint Shades — Cafeteria & Pantry",
         "endDate": "2025-11-01",
         "id": "t71",
-        "notes": "Releases: Putty application (walls) · Readiness target (2025-11-01) has already passed.",
+        "notes": "Releases: Putty application (walls)",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14746,7 +14564,7 @@
         "description": "Issue for approval: Paint Shades — Toilets",
         "endDate": "2025-11-01",
         "id": "t72",
-        "notes": "Releases: Putty application (walls) · Readiness target (2025-11-01) has already passed.",
+        "notes": "Releases: Putty application (walls)",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14759,7 +14577,7 @@
         "description": "Issue for approval: Paint Shades — Support & Server",
         "endDate": "2025-11-01",
         "id": "t73",
-        "notes": "Releases: Putty application (walls) · Readiness target (2025-11-01) has already passed.",
+        "notes": "Releases: Putty application (walls)",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14772,7 +14590,7 @@
         "description": "Issue for approval: FA / PA System Layout",
         "endDate": "2025-11-13",
         "id": "t50",
-        "notes": "Releases: Cutout for power/data entrys · Readiness target (2025-11-13) has already passed.",
+        "notes": "Releases: Cutout for power/data entrys",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14785,7 +14603,7 @@
         "description": "Issue for approval: ACS / CCTV / WiFi Layout",
         "endDate": "2025-11-13",
         "id": "t51",
-        "notes": "Releases: Cutout for power/data entrys · Readiness target (2025-11-13) has already passed.",
+        "notes": "Releases: Cutout for power/data entrys",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14798,7 +14616,7 @@
         "description": "Issue for approval: LV DBR",
         "endDate": "2025-11-15",
         "id": "t52",
-        "notes": "Releases: Cutout for power/data entrys · Readiness target (2025-11-15) has already passed.",
+        "notes": "Releases: Cutout for power/data entrys",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -14824,7 +14642,7 @@
         "description": "Issue for approval: Furniture Layout",
         "endDate": "2025-12-16",
         "id": "t22",
-        "notes": "Releases: Site Measurement for Modular Cubicle · Readiness target (2025-12-16) has already passed.",
+        "notes": "Releases: Site Measurement for Modular Cubicle",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14837,7 +14655,7 @@
         "description": "Issue for approval: Modular Layout",
         "endDate": "2025-12-16",
         "id": "t30",
-        "notes": "Releases: Site Measurement for Modular Cubicle · Readiness target (2025-12-16) has already passed.",
+        "notes": "Releases: Site Measurement for Modular Cubicle",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14850,7 +14668,7 @@
         "description": "Issue for approval: Chairs & Loose Furniture",
         "endDate": "2025-12-16",
         "id": "t100",
-        "notes": "Releases: Site Measurement for Modular Cubicle · Readiness target (2025-12-16) has already passed.",
+        "notes": "Releases: Site Measurement for Modular Cubicle",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14863,7 +14681,7 @@
         "description": "Issue for approval: Furniture Dimensions Layout",
         "endDate": "2025-12-18",
         "id": "t23",
-        "notes": "Releases: Site Measurement for Modular Cubicle · Readiness target (2025-12-18) has already passed.",
+        "notes": "Releases: Site Measurement for Modular Cubicle",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14876,7 +14694,7 @@
         "description": "Issue for approval: TD — Soft Cost (furniture & furnishing)",
         "endDate": "2025-12-18",
         "id": "t104",
-        "notes": "Releases: Site Measurement for Modular Cubicle · Readiness target (2025-12-18) has already passed.",
+        "notes": "Releases: Site Measurement for Modular Cubicle",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14889,7 +14707,7 @@
         "description": "Issue for approval: Demountable Glass Partition",
         "endDate": "2025-12-30",
         "id": "t81",
-        "notes": "Releases: Switchable smart glass · Readiness target (2025-12-30) has already passed.",
+        "notes": "Releases: Switchable smart glass",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -14902,7 +14720,7 @@
         "description": "Issue for approval: Backpainted Glass",
         "endDate": "2026-01-01",
         "id": "t82",
-        "notes": "Releases: Switchable smart glass · Readiness target (2026-01-01) has already passed.",
+        "notes": "Releases: Switchable smart glass",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,

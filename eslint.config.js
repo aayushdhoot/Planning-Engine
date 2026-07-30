@@ -1,7 +1,7 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
-const NODE_GLOBALS = { console: 'readonly', process: 'readonly', URL: 'readonly', Blob: 'readonly', document: 'readonly', window: 'readonly', structuredClone: 'readonly' };
+const NODE_GLOBALS = { console: 'readonly', process: 'readonly', URL: 'readonly', Blob: 'readonly', document: 'readonly', window: 'readonly', structuredClone: 'readonly', fetch: 'readonly', Buffer: 'readonly' };
 
 export default tseslint.config(
   { ignores: ['dist', 'node_modules', 'sample-output'] },

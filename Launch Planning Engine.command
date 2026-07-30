@@ -1,11 +1,16 @@
 #!/bin/bash
-# Double-click this file to open the Planning Engine in your browser.
-# This opens the pre-built app (dist/index.html) directly — no install needed.
-# Use this for everyday use, including Option A (import a folder manifest).
+# Double-click to run the Planning Engine.
 #
-# Note: Google Drive live-scan (Option B on the New Project tab) needs the app
-# served over http://, not opened as a file. If you want to use live scanning,
-# double-click "Start Dev Server (for live Drive scan).command" instead.
+# This builds the app and serves it locally. The local server also proxies Google Drive, so
+# pasting a project folder link works here — opening dist/index.html straight off disk cannot
+# do that, because Drive sends no CORS headers and a bare file has no server to proxy through.
 
 cd "$(dirname "$0")"
-open "dist/index.html"
+
+if [ ! -d node_modules ]; then
+  echo "Installing dependencies (first run only)..."
+  npm install --legacy-peer-deps
+fi
+
+echo "Building and starting — the app will open at http://localhost:4173"
+npm run build && (sleep 2 && open http://localhost:4173) & node scripts/serve.mjs

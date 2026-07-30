@@ -440,9 +440,7 @@
           "criticality": "Very Critical",
           "drawingName": "Base Build Layout",
           "id": "d1",
-          "issues": [
-            "Readiness target (2026-07-08) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-08",
           "releases": [
             "Existing condition / dilapidation survey"
@@ -460,9 +458,7 @@
           "criticality": "Very Critical",
           "drawingName": "Furniture Layout",
           "id": "d2",
-          "issues": [
-            "Readiness target (2026-07-21) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-21",
           "releases": [],
           "revision": "R0",
@@ -478,9 +474,7 @@
           "criticality": "High",
           "drawingName": "Furniture Dimensions Layout",
           "id": "d3",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -496,9 +490,7 @@
           "criticality": "Very Critical",
           "drawingName": "Partition Layout",
           "id": "d4",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -604,9 +596,7 @@
           "criticality": "Very Critical",
           "drawingName": "Modular Layout",
           "id": "d10",
-          "issues": [
-            "Readiness target (2026-07-21) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-21",
           "releases": [],
           "revision": "R0",
@@ -694,9 +684,7 @@
           "criticality": "Very Critical",
           "drawingName": "3D Views — Detailed & Client Approval",
           "id": "d15",
-          "issues": [
-            "Readiness target (2026-07-27) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-27",
           "releases": [],
           "revision": "R0",
@@ -1864,9 +1852,7 @@
           "criticality": "High",
           "drawingName": "Chairs & Loose Furniture",
           "id": "d80",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -1918,9 +1904,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Interior Works",
           "id": "d83",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -1936,9 +1920,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Modular Glass Partitions & Doors",
           "id": "d84",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -1954,9 +1936,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Modular Furniture",
           "id": "d85",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -1972,9 +1952,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Loose Furniture & Chairs",
           "id": "d86",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -7552,7 +7530,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Project resource allocation confirmed (PM, site engineer, MEP, design, procurement)",
         "endDate": "2026-07-04",
         "id": "t2",
@@ -7565,7 +7543,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Project tool creation — tracker, folder structure and access",
         "endDate": "2026-07-05",
         "id": "t4",
@@ -7591,7 +7569,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Client WhatsApp group creation with the agreed participants",
         "endDate": "2026-07-06",
         "id": "t6",
@@ -7604,7 +7582,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Wispr onboarding for the project team",
         "endDate": "2026-07-07",
         "id": "t5",
@@ -7617,7 +7595,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Welcome email issued to the client with team and escalation matrix",
         "endDate": "2026-07-07",
         "id": "t7",
@@ -7630,7 +7608,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Site verification against the GFC layout",
         "endDate": "2026-07-08",
         "id": "t3",
@@ -7643,7 +7621,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Building permissions, gate pass and work permits obtained",
         "endDate": "2026-07-08",
         "id": "t9",
@@ -7656,7 +7634,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Day-0 site photographs and dilapidation record filed",
         "endDate": "2026-07-08",
         "id": "t12",
@@ -7673,7 +7651,7 @@
         "description": "Issue for approval: Base Build Layout",
         "endDate": "2026-07-08",
         "id": "t38",
-        "notes": "Releases: Existing condition / dilapidation survey · Readiness target (2026-07-08) has already passed.",
+        "notes": "Releases: Existing condition / dilapidation survey",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7682,7 +7660,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Site marking completed and signed off",
         "endDate": "2026-07-09",
         "id": "t1",
@@ -7695,7 +7673,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Labour onboarding, ID cards and safety induction",
         "endDate": "2026-07-09",
         "id": "t10",
@@ -7708,7 +7686,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Kick-off meeting with the client and consultants",
         "endDate": "2026-07-10",
         "id": "t8",
@@ -7721,7 +7699,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "general",
         "description": "Temporary power, water and site lighting arranged",
         "endDate": "2026-07-11",
         "id": "t11",
@@ -7738,7 +7716,7 @@
         "description": "Issue for approval: Furniture Dimensions Layout",
         "endDate": "2026-07-19",
         "id": "t40",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7751,7 +7729,7 @@
         "description": "Issue for approval: Partition Layout",
         "endDate": "2026-07-19",
         "id": "t41",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7764,7 +7742,7 @@
         "description": "Issue for approval: Chairs & Loose Furniture",
         "endDate": "2026-07-19",
         "id": "t89",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7777,7 +7755,7 @@
         "description": "Issue for approval: TD — Interior Works",
         "endDate": "2026-07-19",
         "id": "t92",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7790,7 +7768,7 @@
         "description": "Issue for approval: TD — Modular Glass Partitions & Doors",
         "endDate": "2026-07-19",
         "id": "t93",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7803,7 +7781,7 @@
         "description": "Issue for approval: TD — Modular Furniture",
         "endDate": "2026-07-19",
         "id": "t94",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7816,7 +7794,7 @@
         "description": "Issue for approval: TD — Loose Furniture & Chairs",
         "endDate": "2026-07-19",
         "id": "t95",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7842,7 +7820,7 @@
         "description": "Issue for approval: Furniture Layout",
         "endDate": "2026-07-21",
         "id": "t39",
-        "notes": "Readiness target (2026-07-21) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7855,7 +7833,7 @@
         "description": "Issue for approval: Modular Layout",
         "endDate": "2026-07-21",
         "id": "t45",
-        "notes": "Readiness target (2026-07-21) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7881,7 +7859,7 @@
         "description": "Issue for approval: 3D Views — Detailed & Client Approval",
         "endDate": "2026-07-27",
         "id": "t50",
-        "notes": "Readiness target (2026-07-27) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -7890,7 +7868,7 @@
         "status": "Delayed"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "In progress: Civil breaking / hard demolition",
         "endDate": "2026-07-29",
         "id": "t14",
@@ -7903,7 +7881,7 @@
         "status": "WIP"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "In progress: Debris segregation & stacking",
         "endDate": "2026-07-29",
         "id": "t15",
@@ -7916,7 +7894,7 @@
         "status": "WIP"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: Debris removal & disposal",
         "endDate": "2026-07-29",
         "id": "t16",
@@ -7981,7 +7959,7 @@
         "status": "Not Started"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: Removal of existing flooring & floor chipping",
         "endDate": "2026-08-03",
         "id": "t13",
@@ -7994,7 +7972,7 @@
         "status": "Not Started"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: PCC & self-levelling screed preparation",
         "endDate": "2026-08-03",
         "id": "t17",
@@ -8020,7 +7998,7 @@
         "status": "Not Started"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: Joint survey of cleared shell",
         "endDate": "2026-08-05",
         "id": "t19",
@@ -8033,7 +8011,7 @@
         "status": "Not Started"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: Cleared shell handover - Phase 1 completion",
         "endDate": "2026-08-05",
         "id": "t20",
@@ -8254,7 +8232,7 @@
         "status": "WIP"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: Site deep cleaning & dust clearance",
         "endDate": "2026-08-08",
         "id": "t18",
@@ -8267,7 +8245,7 @@
         "status": "Not Started"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: Setting out & marking as per layout",
         "endDate": "2026-08-08",
         "id": "t21",
@@ -8631,7 +8609,7 @@
         "status": "WIP"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: AAC block masonry work",
         "endDate": "2026-08-17",
         "id": "t22",
@@ -8748,7 +8726,7 @@
         "status": "WIP"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: Gypsum partition framing & ply backing",
         "endDate": "2026-08-19",
         "id": "t23",
@@ -8761,7 +8739,7 @@
         "status": "Not Started"
       },
       {
-        "category": "site",
+        "category": "operations",
         "description": "Start: Self-levelling screed flooring",
         "endDate": "2026-08-20",
         "id": "t24",

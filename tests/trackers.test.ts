@@ -46,10 +46,21 @@ describe('design tracker carries two targets and no orphan dates (#6)', () => {
     }
   });
 
-  it('says which rows are unworkable rather than presenting an impossible date plainly', () => {
-    // built against a today far past the programme, every target is already gone
+  it('does not treat a passed target as a deadline defect — the status column says that', () => {
+    // Once a project is underway every target is in the past. Flagging each one put a red badge
+    // on all 93 rows and buried the handful that are genuinely unworkable.
     const late = buildPlan(skf, cfg, '2027-01-01').modules.design.rows;
-    expect(late.every((d) => d.issues.some((i) => /already passed/.test(i)))).toBe(true);
+    expect(late.some((d) => d.issues.some((i) => /already passed/i.test(i)))).toBe(false);
+    // it is still visible as status, which is where slippage belongs
+    expect(late.every((d) => d.statusInt === 'Delayed')).toBe(true);
+  });
+
+  it('still flags the deadlines that genuinely cannot work', () => {
+    for (const d of design) {
+      if (!d.readyBy || !d.approvalBy) continue;
+      // the structural checks survive: readiness must precede approval
+      if (d.readyBy >= d.approvalBy) expect(d.issues.length).toBeGreaterThan(0);
+    }
   });
 });
 

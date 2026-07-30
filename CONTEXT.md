@@ -66,6 +66,13 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
   schema rejects a *silent* breach.
 - **Calendar default is a 7-day week** (Sundays working — Flipspaces convention). Toggle in Settings.
 
+## Date revisions need approval
+Changing a baseline moves every activity, order-by date and billing milestone, so it is
+**proposed, not applied**. `org.pendingDates[projectId]` holds the proposal; `org.dates` holds
+what the plan actually runs on, and `cfg.dates` reads only the latter. `approverFor()` resolves
+the project's **BU Head** from the team — with none assigned, Approve is disabled rather than
+letting the change through unsigned.
+
 ## Project settings (was "New project")
 `src/ui/ProjectSettings.tsx` — three panes over the selected project: Drive & inputs, Site
 details, Project team. Creating a project was only ever the *first* use of that screen; a
@@ -173,6 +180,12 @@ with Amount (excl. tax) / Incl. GST / Post retention / Invoice raised / Received
   `modules.cashflow.margin`; `clientView()` and `validatePlan()` both still enforce it.
 - The Gantt is no longer a tab — it is a toggle inside the PERT section. Resources and the
   canonical JSON moved into Settings.
+
+## Serving the built app
+`scripts/serve.mjs` (`npm start`) serves `dist/` **and** proxies `/gdrive`, because opening
+`dist/index.html` off disk has no server and link scanning cannot work there. Node's `fetch`
+follows the download 302 to `drive.usercontent.google.com`, which is the same reason the Vite
+proxy needs `followRedirects`.
 
 ## Drive without OAuth
 `PublicLinkDriveService` scans a link-shared folder with no credential at all — it reads Drive's

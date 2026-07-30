@@ -323,9 +323,7 @@
           "criticality": "Very Critical",
           "drawingName": "Base Build Layout",
           "id": "d1",
-          "issues": [
-            "Readiness target (2026-07-08) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-08",
           "releases": [
             "Existing condition / dilapidation survey"
@@ -343,9 +341,7 @@
           "criticality": "Very Critical",
           "drawingName": "Furniture Layout",
           "id": "d2",
-          "issues": [
-            "Readiness target (2026-07-21) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-21",
           "releases": [],
           "revision": "R0",
@@ -361,9 +357,7 @@
           "criticality": "High",
           "drawingName": "Furniture Dimensions Layout",
           "id": "d3",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -379,9 +373,7 @@
           "criticality": "Very Critical",
           "drawingName": "Partition Layout",
           "id": "d4",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -487,9 +479,7 @@
           "criticality": "Very Critical",
           "drawingName": "Modular Layout",
           "id": "d10",
-          "issues": [
-            "Readiness target (2026-07-21) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-21",
           "releases": [],
           "revision": "R0",
@@ -577,9 +567,7 @@
           "criticality": "Very Critical",
           "drawingName": "3D Views — Detailed & Client Approval",
           "id": "d15",
-          "issues": [
-            "Readiness target (2026-07-27) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-27",
           "releases": [],
           "revision": "R0",
@@ -1747,9 +1735,7 @@
           "criticality": "High",
           "drawingName": "Chairs & Loose Furniture",
           "id": "d80",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -1801,9 +1787,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Interior Works",
           "id": "d83",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -1819,9 +1803,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Modular Glass Partitions & Doors",
           "id": "d84",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -1837,9 +1819,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Modular Furniture",
           "id": "d85",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -1855,9 +1835,7 @@
           "criticality": "Very Critical",
           "drawingName": "TD — Loose Furniture & Chairs",
           "id": "d86",
-          "issues": [
-            "Readiness target (2026-07-19) has already passed."
-          ],
+          "issues": [],
           "readyBy": "2026-07-19",
           "releases": [],
           "revision": "R0",
@@ -5144,7 +5122,7 @@
         "description": "Issue for approval: Base Build Layout",
         "endDate": "2026-07-08",
         "id": "t38",
-        "notes": "Releases: Existing condition / dilapidation survey · Readiness target (2026-07-08) has already passed.",
+        "notes": "Releases: Existing condition / dilapidation survey",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5157,7 +5135,7 @@
         "description": "Issue for approval: Furniture Dimensions Layout",
         "endDate": "2026-07-19",
         "id": "t40",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5170,7 +5148,7 @@
         "description": "Issue for approval: Partition Layout",
         "endDate": "2026-07-19",
         "id": "t41",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5183,7 +5161,7 @@
         "description": "Issue for approval: Chairs & Loose Furniture",
         "endDate": "2026-07-19",
         "id": "t89",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5196,7 +5174,7 @@
         "description": "Issue for approval: TD — Interior Works",
         "endDate": "2026-07-19",
         "id": "t92",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5209,7 +5187,7 @@
         "description": "Issue for approval: TD — Modular Glass Partitions & Doors",
         "endDate": "2026-07-19",
         "id": "t93",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5222,7 +5200,7 @@
         "description": "Issue for approval: TD — Modular Furniture",
         "endDate": "2026-07-19",
         "id": "t94",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5235,7 +5213,7 @@
         "description": "Issue for approval: TD — Loose Furniture & Chairs",
         "endDate": "2026-07-19",
         "id": "t95",
-        "notes": "Readiness target (2026-07-19) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5248,7 +5226,7 @@
         "description": "Issue for approval: Furniture Layout",
         "endDate": "2026-07-21",
         "id": "t39",
-        "notes": "Readiness target (2026-07-21) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5261,7 +5239,7 @@
         "description": "Issue for approval: Modular Layout",
         "endDate": "2026-07-21",
         "id": "t45",
-        "notes": "Readiness target (2026-07-21) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -5274,7 +5252,7 @@
         "description": "Issue for approval: 3D Views — Detailed & Client Approval",
         "endDate": "2026-07-27",
         "id": "t50",
-        "notes": "Readiness target (2026-07-27) has already passed.",
+        "notes": "",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,

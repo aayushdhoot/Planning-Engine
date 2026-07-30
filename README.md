@@ -7,7 +7,12 @@ client/builder dependencies and cashflow. Every plan exists in an **Internal** a
 
 ## Try it in 10 seconds
 
-Open **`dist/index.html`** in a browser. The whole app is one self-contained file — no install.
+```bash
+npm start          # builds and serves at http://localhost:4173
+```
+
+`dist/index.html` also opens straight off disk, but **pasting a Drive link only works when
+served** — Drive sends no CORS headers, so a bare file has no server to proxy through.
 
 ## Run from source
 
@@ -19,7 +24,8 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 232 tests → build → sample run |
+| `npm start` | Builds and serves at http://localhost:4173 **with the Drive proxy**, so link scanning works outside dev |
+| `npm run gates` | The full bar: typecheck → lint → 236 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -132,8 +138,8 @@ Four paths. All land in the same coverage → queries flow.
   with **no Google account, no OAuth client ID and no API key**. The engine reads Drive's own
   public folder listing and downloads files through the public endpoint. Both are proxied by the
   dev server (`/gdrive` in `vite.config.ts`) because Drive sends no CORS headers — so this path
-  needs `npm run dev`, not the single-file build. Only a genuinely private folder falls through
-  to OAuth.
+  needs a server — `npm start` or `npm run dev`, not a file:// page. Only a genuinely private
+  folder falls through to OAuth.
 - **Local folder (no setup).** Pick the project folder off this machine. If Google Drive for
   Desktop is running, that folder *is* the Drive folder, so you are reading live Drive contents
   with no Google API involved. File contents are real, so the BOQ is genuinely parsed.

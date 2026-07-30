@@ -177,7 +177,12 @@ export interface TodoRow {
   endDate: string | null;
   revisedDate: string | null;
   notes: string;
-  category: 'site' | 'procurement' | 'design' | 'commercial';
+  /**
+   * What kind of work this is, so the list can be filtered by the team that owns it.
+   * 'general' is the standard mobilisation checklist — the items that are not derivable from
+   * the schedule and belong to nobody in particular.
+   */
+  category: 'general' | 'design' | 'procurement' | 'operations' | 'commercial';
   /**
    * 'standard'  — the mobilisation checklist every project runs
    * 'derived'   — generated from the schedule, and therefore also visible in its own tracker

@@ -127,8 +127,35 @@ export const emptySite = (): ProjectSite => ({
 export const PROJECT_LIFECYCLE = ['Planning', 'WIP', 'On hold', 'Handed over', 'Closed'] as const;
 export type ProjectLifecycle = (typeof PROJECT_LIFECYCLE)[number];
 
+/**
+ * A date change waiting on sign-off. Revising a baseline moves every downstream date, the
+ * procurement order-by dates and the billing milestones — so it is proposed, not applied, until
+ * the BU Head approves it. The plan keeps running on the approved dates in the meantime.
+ */
+export interface PendingDateChange {
+  proposed: ScheduleDatesLike;
+  requestedAt: string;
+  /** free text; the engine does not invent a reason */
+  reason: string;
+  decidedAt?: string;
+  decidedBy?: string;
+  decision?: 'approved' | 'rejected';
+}
+
+/** Structurally the engine's ScheduleDates; declared here to keep org free of engine imports. */
+export interface ScheduleDatesLike {
+  internalStart?: string | null;
+  internalEnd?: string | null;
+  clientStart?: string | null;
+  clientEnd?: string | null;
+}
+
 export interface OrgState {
   employees: Employee[];
+  /** project id -> approved schedule dates */
+  dates?: Record<string, ScheduleDatesLike>;
+  /** project id -> a change awaiting BU Head sign-off */
+  pendingDates?: Record<string, PendingDateChange>;
   /** project id -> site details */
   sites?: Record<string, ProjectSite>;
   /** project id -> team */
@@ -140,7 +167,13 @@ export interface OrgState {
   importedAt: string | null;
 }
 
-export const emptyOrg = (): OrgState => ({ employees: [], sites: {}, teams: {}, lifecycle: {}, archived: [], importedAt: null });
+export const emptyOrg = (): OrgState => ({ employees: [], sites: {}, dates: {}, pendingDates: {}, teams: {}, lifecycle: {}, archived: [], importedAt: null });
+
+/** Who has to sign a date change off. Null when the project has no BU Head assigned yet. */
+export function approverFor(org: OrgState, projectId: string): Employee | null {
+  const slot = teamFor(org, projectId).find((m) => m.role === 'BU Head' && m.employeeCode);
+  return employeeByCode(org, slot?.employeeCode ?? null);
+}
 
 export function siteFor(org: OrgState, projectId: string): ProjectSite {
   return org.sites?.[projectId] ?? emptySite();

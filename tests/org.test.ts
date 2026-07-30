@@ -2,7 +2,7 @@
 // importantly — what is deliberately thrown away.
 import { describe, expect, it } from 'vitest';
 import { parseEmployeeCsv, parseEmployeeFile, parseEmployeeWorkbook, splitCsvLine } from '../src/services/employee-directory';
-import { TEAM_GROUPS, departmentLabel, emptyOrg, employeeByCode, emptySite, groupedTeam, isAssignable, levelFor, siteFor, summariseDirectory, teamFor, PROJECT_ROLES } from '../src/domain/org';
+import { TEAM_GROUPS, approverFor, departmentLabel, emptyOrg, employeeByCode, emptySite, groupedTeam, isAssignable, levelFor, siteFor, summariseDirectory, teamFor, PROJECT_ROLES, type OrgState } from '../src/domain/org';
 
 const CSV = [
   'Emp Code,Emp Type,Employee Name,Grade,Actual Designation,Department,DOJ,SBU,Base Location,Status,Mobile NO,Email Id\'s,Reporting to',
@@ -176,5 +176,33 @@ describe('project site details', () => {
     const org = { ...emptyOrg(), sites: { p1: { ...emptySite(), driveUrl: 'https://drive.google.com/drive/folders/abc' } } };
     expect(siteFor(org, 'p1').driveUrl).toMatch(/folders\/abc/);
     expect(siteFor(org, 'p2').driveUrl).toBe('');
+  });
+});
+
+describe('a date revision needs BU Head approval before it moves the plan', () => {
+  const withTeam = (code: string | null) => ({
+    ...emptyOrg(),
+    employees: parseEmployeeCsv(CSV).employees,
+    teams: { p1: [{ role: 'BU Head', employeeCode: code }] },
+  });
+
+  it('names the BU Head assigned to the project as the approver', () => {
+    expect(approverFor(withTeam('44'), 'p1')!.name).toBe('Abhijeet Pawar');
+  });
+
+  it('has no approver when no BU Head is assigned — the change cannot be rubber-stamped', () => {
+    expect(approverFor(withTeam(null), 'p1')).toBeNull();
+    expect(approverFor(emptyOrg(), 'p1')).toBeNull();
+  });
+
+  it('keeps a proposed change out of the approved dates until it is signed off', () => {
+    const org: OrgState = {
+      ...withTeam('44'),
+      dates: { p1: { internalStart: '2026-06-08' } },
+      pendingDates: { p1: { proposed: { internalStart: '2026-07-01' }, requestedAt: '2026-06-01T00:00:00Z', reason: 'builder handover slipped' } },
+    };
+    // the plan runs on the APPROVED value, not the proposal
+    expect(org.dates!.p1.internalStart).toBe('2026-06-08');
+    expect(org.pendingDates!.p1.proposed.internalStart).toBe('2026-07-01');
   });
 });

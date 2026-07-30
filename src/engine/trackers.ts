@@ -129,7 +129,6 @@ function validateDesignRow(
   readyBy: string | null,
   approvalBy: string | null,
   driver: ScheduledActivity | null,
-  today: string,
   projectStart: string | null,
 ): string[] {
   const issues: string[] = [];
@@ -142,7 +141,9 @@ function validateDesignRow(
     issues.push(`Client approval (${approvalBy}) lands on or after "${driver.name}" starts (${driver.startDate}) — the site would be waiting on the drawing.`);
   if (projectStart && readyBy < projectStart)
     issues.push(`Drawing readiness (${readyBy}) is before the project starts (${projectStart}) — this drawing is already late on day one.`);
-  if (readyBy < today) issues.push(`Readiness target (${readyBy}) has already passed.`);
+  // A target that has simply passed is NOT a deadline defect: it is the row's status, and the
+  // Status column already says "Delayed". Flagging it here put a red badge on every row once
+  // the project was underway, which buried the handful of genuinely unworkable deadlines.
   return issues;
 }
 
@@ -183,7 +184,7 @@ export function buildDesignTracker(
       statusClient: statusFor(approvalBy, today),
       releases: gated.map((g) => g.name),
       basis,
-      issues: validateDesignRow(readyBy, approvalBy, driver, today, window?.start ?? null),
+      issues: validateDesignRow(readyBy, approvalBy, driver, window?.start ?? null),
     });
   };
 
@@ -303,7 +304,7 @@ export function buildTodoTracker(
         endDate: due,
         revisedDate: null,
         notes: `Standard project mobilisation task (${norms.version}) — day ${item.dayOffset >= 0 ? '+' : ''}${item.dayOffset} from site start.`,
-        category: 'site',
+        category: 'general',
         source: 'standard',
       });
     }
@@ -319,7 +320,7 @@ export function buildTodoTracker(
         endDate: a.endDate,
         revisedDate: null,
         notes: a.critical ? 'On the critical path — any slip moves the finish date.' : `Float ${a.totalFloat}d.`,
-        category: 'site',
+        category: 'operations',
         source: 'derived',
       });
 

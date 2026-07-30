@@ -18,11 +18,13 @@ import {
   type ProjectSite,
 } from '../domain/org';
 import { Intake } from './Intake';
+import { approverFor, type ScheduleDatesLike } from '../domain/org';
 
-type Pane = 'drive' | 'site' | 'team';
+type Pane = 'drive' | 'site' | 'dates' | 'team';
 const PANES: { key: Pane; label: string }[] = [
   { key: 'drive', label: 'Drive & inputs' },
   { key: 'site', label: 'Site details' },
+  { key: 'dates', label: 'Schedule dates' },
   { key: 'team', label: 'Project team' },
 ];
 
@@ -85,6 +87,7 @@ export function ProjectSettings({
         <Intake clientId={clientId} existingIds={existingIds} onCreate={onCreate} initialUrl={site.driveUrl} onUrlChange={(driveUrl) => setSite({ driveUrl })} />
       )}
       {pane === 'site' && <SiteDetails site={site} setSite={setSite} project={project} />}
+      {pane === 'dates' && <ScheduleDates org={org} setOrg={setOrg} projectId={project.id} />}
       {pane === 'team' && <ProjectTeam org={org} setOrg={setOrg} projectId={project.id} />}
     </>
   );
@@ -243,6 +246,110 @@ function ProjectTeam({ org, setOrg, projectId }: { org: OrgState; setOrg: (o: Or
           </div>
         ))}
       </div>
+    </>
+  );
+}
+
+// ------------------------------------------------------------------ dates
+
+const FIELDS: { key: keyof ScheduleDatesLike; label: string }[] = [
+  { key: 'internalStart', label: 'Internal start (actual)' },
+  { key: 'internalEnd', label: 'Internal target finish' },
+  { key: 'clientStart', label: 'Client start' },
+  { key: 'clientEnd', label: 'Client committed finish' },
+];
+
+/**
+ * Revising a baseline is not a settings tweak — it moves every computed date, every order-by
+ * and every billing milestone. So a change is PROPOSED here and the plan keeps running on the
+ * approved dates until the BU Head signs it off.
+ */
+function ScheduleDates({ org, setOrg, projectId }: { org: OrgState; setOrg: (o: OrgState) => void; projectId: string }) {
+  const approved: ScheduleDatesLike = org.dates?.[projectId] ?? {};
+  const pending = org.pendingDates?.[projectId];
+  const approver = approverFor(org, projectId);
+  const [draft, setDraft] = useState<ScheduleDatesLike>(pending?.proposed ?? approved);
+  const [reason, setReason] = useState(pending?.reason ?? '');
+
+  const changed = FIELDS.some((f) => (draft[f.key] ?? '') !== (approved[f.key] ?? ''));
+
+  const propose = () =>
+    setOrg({
+      ...org,
+      pendingDates: { ...(org.pendingDates ?? {}), [projectId]: { proposed: draft, requestedAt: new Date().toISOString(), reason } },
+    });
+
+  const decide = (decision: 'approved' | 'rejected') => {
+    const next = { ...(org.pendingDates ?? {}) };
+    delete next[projectId];
+    setOrg({
+      ...org,
+      dates: decision === 'approved' ? { ...(org.dates ?? {}), [projectId]: pending!.proposed } : org.dates,
+      pendingDates: next,
+    });
+    if (decision === 'rejected') setDraft(approved);
+  };
+
+  return (
+    <>
+      <h2>Schedule dates</h2>
+      <p className="muted" style={{ marginTop: -6, maxWidth: 880 }}>
+        The contract states a commencement date and a duration; site reality often differs. Changing a date here
+        recomputes the whole plan — every activity, order-by date and billing milestone moves with it — so a change is
+        proposed and applied only once the <strong>BU Head</strong> has approved it. Leave a field blank to use the
+        contract.
+      </p>
+
+      <div className="row">
+        {FIELDS.map((f) => (
+          <div className="field" key={f.key}>
+            <label>{f.label}</label>
+            <input
+              type="date"
+              value={draft[f.key] ?? ''}
+              onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value || null })}
+              disabled={!!pending}
+            />
+          </div>
+        ))}
+      </div>
+
+      {pending ? (
+        <div className="banner" style={{ marginTop: 14, maxWidth: 940 }}>
+          <strong>Awaiting approval from the BU Head.</strong>{' '}
+          {approver ? `${approver.name} (${approver.designation}) must sign this off.` : 'No BU Head is assigned to this project — assign one on the Project team pane, or the change cannot be approved.'}
+          <ul style={{ margin: '8px 0 8px 18px', padding: 0 }}>
+            {FIELDS.filter((f) => (pending.proposed[f.key] ?? '') !== (approved[f.key] ?? '')).map((f) => (
+              <li key={f.key}>
+                {f.label}: <s>{approved[f.key] || 'contract'}</s> → <strong>{pending.proposed[f.key] || 'contract'}</strong>
+              </li>
+            ))}
+          </ul>
+          {pending.reason && <div className="muted" style={{ fontSize: 12 }}>Reason: {pending.reason}</div>}
+          <div className="row" style={{ marginTop: 10 }}>
+            <button className="primary" disabled={!approver} onClick={() => decide('approved')}>
+              Approve as {approver ? approver.name : 'BU Head'}
+            </button>
+            <button onClick={() => decide('rejected')}>Reject</button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="row" style={{ marginTop: 10 }}>
+            <div className="field" style={{ minWidth: 420 }}>
+              <label>Reason for the revision</label>
+              <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. site handover delayed by the builder" />
+            </div>
+            <button className="primary" disabled={!changed} onClick={propose}>Propose change</button>
+            {changed && <button onClick={() => setDraft(approved)}>Discard</button>}
+          </div>
+          <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
+            {changed
+              ? 'The plan is still running on the approved dates. It will move when the BU Head approves.'
+              : 'The plan is running on these dates.'}
+          </div>
+        </>
+      )}
     </>
   );
 }

@@ -51,8 +51,7 @@ export default function App() {
   const [workMode, setWorkMode] = useState(1);
   const [buffer, setBuffer] = useState(normsData.bufferPolicy.defaultInternalBufferDays);
   const [leadOverrides, setLeadOverrides] = useState<Record<string, number>>({});
-  // actual dates, when they differ from the contract's
-  const [dates, setDates] = useState<ScheduleDates>({});
+
   // Persisted, or it would be lost on every reload — see services/settings-store.ts.
   const [clientId, setClientIdState] = useState(readDriveClientId);
   const setClientId = (v: string) => {
@@ -84,9 +83,11 @@ export default function App() {
       buffer: { internalBufferDays: buffer, min: normsData.bufferPolicy.min, max: normsData.bufferPolicy.max },
       normsVersion: normsData.version,
       normsOverrides: { packageLeadTimeDays: leadOverrides },
-      dates,
+      // only APPROVED dates drive the plan; a proposed change sits in org.pendingDates until
+      // the BU Head signs it off
+      dates: (org.dates?.[projectId] ?? {}) as ScheduleDates,
     };
-  }, [sundaysOff, holidays, workMode, buffer, leadOverrides, dates]);
+  }, [sundaysOff, holidays, workMode, buffer, leadOverrides, org.dates, projectId]);
 
   // Carpet area set in project settings is an input like any other, and overrides the BOQ
   // figure — the two are not always the same number. It carries its own provenance so the
@@ -174,6 +175,7 @@ export default function App() {
         {tab === 'To-do' && (
           <Todos
             plan={plan}
+            view={view}
             edit={edit}
             val={val}
             custom={customTodos[project.id] ?? []}
@@ -193,7 +195,7 @@ export default function App() {
                     endDate: null,
                     revisedDate: null,
                     notes: '',
-                    category: 'site',
+                    category: 'general',
                     source: 'custom',
                   },
                 ],
@@ -239,7 +241,6 @@ export default function App() {
             buffer={buffer} setBuffer={setBuffer}
             leadOverrides={leadOverrides} setLeadOverrides={setLeadOverrides}
             clientId={clientId} setClientId={setClientId}
-            dates={dates} setDates={setDates}
             org={org} setOrg={setOrg}
             project={project}
             ingestResult={ingestResult}
@@ -618,13 +619,9 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
               <td><span className={`tag ${r.category === 'MEP' ? 'ext' : r.category === 'SAMPLING' ? 'warn' : 'info'}`}>{r.category}</span></td>
               <td className="muted">{r.subCategory}</td>
               <td className="muted">{r.zone ?? '—'}</td>
-              <td>
+              <td title={r.issues.join(' ')}>
                 {r.drawingName}
-                {r.issues.length > 0 && (
-                  <div className="tag crit" style={{ marginTop: 3, whiteSpace: 'normal', display: 'inline-block' }} title={r.issues.join(' ')}>
-                    {r.issues[0]}
-                  </div>
-                )}
+                {r.issues.length > 0 && <span className="tag crit" style={{ marginLeft: 6 }}>!</span>}
               </td>
               <td><span className={`tag ${r.criticality === 'Very Critical' ? 'crit' : r.criticality === 'High' ? 'warn' : ''}`}>{r.criticality}</span></td>
               <TextCell id={r.id} field="revision" current={r.revision} edit={edit} val={val} />
@@ -755,9 +752,9 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
  * mobilisation checklist plus whatever the team adds. Rows can be added and removed here.
  */
 function Todos({
-  plan, edit, val, custom, onAdd, onDelete, deleted, onRestore,
+  plan, view, edit, val, custom, onAdd, onDelete, deleted, onRestore,
 }: {
-  plan: Plan; edit: EditFn; val: ValFn;
+  plan: Plan; view: string; edit: EditFn; val: ValFn;
   custom: TodoRow[];
   onAdd: (description: string) => void;
   onDelete: (id: string) => void;
@@ -765,11 +762,14 @@ function Todos({
   onRestore: () => void;
 }) {
   const [showDerived, setShowDerived] = useState(false);
+  const [cat, setCat] = useState<'all' | TodoRow['category']>('all');
   const [draft, setDraft] = useState('');
 
   const general = [...plan.modules.todos.filter((r) => r.source === 'standard'), ...custom];
   const derived = plan.modules.todos.filter((r) => r.source === 'derived');
-  const rows = (showDerived ? [...general, ...derived] : general).filter((r) => !deleted.has(r.id));
+  const pool = (showDerived ? [...general, ...derived] : general).filter((r) => !deleted.has(r.id));
+  const rows = cat === 'all' ? pool : pool.filter((r) => r.category === cat);
+  const countOf = (c: TodoRow['category']) => pool.filter((r) => r.category === c).length;
 
   const add = () => {
     const t = draft.trim();
@@ -777,6 +777,14 @@ function Todos({
     onAdd(t);
     setDraft('');
   };
+
+  if (view === 'external')
+    return (
+      <div className="banner info">
+        The to-do list is an internal working register — mobilisation tasks, site actions and PO chases — so it is
+        withheld from the client view. Switch to <strong>Internal</strong> to see and edit it.
+      </div>
+    );
 
   return (
     <>
@@ -791,6 +799,17 @@ function Todos({
             : 'The tasks that are not derivable from the schedule. Add your own below.'}
         </span>
         {deleted.size > 0 && <button onClick={onRestore}>Restore {deleted.size} removed</button>}
+      </div>
+
+      <div className="row" style={{ marginBottom: 12 }}>
+        <div className="seg">
+          <button className={cat === 'all' ? 'on' : ''} onClick={() => setCat('all')}>All ({pool.length})</button>
+          {(['general', 'design', 'procurement', 'operations'] as const).map((c) => (
+            <button key={c} className={cat === c ? 'on' : ''} onClick={() => setCat(c)} disabled={!countOf(c)}>
+              {c.charAt(0).toUpperCase() + c.slice(1)} ({countOf(c)})
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="row" style={{ marginBottom: 12 }}>
@@ -811,7 +830,7 @@ function Todos({
       ) : (
         <div className="tblwrap">
           <table>
-            <thead><tr><th>Description</th><th>Responsibility</th><th>Priority</th><th>Status</th><th>Due</th><th>Revised date</th><th>Notes</th><th /></tr></thead>
+            <thead><tr><th>Description</th><th>Category</th><th>Responsibility</th><th>Priority</th><th>Status</th><th>Due</th><th>Revised date</th><th>Notes</th><th /></tr></thead>
             <tbody>{rows.map((r) => (
               <tr key={r.id} style={r.source === 'derived' ? { opacity: 0.75 } : undefined}>
                 <td>
@@ -819,6 +838,7 @@ function Todos({
                   {r.source === 'derived' && <div><span className="tag" style={{ marginTop: 3 }}>from schedule</span></div>}
                   {r.source === 'custom' && <div><span className="tag info" style={{ marginTop: 3 }}>added by you</span></div>}
                 </td>
+                <td><span className={`tag ${r.category === 'design' ? 'ext' : r.category === 'procurement' ? 'warn' : r.category === 'general' ? 'info' : ''}`}>{r.category}</span></td>
                 <TextCell id={r.id} field="responsibility" current={r.responsibility} edit={edit} val={val} />
                 <td className="edit">
                   <select value={val(r.id, 'priority', r.priority) as string} onChange={(e) => edit(r.id, 'priority', e.target.value)}
@@ -1030,7 +1050,6 @@ function Settings(p: {
   buffer: number; setBuffer: (v: number) => void;
   leadOverrides: Record<string, number>; setLeadOverrides: (v: Record<string, number>) => void;
   clientId: string; setClientId: (v: string) => void;
-  dates: ScheduleDates; setDates: (v: ScheduleDates) => void;
   org: OrgState; setOrg: (v: OrgState) => void;
   plan: Plan;
   project: ProjectInputs;
@@ -1081,43 +1100,10 @@ function Settings(p: {
         </div>
       </div>
 
-      <h2>Actual project dates</h2>
-      <p className="muted" style={{ marginTop: -6, maxWidth: 860 }}>
-        The contract states a commencement date and a duration. Site reality often differs — set the actual dates
-        here and the whole plan is recomputed from them. Leave a field blank to use the contract.
-        The internal pair is the baseline the team works to; the client pair is what the client is shown. The gap
-        between them is the buffer.
-      </p>
-      <div className="row">
-        <div className="field">
-          <label>Internal start (actual)</label>
-          <input type="date" value={p.dates.internalStart ?? ''} onChange={(e) => p.setDates({ ...p.dates, internalStart: e.target.value || null })} />
-        </div>
-        <div className="field">
-          <label>Internal target finish</label>
-          <input type="date" value={p.dates.internalEnd ?? ''} onChange={(e) => p.setDates({ ...p.dates, internalEnd: e.target.value || null })} />
-        </div>
-        <div className="field">
-          <label>Client start</label>
-          <input type="date" value={p.dates.clientStart ?? ''} onChange={(e) => p.setDates({ ...p.dates, clientStart: e.target.value || null })} />
-        </div>
-        <div className="field">
-          <label>Client committed finish</label>
-          <input type="date" value={p.dates.clientEnd ?? ''} onChange={(e) => p.setDates({ ...p.dates, clientEnd: e.target.value || null })} />
-        </div>
-        <button onClick={() => p.setDates({})} disabled={!Object.values(p.dates).some(Boolean)}>Reset to contract</button>
+      <div className="banner info" style={{ maxWidth: 900, marginBottom: 18 }}>
+        Project dates moved to <strong>Project settings → Schedule dates</strong>. They are per project and a change
+        now needs BU Head approval before the plan is recomputed, so they no longer belong in global settings.
       </div>
-      {p.plan.internal && (
-        <div className={`banner ${p.plan.internal.varianceDays !== null && p.plan.internal.varianceDays > 0 ? '' : 'ok'}`} style={{ marginTop: 12, maxWidth: 900 }}>
-          Internal baseline <strong>{p.plan.internal.start} → {p.plan.internal.end}</strong> ({p.plan.internal.durationWorkingDays} working days).
-          {' '}Client baseline <strong>{p.plan.external?.start} → {p.plan.external?.end}</strong>.
-          {p.plan.internal.target && (
-            p.plan.internal.varianceDays !== null && p.plan.internal.varianceDays > 0
-              ? ` The CPM finish is ${p.plan.internal.varianceDays}d past your internal target of ${p.plan.internal.target} — the engine reports the gap rather than compressing durations to hide it.`
-              : ` Inside the internal target of ${p.plan.internal.target} by ${Math.abs(p.plan.internal.varianceDays ?? 0)}d.`
-          )}
-        </div>
-      )}
 
       <h2 style={{ marginTop: 26 }}>Google Drive access</h2>
       <div className="row">
