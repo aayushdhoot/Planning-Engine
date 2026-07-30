@@ -13,6 +13,7 @@ import { buildEmiratesPert } from './data/emirates-pert';
 import normsData from './norms/norms-v1.json';
 import { Gantt } from './ui/Gantt';
 import { SCurveChart } from './ui/SCurve';
+import { Cockpit } from './ui/Cockpit';
 import { buildSCurve } from './engine/scurve';
 import { Pert } from './ui/Pert';
 import type { PertTree } from './domain/pert';
@@ -28,7 +29,7 @@ import { buildDeck } from './reports/deck';
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
-const TABS = ['Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'To-do', 'Dependencies', 'RA Milestones', 'New project', 'Admin', 'Settings'] as const;
+const TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'To-do', 'Dependencies', 'RA Milestones', 'New project', 'Admin', 'Settings'] as const;
 type Tab = (typeof TABS)[number];
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -44,7 +45,7 @@ export default function App() {
   const [ingestResult, setIngestResult] = useState<{ boq: IngestedBoq; file: string } | null>(null);
   const [projectId, setProjectId] = useState(BASE_PROJECTS[0].id);
   const [view, setView] = useState<'internal' | 'external'>('internal');
-  const [tab, setTab] = useState<Tab>('Overview');
+  const [tab, setTab] = useState<Tab>('Cockpit');
   const [sundaysOff, setSundaysOff] = useState(false);
   const [holidays, setHolidays] = useState('');
   const [workMode, setWorkMode] = useState(1);
@@ -141,6 +142,21 @@ export default function App() {
           <div className="banner info">Client view — anchored to contract dates. Buffer, cost, margin, float and manpower are withheld.</div>
         )}
 
+        {tab === 'Cockpit' && (
+          <Cockpit
+            plan={plan}
+            today={today}
+            onOpen={(area) =>
+              setTab(
+                area === 'design' ? 'Design'
+                : area === 'procurement' ? 'Procurement'
+                : area === 'billing' ? 'RA Milestones'
+                : area === 'manpower' ? 'Manpower'
+                : 'PERT',
+              )
+            }
+          />
+        )}
         {tab === 'Overview' && <Overview plan={plan} view={view} />}
         {tab === 'PERT' && <PertSection tree={pert} today={today} plan={plan} view={view} />}
         {tab === 'Manpower' && <Manpower plan={plan} />}

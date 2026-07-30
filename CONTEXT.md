@@ -84,6 +84,18 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
 - Archiving hides a project from the switcher and leaves its data intact; only user-created
   projects can be deleted outright.
 
+## Executive cockpit
+`src/engine/cockpit.ts` (model) + `src/ui/Cockpit.tsx` (screen). The landing tab.
+- **Variance, not absolutes.** "245 working days" tells an executive nothing; "13 days past the
+  client date" tells them everything. Every KPI is a comparison.
+- **Exceptions, not inventories.** The trackers already list everything; the cockpit ranks the
+  handful needing a decision and stays silent otherwise.
+- **Brushing** is the Spotfire idea worth stealing: selecting a trade re-expresses every visual
+  for it — the S-curve is rebuilt from that trade's activities — and unselected material fades
+  rather than being filtered out, so the comparison survives.
+- It **cannot go green while a red exception is open**; a test asserts this. The health number
+  is blunt on purpose and its reasons always sit beside it.
+
 ## PERT view levels
 `collapseForDepth()` seeds the collapse set; choosing a level **resets** it. The first version
 layered the level on top of the mount-time collapse, so "Activity level" showed exactly the same

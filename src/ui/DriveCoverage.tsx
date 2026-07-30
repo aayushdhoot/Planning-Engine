@@ -187,13 +187,23 @@ function Row({
             <button onClick={onUndrop}>Restore</button>
           ) : (
             <>
+              {/*
+                Every file can be read, and re-read, on demand. This used to be disabled for
+                anything without a structural extractor, which meant a drawing or a contract
+                could never be sent back for another attempt — the one thing you want when a
+                document looks like it was not picked up properly.
+              */}
               <button
                 className={r.extractor ? 'primary' : ''}
-                disabled={!r.extractor || !!busy}
-                title={r.extractor ? 'Parse this file into engine inputs' : 'No structural extractor for this file — use Prepare by hand'}
+                disabled={!!busy}
+                title={
+                  r.extractor
+                    ? 'Fetch this file and parse it into engine inputs'
+                    : 'Fetch this file and report exactly what could be extracted from it'
+                }
                 onClick={onRead}
               >
-                {busy === r.file.id ? 'Reading…' : r.state === 'extracted' ? 'Re-read' : 'Read now'}
+                {busy === r.file.id ? 'Reading…' : r.state === 'pending' ? 'Read now' : 'Re-read'}
               </button>
               <button onClick={onPrepareByHand} title="Supply this document's contents yourself">Prepare by hand</button>
               <button onClick={onDrop} title="Exclude this document from the plan">Drop reading</button>

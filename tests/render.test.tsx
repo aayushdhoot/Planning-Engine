@@ -109,6 +109,10 @@ describe('UI renders without throwing', () => {
     expect(html).toContain('EVIDENCE ONLY');
     expect(html).toContain('Prepare by hand');
     expect(html).toContain('Drop reading');
+    // a document that yielded nothing must still be re-readable — that is the whole point of
+    // the control, and it used to be disabled for anything without a structural extractor
+    expect(html).toContain('Re-read');
+    expect(html).not.toContain('disabled=""');
   });
 
   it('a pending-input project renders its blocking banner rather than a broken page', () => {

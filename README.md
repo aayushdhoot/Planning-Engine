@@ -19,7 +19,7 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 217 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 225 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -63,7 +63,13 @@ a name, a role and a work address. Admin manages people and projects, including 
 (Planning / WIP / On hold / Handed over / Closed) and archiving. All of it is local to the
 machine: there is no shared server, and the directory is never committed.
 
-**Sections.** Overview · PERT (**PERT network / Gantt / S-curve**) · Manpower · Design ·
+**Executive cockpit.** The landing screen: one health score, five RAG KPIs expressed as
+**variance** rather than absolutes, and a ranked *“needs a decision”* list instead of an
+inventory. Click a trade in *Where the work is* and the whole screen **brushes** to it — the
+S-curve re-computes for that trade, exceptions filter, and everything else recedes rather than
+disappearing, so the comparison survives. KPI and exception cards drill through to the module.
+
+**Sections.** Cockpit · Overview · PERT (**PERT network / Gantt / S-curve**) · Manpower · Design ·
 Procurement · To-do · Dependencies · RA Milestones · New project · Settings (resource plan,
 calendar, norms, Drive access and the canonical JSON live here).
 
