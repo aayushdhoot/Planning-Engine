@@ -3,6 +3,7 @@
 // PRIVACY: the master carries a "Mobile NO" column. It is read and thrown away — team
 // assignment needs a name, a role and a work address, not 182 people's personal phone numbers.
 // Holding the smallest useful copy is the point, and this repository is public.
+import * as XLSX from 'xlsx';
 import type { Employee } from '../domain/org';
 
 /** Header spellings seen in the master sheet, mapped to the fields the app needs. */
@@ -58,8 +59,36 @@ export interface DirectoryImport {
 export function parseEmployeeCsv(text: string): DirectoryImport {
   const lines = text.split(/\r?\n/).filter((l) => l.trim().length);
   if (!lines.length) throw new Error('That file is empty.');
+  return fromRows(lines.map(splitCsvLine));
+}
 
-  const header = splitCsvLine(lines[0]);
+/**
+ * The master is kept as a spreadsheet, so accept it as one. The sheet is read as formatted
+ * text rather than raw: employee codes like "FSD - 002" must stay strings, and a raw read
+ * would mangle anything that looks numeric.
+ */
+export function parseEmployeeWorkbook(data: ArrayBuffer): DirectoryImport {
+  const wb = XLSX.read(new Uint8Array(data), { type: 'array' });
+  for (const name of wb.SheetNames) {
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[name], { header: 1, blankrows: false, raw: false });
+    const grid = rows.map((r) => r.map((c) => String(c ?? '').trim()));
+    // the master is not always the first sheet, so take the first one that looks like it
+    if (grid.some((r) => r.some((c) => /^employee\s*name$/i.test(c)))) return fromRows(grid);
+  }
+  throw new Error(`No sheet with an "Employee Name" column. Sheets found: ${wb.SheetNames.join(', ')}`);
+}
+
+/** Dispatch on the file's extension; both formats end up in the same importer. */
+export async function parseEmployeeFile(file: {
+  name: string;
+  text: () => Promise<string>;
+  arrayBuffer: () => Promise<ArrayBuffer>;
+}): Promise<DirectoryImport> {
+  return /\.(xlsx|xls)$/i.test(file.name) ? parseEmployeeWorkbook(await file.arrayBuffer()) : parseEmployeeCsv(await file.text());
+}
+
+function fromRows(rows: string[][]): DirectoryImport {
+  const header = rows[0] ?? [];
   const index: Partial<Record<keyof Employee, number>> = {};
   for (const [field, re] of COLUMNS) {
     const i = header.findIndex((h) => re.test(h));
@@ -70,14 +99,13 @@ export function parseEmployeeCsv(text: string): DirectoryImport {
 
   const dropped = header.filter((h) => Object.keys(DROPPED_COLUMNS).some((d) => d.toLowerCase() === h.toLowerCase()));
   const warnings: string[] = [];
-  const at = (cells: string[], f: keyof Employee) => (index[f] === undefined ? '' : cells[index[f]!] ?? '');
+  const at = (cells: string[], f: keyof Employee) => (index[f] === undefined ? '' : (cells[index[f]!] ?? '').trim());
 
   const employees: Employee[] = [];
   const seen = new Set<string>();
   let skipped = 0;
 
-  for (const line of lines.slice(1)) {
-    const cells = splitCsvLine(line);
+  for (const cells of rows.slice(1)) {
     const name = at(cells, 'name');
     if (!name) {
       skipped++;
@@ -107,5 +135,5 @@ export function parseEmployeeCsv(text: string): DirectoryImport {
   if (dropped.length)
     warnings.push(`Not imported: ${dropped.map((d) => `${d} (${DROPPED_COLUMNS[Object.keys(DROPPED_COLUMNS).find((k) => k.toLowerCase() === d.toLowerCase())!]})`).join('; ')}.`);
 
-  return { employees, rowsRead: lines.length - 1, rowsSkipped: skipped, dropped, warnings };
+  return { employees, rowsRead: rows.length - 1, rowsSkipped: skipped, dropped, warnings };
 }

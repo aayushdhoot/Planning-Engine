@@ -6,6 +6,14 @@ const DAY = 86400000;
 const iso = (s: string) => Date.parse(s + 'T00:00:00Z');
 const fmt = (s: string | null) => (s ? new Date(iso(s)).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit', timeZone: 'UTC' }) : '—');
 
+/** How much of the programme to show. The tree's own levels do the work. */
+type Depth = 'wbs' | 'summary' | 'activity';
+const DEPTHS: { key: Depth; label: string; hint: string }[] = [
+  { key: 'wbs', label: 'WBS level', hint: 'work breakdown only — project and its four streams' },
+  { key: 'summary', label: 'Summary level', hint: 'summary rows — each stream broken into its sections' },
+  { key: 'activity', label: 'Activity level', hint: 'every activity, collapsible by hand' },
+];
+
 const STATUS_TAG: Record<PertNode['status'], { cls: string; label: string }> = {
   complete: { cls: 'ok', label: 'Complete' },
   in_progress: { cls: 'info', label: 'In progress' },
@@ -13,19 +21,35 @@ const STATUS_TAG: Record<PertNode['status'], { cls: string; label: string }> = {
   not_started: { cls: '', label: 'Not started' },
 };
 
+/** Ids to collapse so the tree reads at the requested level. Activity level collapses nothing. */
+function collapseForDepth(tree: PertTree, depth: Depth): Set<number> {
+  const s = new Set<number>();
+  if (depth === 'activity') return s;
+  const maxLevel = depth === 'wbs' ? 1 : 2;
+  const walk = (n: PertNode) => {
+    if (n.level >= maxLevel && n.children.length) s.add(n.id);
+    n.children.forEach(walk);
+  };
+  if (tree.root) walk(tree.root);
+  return s;
+}
+
 export function Pert({ tree, today }: { tree: PertTree; today: string }) {
   const [category, setCategory] = useState<PertCategory | 'all'>('all');
-  const [collapsed, setCollapsed] = useState<Set<number>>(() => {
-    // start with the top two levels open, everything below closed
-    const s = new Set<number>();
-    const walk = (n: PertNode) => {
-      if (n.level >= 2 && n.children.length) s.add(n.id);
-      n.children.forEach(walk);
-    };
-    if (tree.root) tree.root.children.forEach(walk);
-    return s;
-  });
+  const [depth, setDepth] = useState<Depth>('summary');
+  const [collapsed, setCollapsed] = useState<Set<number>>(() => collapseForDepth(tree, 'summary'));
   const [showBars, setShowBars] = useState(true);
+
+  /**
+   * Choosing a level RESETS the collapse state to that level. It used to layer the level on top
+   * of whatever was already collapsed, which meant picking "Activity level" left the mount-time
+   * collapse in place and showed exactly the same rows as Summary — the control looked broken.
+   * Hand expand/collapse still works afterwards; it is the level that seeds it.
+   */
+  const chooseDepth = (d: Depth) => {
+    setDepth(d);
+    setCollapsed(collapseForDepth(tree, d));
+  };
 
   const roots: PertNode[] = useMemo(() => {
     if (!tree.root) return [];
@@ -81,11 +105,20 @@ export function Pert({ tree, today }: { tree: PertTree; today: string }) {
             <button key={c.key} className={category === c.key ? 'on' : ''} onClick={() => setCategory(c.key)}>{c.label}</button>
           ))}
         </div>
-        <button onClick={expandAll}>Expand all</button>
-        <button onClick={collapseAll}>Collapse all</button>
+        <div className="seg">
+          {DEPTHS.map((d) => (
+            <button key={d.key} className={depth === d.key ? 'on' : ''} onClick={() => chooseDepth(d.key)} title={d.hint}>
+              {d.label}
+            </button>
+          ))}
+        </div>
+        <button onClick={expandAll} disabled={depth !== 'activity'} title={depth !== 'activity' ? 'Switch to Activity level to expand by hand' : undefined}>Expand all</button>
+        <button onClick={collapseAll} disabled={depth !== 'activity'}>Collapse all</button>
         <button onClick={() => setShowBars((v) => !v)}>{showBars ? 'Hide' : 'Show'} bars</button>
         <div className="spacer" />
-        <span className="muted" style={{ fontSize: 12 }}>{visible.length} of {tree.totalTasks} rows · source: {tree.source}</span>
+        <span className="muted" style={{ fontSize: 12 }}>
+          {visible.length} of {tree.totalTasks} rows · {DEPTHS.find((d) => d.key === depth)!.hint} · source: {tree.source}
+        </span>
       </div>
 
       <div className="legend">

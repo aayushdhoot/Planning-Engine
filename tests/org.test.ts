@@ -1,7 +1,7 @@
 // The directory holds real people's data, so the tests pin what is imported and — more
 // importantly — what is deliberately thrown away.
 import { describe, expect, it } from 'vitest';
-import { parseEmployeeCsv, splitCsvLine } from '../src/services/employee-directory';
+import { parseEmployeeCsv, parseEmployeeFile, parseEmployeeWorkbook, splitCsvLine } from '../src/services/employee-directory';
 import { emptyOrg, employeeByCode, isAssignable, summariseDirectory, teamFor, PROJECT_ROLES } from '../src/domain/org';
 
 const CSV = [
@@ -81,5 +81,49 @@ describe('project teams', () => {
     expect(employeeByCode(withTeam, '44')!.name).toBe('Abhijeet Pawar');
     expect(employeeByCode(withTeam, null)).toBeNull();
     expect(employeeByCode(withTeam, 'nope')).toBeNull();
+  });
+});
+
+describe('the master can be an Excel workbook, not just CSV', () => {
+  it('reads an .xlsx and produces the same people as the CSV', async () => {
+    const XLSX = await import('xlsx');
+    const wb = XLSX.read(CSV, { type: 'string' });
+    // a real workbook has other tabs; the importer must find the right one
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Notes'], ['not the master']]), 'Notes');
+    const buf = XLSX.write(wb, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer;
+    const fromXlsx = parseEmployeeWorkbook(buf);
+    expect(fromXlsx.employees.map((e) => e.name)).toEqual(parseEmployeeCsv(CSV).employees.map((e) => e.name));
+    expect(fromXlsx.dropped.sort()).toEqual(['DOJ', 'Grade', 'Mobile NO']);
+    expect(JSON.stringify(fromXlsx.employees)).not.toContain('9403717007');
+  });
+
+  it('keeps employee codes as text — "FSD - 002" must not be mangled', async () => {
+    const XLSX = await import('xlsx');
+    const rows = [
+      ['Emp Code', 'Employee Name', 'Actual Designation', 'Status'],
+      ['FSD - 002', 'Shantanu Dingre', 'Vice President', 'Current'],
+      ['0044', 'Zero Prefixed', 'Manager', 'Current'],
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Master');
+    const r = parseEmployeeWorkbook(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer);
+    expect(r.employees.map((e) => e.code)).toEqual(['FSD - 002', '0044']);
+  });
+
+  it('says which sheets it looked at when none is the master', async () => {
+    const XLSX = await import('xlsx');
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['a', 'b'], [1, 2]]), 'Sheet1');
+    expect(() => parseEmployeeWorkbook(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }) as ArrayBuffer)).toThrow(/Sheet1/);
+  });
+
+  it('dispatches on the file extension', async () => {
+    const asFile = (name: string, text: string) => ({
+      name,
+      text: async () => text,
+      arrayBuffer: async () => new TextEncoder().encode(text).buffer as ArrayBuffer,
+    });
+    const r = await parseEmployeeFile(asFile('master.csv', CSV));
+    expect(r.employees).toHaveLength(3);
   });
 });

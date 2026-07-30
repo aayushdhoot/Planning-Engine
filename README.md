@@ -19,7 +19,7 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 206 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 217 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -34,8 +34,11 @@ stays in `pending_inputs` as the degrade fixture; the engine will not invent num
 
 **PERT view.** MS-Project format — ID, Task Name, Duration, Start, Finish, Actual Start,
 Actual Finish — with collapsible summary rows, roll-up progress, delay flags and inline bars.
-Filter by **Schedule & Milestones / Design / Procurement / Execution**. Projects without an
-issued programme get the same four-category view derived from their computed plan.
+Filter by **Schedule & Milestones / Design / Procurement / Execution**, and read it at
+**WBS / Summary / Activity** level — the tree is already levelled, so a level view is just how
+far down it opens. Summary rows carry rolled-up dates and progress, so a collapsed view is
+still a real report. Projects without an issued programme get the same four-category view
+derived from their computed plan.
 
 **Manpower that a contractor would recognise.** Work content is levelled across each trade's
 engagement window against realistic gang caps, so trades hold a stable core team and surge
@@ -53,8 +56,9 @@ internal target finish is reported as a variance — the engine never compresses
 a date. The Gantt marks today, draws recorded progress, and flags activities past their planned
 finish that nobody has signed off.
 
-**Admin & teams.** Import the employee master CSV once; staff each project's role slots from it
-in Settings. Mobile numbers, joining dates and pay grades are read and discarded — staffing needs
+**Admin & teams.** Import the employee master (**.xlsx, .xls or .csv**) once — in a workbook the
+importer finds the sheet with an “Employee Name” column, whichever tab that is — then staff each
+project's role slots from it in Settings. Mobile numbers, joining dates and pay grades are read and discarded — staffing needs
 a name, a role and a work address. Admin manages people and projects, including lifecycle status
 (Planning / WIP / On hold / Handed over / Closed) and archiving. All of it is local to the
 machine: there is no shared server, and the directory is never committed.

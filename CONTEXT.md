@@ -68,6 +68,10 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
 
 ## Org: directory, teams, admin
 `src/domain/org.ts` + `src/services/employee-directory.ts` + `src/ui/Admin.tsx`.
+- The master imports as **.xlsx / .xls / .csv**. Workbooks are read as *formatted text*, not
+  raw: employee codes like `FSD - 002` and `0044` must stay strings, and a raw read mangles
+  anything that looks numeric. The importer finds the sheet with an "Employee Name" column
+  rather than assuming the first tab.
 - The directory is **imported at runtime, never checked in**. The master sheet is personal data
   and this repo is public; `source-documents/org/` is gitignored.
 - `parseEmployeeCsv()` deliberately **drops Mobile NO, DOJ and Grade** and lists what it
@@ -79,6 +83,11 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
   `plan.project.status`. That one answers "do I have the inputs?"; this answers "is it live?".
 - Archiving hides a project from the switcher and leaves its data intact; only user-created
   projects can be deleted outright.
+
+## PERT view levels
+`collapseForDepth()` seeds the collapse set; choosing a level **resets** it. The first version
+layered the level on top of the mount-time collapse, so "Activity level" showed exactly the same
+rows as "Summary" and looked broken. Hand expand/collapse still works — the level just seeds it.
 
 ## S-curve
 `src/engine/scurve.ts` + `src/ui/SCurve.tsx`, shown as the third mode in the PERT section.

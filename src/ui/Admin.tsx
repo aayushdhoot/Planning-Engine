@@ -11,7 +11,7 @@ import {
   type OrgState,
   type ProjectLifecycle,
 } from '../domain/org';
-import { parseEmployeeCsv } from '../services/employee-directory';
+import { parseEmployeeFile } from '../services/employee-directory';
 
 export function Admin({
   org,
@@ -37,7 +37,7 @@ export function Admin({
   const importCsv = async (f: File) => {
     setError(null);
     try {
-      const r = parseEmployeeCsv(await f.text());
+      const r = await parseEmployeeFile(f);
       setOrg({ ...org, employees: r.employees, importedAt: new Date().toISOString() });
       setNotes([`Imported ${r.employees.length} people from ${f.name}.`, ...r.warnings]);
     } catch (e) {
@@ -144,11 +144,11 @@ export function Admin({
         <input
           ref={fileRef}
           type="file"
-          accept=".csv"
+          accept=".csv,.xlsx,.xls"
           style={{ display: 'none' }}
           onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void importCsv(f); }}
         />
-        <button className="primary" onClick={() => fileRef.current?.click()}>Import employee directory (CSV)</button>
+        <button className="primary" onClick={() => fileRef.current?.click()}>Import employee directory (CSV or Excel)</button>
         <div className="field" style={{ minWidth: 260 }}>
           <label>Search</label>
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="name, role, department, location" />
@@ -156,7 +156,8 @@ export function Admin({
         <span className="muted" style={{ fontSize: 12 }}>{shown.length} of {org.employees.length}</span>
       </div>
       <p className="muted" style={{ fontSize: 12, maxWidth: 820 }}>
-        Expects the employee master sheet. <strong>Mobile numbers, joining dates and pay grades are read and
+        Expects the employee master sheet, as <strong>.xlsx, .xls or .csv</strong> — in a workbook it finds the sheet
+        with an “Employee Name” column, whichever tab that is. <strong>Mobile numbers, joining dates and pay grades are read and
         discarded</strong> — staffing a project needs a name, a role and a work address, nothing more.
       </p>
 
