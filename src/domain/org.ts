@@ -21,23 +21,103 @@ export interface Employee {
   reportingTo: string;
 }
 
-/** Roles a project team is staffed with, matching norms.resourceRoleNorms. */
-export const PROJECT_ROLES = [
-  'Project Manager',
-  'Site Engineer (Civil/Interior)',
-  'MEP Engineer',
-  'Design Lead',
-  'Procurement Owner',
-  'Safety Officer',
-  'QC / Snag Engineer',
-] as const;
-export type ProjectRole = (typeof PROJECT_ROLES)[number];
+/**
+ * The project team, grouped the way the business is actually organised rather than as a flat
+ * list of seven slots. Some roles take one person, some take several — five procurement
+ * executives and four interior designers on one project is normal.
+ */
+export interface RoleSpec {
+  role: string;
+  /** several people can hold this role on one project */
+  multi?: boolean;
+}
+
+export interface TeamGroup {
+  group: string;
+  roles: RoleSpec[];
+}
+
+export const TEAM_GROUPS: TeamGroup[] = [
+  { group: 'Sales', roles: [{ role: 'Sales Head' }, { role: 'Sales Person', multi: true }] },
+  {
+    group: 'Procurement',
+    roles: [{ role: 'Procurement Head' }, { role: 'Category Head' }, { role: 'Procurement Manager' }, { role: 'Procurement Executive', multi: true }],
+  },
+  { group: 'Snag', roles: [{ role: 'Snag Head' }, { role: 'Snag Manager' }] },
+  {
+    group: 'Operations',
+    roles: [
+      { role: 'SBU Head' }, { role: 'Cluster Head' }, { role: 'BU Head' },
+      { role: 'Senior Operations Manager' }, { role: 'Operations Manager' },
+      { role: 'Senior Project Manager', multi: true }, { role: 'Project Manager' },
+      { role: 'Site Supervisor', multi: true }, { role: 'MEP Engineer', multi: true },
+      { role: 'Safety Officer', multi: true },
+    ],
+  },
+  {
+    group: 'Design',
+    roles: [{ role: 'Design Head', multi: true }, { role: 'Design Manager' }, { role: 'Interior Designer', multi: true }, { role: '3D Artist', multi: true }],
+  },
+  { group: 'Additional', roles: [{ role: 'Additional Team Member', multi: true }] },
+];
+
+/** Every role name, in group order — used to seed a fresh team. */
+export const PROJECT_ROLES: string[] = TEAM_GROUPS.flatMap((g) => g.roles.map((r) => r.role));
 
 export interface TeamMember {
-  role: ProjectRole | string;
+  role: string;
   /** employee code; null when the slot is named but unfilled */
   employeeCode: string | null;
 }
+
+/**
+ * Seniority band shown against each name (e.g. "Operations - L3"), derived from the
+ * DESIGNATION rather than the pay grade — grade is compensation data and is deliberately not
+ * imported. Adjust the bands here if the business ladder changes; this is a convention, not a
+ * measurement.
+ */
+export type SeniorityLevel = 'L1' | 'L2' | 'L3';
+
+export function levelFor(designation: string): SeniorityLevel {
+  if (/vice president|\bvp\b|general manager|\bgm\b|head|chief|director/i.test(designation)) return 'L3';
+  if (/manager|lead/i.test(designation)) return 'L2';
+  return 'L1';
+}
+
+/** Short department label for the badge, e.g. "Operations", "Procurement". */
+export function departmentLabel(department: string): string {
+  if (/procure|supply/i.test(department)) return 'Procurement';
+  if (/design/i.test(department)) return 'Design';
+  if (/operation/i.test(department)) return 'Operations';
+  if (/business development|marketing/i.test(department)) return 'Sales';
+  if (/human resource/i.test(department)) return 'HR';
+  return department.split(',')[0] || '—';
+}
+
+/**
+ * Where the project physically is, and how big. Captured here rather than derived, because a
+ * BOQ's "PROJECT AREA" and the leasable carpet area are not always the same number and the
+ * team needs to be able to correct it.
+ */
+export interface ProjectSite {
+  projectCode: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  pinCode: string;
+  floors: string;
+  /** carpet area in sft; when set it overrides the BOQ-derived figure in the plan */
+  carpetAreaSft: number | null;
+  loginDate: string | null;
+  /** the Drive folder this project's documents live in */
+  driveUrl: string;
+}
+
+export const emptySite = (): ProjectSite => ({
+  projectCode: '', address: '', city: '', state: '', country: 'IN', pinCode: '',
+  floors: '', carpetAreaSft: null, loginDate: null, driveUrl: '',
+});
 
 /**
  * Where a project is in its life, as opposed to whether the ENGINE can plan it.
@@ -49,6 +129,8 @@ export type ProjectLifecycle = (typeof PROJECT_LIFECYCLE)[number];
 
 export interface OrgState {
   employees: Employee[];
+  /** project id -> site details */
+  sites?: Record<string, ProjectSite>;
   /** project id -> team */
   teams: Record<string, TeamMember[]>;
   /** project id -> lifecycle status */
@@ -58,7 +140,11 @@ export interface OrgState {
   importedAt: string | null;
 }
 
-export const emptyOrg = (): OrgState => ({ employees: [], teams: {}, lifecycle: {}, archived: [], importedAt: null });
+export const emptyOrg = (): OrgState => ({ employees: [], sites: {}, teams: {}, lifecycle: {}, archived: [], importedAt: null });
+
+export function siteFor(org: OrgState, projectId: string): ProjectSite {
+  return org.sites?.[projectId] ?? emptySite();
+}
 
 export const isAssignable = (e: Employee): boolean => /current/i.test(e.status);
 
@@ -71,6 +157,19 @@ export function teamFor(org: OrgState, projectId: string): TeamMember[] {
   const existing = org.teams[projectId];
   if (existing?.length) return existing;
   return PROJECT_ROLES.map((role) => ({ role, employeeCode: null }));
+}
+
+/** The team arranged into its groups, so the screen mirrors how the business is organised. */
+export function groupedTeam(org: OrgState, projectId: string): { group: string; rows: { role: string; multi: boolean; members: TeamMember[] }[] }[] {
+  const team = teamFor(org, projectId);
+  return TEAM_GROUPS.map((g) => ({
+    group: g.group,
+    rows: g.roles.map((r) => ({
+      role: r.role,
+      multi: !!r.multi,
+      members: team.filter((m) => m.role === r.role),
+    })),
+  }));
 }
 
 export interface DirectorySummary {

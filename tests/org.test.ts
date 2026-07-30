@@ -2,7 +2,7 @@
 // importantly — what is deliberately thrown away.
 import { describe, expect, it } from 'vitest';
 import { parseEmployeeCsv, parseEmployeeFile, parseEmployeeWorkbook, splitCsvLine } from '../src/services/employee-directory';
-import { emptyOrg, employeeByCode, isAssignable, summariseDirectory, teamFor, PROJECT_ROLES } from '../src/domain/org';
+import { TEAM_GROUPS, departmentLabel, emptyOrg, employeeByCode, emptySite, groupedTeam, isAssignable, levelFor, siteFor, summariseDirectory, teamFor, PROJECT_ROLES } from '../src/domain/org';
 
 const CSV = [
   'Emp Code,Emp Type,Employee Name,Grade,Actual Designation,Department,DOJ,SBU,Base Location,Status,Mobile NO,Email Id\'s,Reporting to',
@@ -125,5 +125,56 @@ describe('the master can be an Excel workbook, not just CSV', () => {
     });
     const r = await parseEmployeeFile(asFile('master.csv', CSV));
     expect(r.employees).toHaveLength(3);
+  });
+});
+
+describe('project team is grouped the way the business is organised', () => {
+  const org = { ...emptyOrg(), employees: parseEmployeeCsv(CSV).employees };
+
+  it('exposes the real functional groups, not seven flat slots', () => {
+    expect(TEAM_GROUPS.map((g) => g.group)).toEqual(['Sales', 'Procurement', 'Snag', 'Operations', 'Design', 'Additional']);
+  });
+
+  it('allows several people in the roles that take several', () => {
+    const procurement = TEAM_GROUPS.find((g) => g.group === 'Procurement')!;
+    expect(procurement.roles.find((r) => r.role === 'Procurement Executive')!.multi).toBe(true);
+    expect(procurement.roles.find((r) => r.role === 'Procurement Head')!.multi).toBeUndefined();
+  });
+
+  it('groups a seeded team without losing any role', () => {
+    const grouped = groupedTeam(org, 'p1');
+    const roles = grouped.flatMap((g) => g.rows.map((r) => r.role));
+    expect(new Set(roles).size).toBe(roles.length);
+    expect(roles).toContain('Site Supervisor');
+    expect(roles).toContain('3D Artist');
+  });
+
+  it('derives the seniority badge from designation, never from pay grade', () => {
+    expect(levelFor('Senior Vice President - Business Development')).toBe('L3');
+    expect(levelFor('Deputy General Manager - Operations')).toBe('L3');
+    expect(levelFor('Senior Manager- Procurement')).toBe('L2');
+    expect(levelFor('Executive - Procurement')).toBe('L1');
+    expect(levelFor('Site Supervisor')).toBe('L1');
+  });
+
+  it('shortens the department for the badge', () => {
+    expect(departmentLabel('Procurement, Production, Inventory and Services')).toBe('Procurement');
+    expect(departmentLabel('Business Development')).toBe('Sales');
+    expect(departmentLabel('Operations')).toBe('Operations');
+  });
+});
+
+describe('project site details', () => {
+  it('starts empty rather than inventing an address', () => {
+    const s = siteFor(emptyOrg(), 'p1');
+    expect(s.address).toBe('');
+    expect(s.carpetAreaSft).toBeNull();
+    expect(s.driveUrl).toBe('');
+  });
+
+  it('keeps the Drive folder per project so it can be rescanned later', () => {
+    const org = { ...emptyOrg(), sites: { p1: { ...emptySite(), driveUrl: 'https://drive.google.com/drive/folders/abc' } } };
+    expect(siteFor(org, 'p1').driveUrl).toMatch(/folders\/abc/);
+    expect(siteFor(org, 'p2').driveUrl).toBe('');
   });
 });

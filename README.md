@@ -19,7 +19,7 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
-| `npm run gates` | The full bar: typecheck → lint → 225 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 232 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -68,6 +68,13 @@ machine: there is no shared server, and the directory is never committed.
 inventory. Click a trade in *Where the work is* and the whole screen **brushes** to it — the
 S-curve re-computes for that trade, exceptions filter, and everything else recedes rather than
 disappearing, so the comparison survives. KPI and exception cards drill through to the module.
+
+**Project settings.** Per project, in three panes: **Drive & inputs** (the folder link, scan or
+rescan, and every document listed with whether the engine actually read it — re-read any of
+them on demand), **Site details** (project code, floors, carpet area, full address), and
+**Project team** (grouped Sales / Procurement / Snag / Operations / Design, several people per
+role where the role takes several, each badged by department and seniority). Carpet area set
+here overrides the BOQ figure and is recorded as an input from project settings.
 
 **Sections.** Cockpit · Overview · PERT (**PERT network / Gantt / S-curve**) · Manpower · Design ·
 Procurement · To-do · Dependencies · RA Milestones · New project · Settings (resource plan,

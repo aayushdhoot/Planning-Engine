@@ -66,6 +66,18 @@ scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
   schema rejects a *silent* breach.
 - **Calendar default is a 7-day week** (Sundays working — Flipspaces convention). Toggle in Settings.
 
+## Project settings (was "New project")
+`src/ui/ProjectSettings.tsx` — three panes over the selected project: Drive & inputs, Site
+details, Project team. Creating a project was only ever the *first* use of that screen; a
+folder needs rescanning and re-reading long after, and there was nowhere to do it.
+- `ProjectSite.driveUrl` is stored per project, so rescan does not need the link re-pasted.
+- `carpetAreaSft` set here **overrides** `areaSft` from the BOQ, carrying its own provenance
+  (`project settings · site details`). The two genuinely differ and the resource plan scales
+  from it, so the override must stay traceable rather than editing the document's figure.
+- `TEAM_GROUPS` mirrors the business, not the norms: some roles take several people
+  (`multi: true`). `levelFor()` derives the L1/L2/L3 badge from **designation**, never from pay
+  grade — grade is compensation data and is deliberately not imported.
+
 ## Org: directory, teams, admin
 `src/domain/org.ts` + `src/services/employee-directory.ts` + `src/ui/Admin.tsx`.
 - The master imports as **.xlsx / .xls / .csv**. Workbooks are read as *formatted text*, not

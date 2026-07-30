@@ -15,9 +15,26 @@ const scheduleIngestion = new ScheduleIngestionService();
 const kb = (n: number | null) => (n == null ? '—' : n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
-export function Intake({ clientId, existingIds, onCreate }: { clientId: string; existingIds: string[]; onCreate: (p: ProjectInputs) => void }) {
+export function Intake({
+  clientId,
+  existingIds,
+  onCreate,
+  initialUrl = '',
+  onUrlChange,
+}: {
+  clientId: string;
+  existingIds: string[];
+  onCreate: (p: ProjectInputs) => void;
+  /** the project's saved Drive folder, so it can be rescanned without pasting it again */
+  initialUrl?: string;
+  onUrlChange?: (url: string) => void;
+}) {
   const [step, setStep] = useState<Step>('link');
-  const [folderUrl, setFolderUrl] = useState('');
+  const [folderUrl, setFolderUrlState] = useState(initialUrl);
+  const setFolderUrl = (v: string) => {
+    setFolderUrlState(v);
+    onUrlChange?.(v);
+  };
   const [busy, setBusy] = useState(false);
   const [reading, setReading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
