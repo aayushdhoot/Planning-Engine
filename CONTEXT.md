@@ -208,6 +208,12 @@ all my input data?", so its whole value is in **not overstating what was read**.
   `BOQ & Project Plan`. Filename-only matching hid the project's most important document.
 - `slotFor()` is the opposite way round — **name beats path** — or the programme sitting in that
   same BOQ folder gets labelled as the BOQ.
+- **Rows are grouped, never listed flat.** `groupCoverage()` groups by required-input slot or by
+  folder; `startsCollapsed()` opens groups holding parseable documents and collapses big
+  evidence folders. SKF's folder is 109 files, 96 of them site photographs — flat, that buried
+  the two documents that actually carry data.
+- Group open/closed state tracks only what the user *flipped*, so the sensible default survives
+  for groups they never touched, including new ones after a rescan.
 - Adding an extractor means adding it here *and* in `applyBytes()` in `Intake.tsx`, or the row
   will offer "Read now" and then mark the file `logged`.
 

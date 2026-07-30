@@ -169,3 +169,63 @@ export function coverageRank(r: CoverageRow): number {
   if (r.slot) return 3;
   return 5;
 }
+
+// ---------------------------------------------------------------- grouping
+
+/**
+ * A folder of ninety site photographs is one decision, not ninety. Listing every file flat made
+ * the screen unreadable and buried the two or three documents that actually carry data, so rows
+ * are grouped and the group is what you act on.
+ */
+export interface CoverageGroup {
+  key: string;
+  label: string;
+  /** the folder path, when grouping by folder */
+  hint: string;
+  rows: CoverageRow[];
+  extracted: number;
+  logged: number;
+  pending: number;
+  dropped: number;
+  /** files the engine could parse but has not — the reason a group needs attention */
+  readable: number;
+}
+
+export type GroupBy = 'slot' | 'folder';
+
+/** Parent folder of a file, i.e. its path without the filename. */
+export function folderOf(path: string): string {
+  const i = path.lastIndexOf('/');
+  return i > 0 ? path.slice(0, i) : path;
+}
+
+export function groupCoverage(rows: CoverageRow[], by: GroupBy): CoverageGroup[] {
+  const map = new Map<string, CoverageRow[]>();
+  for (const r of rows) {
+    const key = by === 'folder' ? folderOf(r.file.path) : (r.slot?.label ?? 'Unclassified');
+    const list = map.get(key);
+    if (list) list.push(r);
+    else map.set(key, [r]);
+  }
+
+  const groups: CoverageGroup[] = [...map.entries()].map(([key, list]) => ({
+    key,
+    label: by === 'folder' ? key.split('/').slice(-1)[0] || key : key,
+    hint: by === 'folder' ? key : '',
+    rows: list,
+    extracted: list.filter((r) => r.state === 'extracted').length,
+    logged: list.filter((r) => r.state === 'logged').length,
+    pending: list.filter((r) => r.state === 'pending').length,
+    dropped: list.filter((r) => r.state === 'dropped').length,
+    readable: list.filter((r) => r.extractor && r.state === 'pending').length,
+  }));
+
+  // groups holding unread parseable documents come first — those are the ones that change the
+  // plan. Everything else falls back to size, so the big evidence folders sink.
+  return groups.sort((a, b) => b.readable - a.readable || b.rows.length - a.rows.length || a.label.localeCompare(b.label));
+}
+
+/** Groups big enough to be noise start collapsed; a group carrying data does not. */
+export function startsCollapsed(g: CoverageGroup): boolean {
+  return g.readable === 0 && g.rows.length > 4;
+}

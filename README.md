@@ -25,7 +25,7 @@ npm run dev                    # http://localhost:5173
 | Command | What it does |
 |---|---|
 | `npm start` | Builds and serves at http://localhost:4173 **with the Drive proxy**, so link scanning works outside dev |
-| `npm run gates` | The full bar: typecheck → lint → 236 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 242 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -125,6 +125,11 @@ It separates two outcomes that a plain "read" badge would blur:
 | **EVIDENCE ONLY** | Bytes were opened, but there is no extractor for this format. Nothing reached the plan |
 | **NOT READ** | Untouched. The amber tile counts the ones the engine *could* parse but has not |
 | **DROPPED** | Excluded by you. The required input it matched then counts as uncovered |
+
+Documents are **grouped and collapsible** — by required input or by Drive folder. A folder of
+ninety site photographs is one decision, not ninety, so it collapses to a single line while the
+BOQ and the programme stay open at the top. Groups can be read or dropped wholesale. SKF's real
+folder goes from 109 rows to 12.
 
 Per document: **Read now** (parse it), **Prepare by hand** (upload a file to stand in for it),
 **Drop reading** (exclude it). A contract PDF therefore never reads as "READ" — the engine holds

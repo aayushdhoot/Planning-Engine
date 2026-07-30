@@ -1,8 +1,8 @@
 // "What is in Drive" — the audit screen. Its whole job is to make it obvious whether the
 // engine actually turned each input document into numbers, or merely opened it.
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import type { DriveFile, DriveScan } from '../services/drive';
-import { buildCoverage, coverageRank, type CoverageRow, type DocStates, type ReadState } from '../engine/coverage';
+import { buildCoverage, coverageRank, groupCoverage, startsCollapsed, type CoverageRow, type DocStates, type GroupBy, type ReadState } from '../engine/coverage';
 
 const kb = (n: number | null) => (n == null ? '—' : n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
@@ -37,11 +37,28 @@ export function DriveCoverage({
   onBack: () => void;
 }) {
   const [showAll, setShowAll] = useState(false);
+  const [groupBy, setGroupBy] = useState<GroupBy>('slot');
+  // keys the user has explicitly flipped; everything else follows startsCollapsed()
+  const [flipped, setFlipped] = useState<Set<string>>(new Set());
   const cov = useMemo(() => buildCoverage(scan, states), [scan, states]);
 
   const visible = cov.rows
     .filter((r) => showAll || r.slot || r.extractor)
     .sort((a, b) => coverageRank(a) - coverageRank(b) || a.file.name.localeCompare(b.file.name));
+
+  const groups = useMemo(() => groupCoverage(visible, groupBy), [visible, groupBy]);
+
+  // A group carrying parseable documents starts open; a folder of ninety photographs does not.
+  // Tracking only what the user flipped keeps that default alive for groups they never touched,
+  // including ones that appear after a rescan.
+  const isOpen = (g: (typeof groups)[number]) => (flipped.has(g.key) ? startsCollapsed(g) : !startsCollapsed(g));
+  const toggle = (key: string) =>
+    setFlipped((prev) => {
+      const n = new Set(prev);
+      if (n.has(key)) n.delete(key);
+      else n.add(key);
+      return n;
+    });
 
   const readable = cov.rows.filter((r) => r.extractor && r.state === 'pending').map((r) => r.file);
   const scannedAt = new Date(scan.scannedAt);
@@ -107,6 +124,13 @@ export function DriveCoverage({
           <button className={!showAll ? 'on' : ''} onClick={() => setShowAll(false)}>Input documents ({cov.rows.filter((r) => r.slot || r.extractor).length})</button>
           <button className={showAll ? 'on' : ''} onClick={() => setShowAll(true)}>Everything ({cov.documents})</button>
         </div>
+        <div className="seg">
+          <button className={groupBy === 'slot' ? 'on' : ''} onClick={() => { setGroupBy('slot'); setFlipped(new Set()); }}>By required input</button>
+          <button className={groupBy === 'folder' ? 'on' : ''} onClick={() => { setGroupBy('folder'); setFlipped(new Set()); }}>By folder</button>
+        </div>
+        <span className="muted" style={{ fontSize: 12 }}>
+          {groups.length} group{groups.length === 1 ? '' : 's'} · groups holding readable documents open first
+        </span>
       </div>
 
       <div className="tblwrap">
@@ -122,18 +146,65 @@ export function DriveCoverage({
             </tr>
           </thead>
           <tbody>
-            {visible.map((r) => (
-              <Row
-                key={r.file.id}
-                r={r}
-                busy={busy}
-                onRead={() => onRead([r.file])}
-                onPrepareByHand={() => onPrepareByHand(r.file)}
-                onDrop={() => onDrop(r.file)}
-                onUndrop={() => onUndrop(r.file)}
-              />
-            ))}
-            {visible.length === 0 && (
+            {groups.map((g) => {
+              const opened = isOpen(g);
+              const unreadFiles = g.rows.filter((r) => r.extractor && r.state === 'pending').map((r) => r.file);
+              return (
+                <Fragment key={g.key}>
+                  <tr style={{ background: 'var(--panel2)' }}>
+                    <td colSpan={4}>
+                      <button
+                        style={{ boxShadow: 'none', padding: '2px 8px', marginRight: 8 }}
+                        onClick={() => toggle(g.key)}
+                      >
+                        {opened ? '▾' : '▸'}
+                      </button>
+                      <strong style={{ fontSize: 12.5 }}>{g.label}</strong>
+                      <span className="faint" style={{ fontSize: 11, marginLeft: 8 }}>
+                        {g.rows.length} file{g.rows.length === 1 ? '' : 's'}
+                        {g.hint && g.hint !== g.label ? ` · ${g.hint}` : ''}
+                      </span>
+                    </td>
+                    <td className="muted" style={{ fontSize: 11.5 }}>
+                      {[
+                        g.extracted ? `${g.extracted} read` : '',
+                        g.logged ? `${g.logged} evidence only` : '',
+                        g.readable ? `${g.readable} readable, not read` : '',
+                        g.dropped ? `${g.dropped} dropped` : '',
+                      ].filter(Boolean).join(' · ') || `${g.pending} not read`}
+                    </td>
+                    <td>
+                      <div className="row" style={{ gap: 6, justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
+                        {unreadFiles.length > 0 && (
+                          <button className="primary" disabled={!!busy} onClick={() => onRead(unreadFiles)}>
+                            Read {unreadFiles.length}
+                          </button>
+                        )}
+                        <button
+                          title="Exclude every document in this group"
+                          onClick={() => g.rows.filter((r) => r.state !== 'dropped').forEach((r) => onDrop(r.file))}
+                        >
+                          Drop group
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {opened &&
+                    g.rows.map((r) => (
+                      <Row
+                        key={r.file.id}
+                        r={r}
+                        busy={busy}
+                        onRead={() => onRead([r.file])}
+                        onPrepareByHand={() => onPrepareByHand(r.file)}
+                        onDrop={() => onDrop(r.file)}
+                        onUndrop={() => onUndrop(r.file)}
+                      />
+                    ))}
+                </Fragment>
+              );
+            })}
+            {groups.length === 0 && (
               <tr><td colSpan={6} className="muted">No documents matched the required-input checklist. Switch to “Everything” to see the whole folder.</td></tr>
             )}
           </tbody>
@@ -173,7 +244,7 @@ function Row({
   const highlight = r.extractor && r.state === 'pending';
   return (
     <tr style={highlight ? { background: 'var(--warn-soft)' } : r.state === 'dropped' ? { opacity: 0.5 } : undefined}>
-      <td>
+      <td style={{ paddingLeft: 30 }}>
         <strong style={{ fontSize: 12.5 }}>{r.file.name}</strong>
         <div className="faint" style={{ fontSize: 11 }}>{r.file.path}</div>
       </td>

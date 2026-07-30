@@ -1,7 +1,7 @@
 // The coverage screen exists to answer "is the engine reading all my input data?".
 // Its value is entirely in not overstating what was read, so that is what these tests pin.
 import { describe, expect, it } from 'vitest';
-import { buildCoverage, coverageRank, extractorFor, kindOf, slotFor, type DocStates } from '../src/engine/coverage';
+import { buildCoverage, coverageRank, extractorFor, folderOf, groupCoverage, kindOf, slotFor, startsCollapsed, type DocStates } from '../src/engine/coverage';
 import type { DriveFile, DriveScan } from '../src/services/drive';
 
 const f = (name: string, path = `KOHLER OS/${name}`): DriveFile => ({
@@ -139,5 +139,60 @@ describe('coverageRank', () => {
     const order = [...rows].sort((x, y) => coverageRank(x) - coverageRank(y)).map((r) => r.file.name);
     expect(order[0]).toBe('BOQ.xlsx');
     expect(order.at(-1)).toBe('Schedule.xlsx');
+  });
+});
+
+describe('grouping — a folder of ninety photographs is one decision, not ninety', () => {
+  const photos = Array.from({ length: 40 }, (_, i) =>
+    f(`IMG_22${String(i).padStart(2, '0')}.HEIC`, `SKF, Pune OS/Day -0 Site Pictures Videos/IMG_22${String(i).padStart(2, '0')}.HEIC`),
+  );
+  const rows = buildCoverage(
+    scan([
+      ...photos,
+      f('priced BOQ_BCS.xlsx', 'SKF, Pune OS/Contract & scope/priced BOQ_BCS.xlsx'),
+      f('Schedule.xlsx', 'SKF, Pune OS/Contract & scope/Schedule.xlsx'),
+      f('Signed agreement.pdf', 'SKF, Pune OS/Contract & scope/Signed agreement.pdf'),
+    ]),
+  ).rows;
+
+  it('collapses 43 files into a handful of groups', () => {
+    const bySlot = groupCoverage(rows, 'slot');
+    expect(bySlot.length).toBeLessThan(6);
+    expect(bySlot.reduce((n, g) => n + g.rows.length, 0)).toBe(43);
+  });
+
+  it('puts groups holding readable documents first', () => {
+    const g = groupCoverage(rows, 'slot');
+    expect(g[0].readable).toBeGreaterThan(0);
+    // the 40 photographs are the biggest group but carry nothing parseable, so they sink
+    expect(g[0].rows.length).toBeLessThan(40);
+  });
+
+  it('groups by folder as well, keeping the path as the hint', () => {
+    const byFolder = groupCoverage(rows, 'folder');
+    const contract = byFolder.find((g) => g.label === 'Contract & scope')!;
+    expect(contract.rows).toHaveLength(3);
+    expect(contract.hint).toBe('SKF, Pune OS/Contract & scope');
+    expect(byFolder.find((g) => g.label === 'Day -0 Site Pictures Videos')!.rows).toHaveLength(40);
+  });
+
+  it('starts a big evidence group collapsed and a data-carrying one open', () => {
+    const byFolder = groupCoverage(rows, 'folder');
+    expect(startsCollapsed(byFolder.find((g) => g.label === 'Day -0 Site Pictures Videos')!)).toBe(true);
+    expect(startsCollapsed(byFolder.find((g) => g.label === 'Contract & scope')!)).toBe(false);
+  });
+
+  it('counts each state so the header can summarise without expanding', () => {
+    const withStates = buildCoverage(
+      scan([...photos, f('priced BOQ_BCS.xlsx', 'SKF, Pune OS/Contract & scope/priced BOQ_BCS.xlsx')]),
+      { 'priced BOQ_BCS.xlsx': { state: 'extracted', detail: '18 packages' } },
+    ).rows;
+    const g = groupCoverage(withStates, 'folder').find((x) => x.label === 'Contract & scope')!;
+    expect(g).toMatchObject({ extracted: 1, pending: 0, readable: 0 });
+  });
+
+  it('folderOf strips the filename', () => {
+    expect(folderOf('a/b/c.xlsx')).toBe('a/b');
+    expect(folderOf('loose.xlsx')).toBe('loose.xlsx');
   });
 });
