@@ -26,7 +26,7 @@ export interface Exception {
   id: string;
   severity: Rag;
   /** the module a click should take you to */
-  area: 'schedule' | 'design' | 'procurement' | 'billing' | 'manpower';
+  area: 'schedule' | 'design' | 'procurement' | 'materials' | 'billing' | 'manpower';
   title: string;
   detail: string;
   /** activities/trades this exception concerns, for brushing */
@@ -148,6 +148,42 @@ export function buildCockpit(plan: Plan, today: string): Cockpit {
       detail: `Order-by was ${p.orderBy} (${p.leadDays}d lead). It is needed on site by ${p.deliveryRequired}. Every day of delay now moves ${p.feeds ?? 'the dependent activity'}.`,
       trades: [],
     });
+
+  // ---------------------------------------------------------------- materials
+  // One level below procurement: a package can read "Partially Delivered" while the one board
+  // the site is actually waiting on is the thing holding the floor up.
+  const mat = plan.modules.materials;
+  if (mat.rows.length) {
+    const short = mat.rows.filter((m) => m.status !== 'Delivered' && m.requiredOnSite && m.requiredOnSite < today);
+    const materialRag: Rag = short.length > 3 ? 'red' : short.length ? 'amber' : mat.summary.orderOverdue ? 'amber' : 'green';
+    kpis.push({
+      key: 'materials',
+      label: 'Material at site',
+      value: `${short.length}`,
+      sub: `short on site, of ${mat.summary.items} tracked materials`,
+      rag: materialRag,
+    });
+    if (short.length)
+      flag({
+        severity: materialRag,
+        area: 'materials',
+        title: `${short.length} material${short.length === 1 ? '' : 's'} should already be on site`,
+        detail: short
+          .slice(0, 3)
+          .map((m) => `${m.item} — needed ${m.requiredOnSite} for ${m.consumedBy ?? 'site'}`)
+          .join('; ') + '.',
+        trades: [],
+      });
+    const freeIssue = mat.rows.filter((m) => m.supply === 'client' && m.status !== 'Delivered' && m.orderBy && m.orderBy < today);
+    if (freeIssue.length)
+      flag({
+        severity: 'amber',
+        area: 'materials',
+        title: `${freeIssue.length} client free-issue item${freeIssue.length === 1 ? '' : 's'} past the date they had to be ordered`,
+        detail: `${freeIssue.slice(0, 3).map((m) => m.item).join(', ')}. These are not on our PO — raise them with the client, they land on the same site dates as everything else.`,
+        trades: [],
+      });
+  }
 
   // ---------------------------------------------------------------- billing
   const ra = plan.modules.raMilestones;

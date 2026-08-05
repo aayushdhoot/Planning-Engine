@@ -6,7 +6,8 @@ import { addCalendarDays, parseIso } from './calendar';
 import { deriveWbs } from './wbs';
 import { levelManpower, type ManpowerPlan } from './manpower';
 import { buildDependencyTracker, buildDesignTracker, buildProcurementTracker, buildRaTracker, buildTodoTracker } from './trackers';
-import { summariseDesign, type DependencyRow, type DesignRow, type DesignSummary, type ProcurementRow, type RaMilestoneRow, type TodoRow } from '../domain/trackers';
+import { buildMaterialTracker } from './materials';
+import { summariseDesign, summariseMaterials, type DependencyRow, type DesignRow, type DesignSummary, type MaterialRow, type MaterialSummary, type ProcurementRow, type RaMilestoneRow, type TodoRow } from '../domain/trackers';
 import norms from '../norms/norms-v1.json';
 
 const comp = (v: number, src: string): Traced<number> => ({ value: v, provenance: 'computed', source: src });
@@ -54,6 +55,8 @@ export interface Plan {
     manpower: ManpowerPlan;
     resources: { role: string; count: Traced<number> }[];
     procurement: ProcurementRow[];
+    /** what has to physically land at site, one level below the procurement packages */
+    materials: { rows: MaterialRow[]; summary: MaterialSummary };
     design: { rows: DesignRow[]; summary: DesignSummary };
     todos: TodoRow[];
     dependencies: DependencyRow[];
@@ -108,6 +111,10 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
       manpower: { days: [], peak: 0, peakDate: null, averageDaily: 0, totalManDays: 0, trades: [], smoothness: 1, warnings: [] },
       resources: [],
       procurement: [],
+      materials: {
+        rows: [],
+        summary: { items: 0, delivered: 0, inTransit: 0, awaiting: 0, shortOnSite: 0, orderOverdue: 0, clientSupplied: 0, nextRequired: null },
+      },
       design: { rows: [], summary: { drawings: 0, approved: 0, pending: 0, percentComplete: 0 } },
       todos: [],
       dependencies: [],
@@ -237,6 +244,26 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
     if (!pr.feeds)
       assumptions.push({ area: 'procurement', text: `Package "${pr.category}" has no mapped site activity; order-by date not computed.`, internalOnly: true });
 
+  // Materials sit one level below procurement: the package says when to order, this says which
+  // physical items that package puts on site, on what date, and who is bringing them.
+  const materialRows = buildMaterialTracker(p, cpm.activities, base.modules.procurement, designRows, today, start);
+  base.modules.materials = { rows: materialRows, summary: summariseMaterials(materialRows, today) };
+  // Reported as one finding, not one per row: on a compressed fit-out a whole band of long-lead
+  // items is unorderable inside the programme, and thirty near-identical notes bury everything
+  // else. The rows themselves carry the detail.
+  const unworkable = materialRows.filter((m) => m.issues.length);
+  if (unworkable.length)
+    assumptions.push({
+      area: 'materials',
+      text: `${unworkable.length} of ${materialRows.length} site materials cannot be ordered inside the programme as scheduled — their lead times run behind the site start, so they had to be released at award. Longest exposure: ${unworkable
+        .slice()
+        .sort((a, b) => b.leadDays - a.leadDays)
+        .slice(0, 3)
+        .map((m) => `${m.item} (${m.leadDays}d lead, order-by ${m.orderBy})`)
+        .join('; ')}.`,
+      internalOnly: true,
+    });
+
   base.modules.todos = buildTodoTracker(cpm.activities, base.modules.procurement, designRows, today, start);
   base.modules.dependencies = buildDependencyTracker(cpm.activities, today, start);
 
@@ -287,7 +314,7 @@ function nextWorkingDay(iso: string, cfg: EngineConfig): string {
 }
 
 // ---------- External (client) view redaction ----------
-export function clientView(plan: Plan): Plan {
+export function clientView(plan: Plan, today: string = new Date().toISOString().slice(0, 10)): Plan {
   const clone: Plan = JSON.parse(JSON.stringify(plan));
   clone.audience = 'client';
   clone.margin = null;
@@ -301,6 +328,13 @@ export function clientView(plan: Plan): Plan {
   }));
   // procurement carries no money at all now, but vendor and internal remarks stay internal
   clone.modules.procurement = clone.modules.procurement.map((x) => ({ ...x, vendor: '', remarks: '', basis: '' }));
+  // The site material register is an internal working document — vendors, POs, storage bays and
+  // GRN notes. The client's stake in it is the material THEY owe us, so the client view keeps
+  // the free-issue rows and nothing else, redacted the same way procurement is.
+  const freeIssue = clone.modules.materials.rows
+    .filter((m) => m.supply === 'client')
+    .map((m) => ({ ...m, vendor: '', poNumber: '', remarks: '', basis: '', storage: '', issues: [] }));
+  clone.modules.materials = { rows: freeIssue, summary: summariseMaterials(freeIssue, today) };
   clone.buffer = { ...clone.buffer, internalBufferDays: 0 };
   clone.ieInvariant = { externalEnd: clone.ieInvariant.externalEnd, internalEnd: null, bufferCalendarDays: null, holds: clone.ieInvariant.holds };
   clone.internal = null;

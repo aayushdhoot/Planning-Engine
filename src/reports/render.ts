@@ -84,6 +84,13 @@ function clientReport(plan: Plan): string {
   ${plan.modules.procurement.map((i) => `<tr><td>${esc(i.category)}</td><td>${i.criticality}</td><td>${i.deliveryRequired ?? '—'}</td></tr>`).join('')}
   </tbody></table>
 
+  ${plan.modules.materials.rows.length ? `<h2>Material supplied by you (free issue)</h2>
+  <div class="note">These items are not on our purchase orders. Each has to be at site by the date shown for the
+  activity that uses it to start on programme.</div>
+  <table><thead><tr><th>Material</th><th>Unit</th><th>Required on site</th><th>Status</th><th>Feeds</th></tr></thead><tbody>
+  ${plan.modules.materials.rows.map((m) => `<tr><td>${esc(m.item)}</td><td class="muted">${esc(m.unit)}</td><td>${m.requiredOnSite ?? '—'}</td><td>${m.status}</td><td class="muted">${esc(m.consumedBy ?? '—')}</td></tr>`).join('')}
+  </tbody></table>` : ''}
+
   <h2>Inputs required from client / builder</h2>
   <div class="note">The dates below are the latest at which each item can be received without impacting the contract completion date.</div>
   <table><thead><tr><th>Sr</th><th>Area</th><th>Description</th><th>Responsibility</th><th>Plan date</th><th>Status</th></tr></thead><tbody>
@@ -150,6 +157,14 @@ function internalReport(plan: Plan): string {
   <h2>Procurement — order-by and delivery required</h2>
   <table><thead><tr><th>Category</th><th>Sub</th><th>Criticality</th><th>Order by</th><th>Delivery required</th><th>Vendor</th><th>Order status</th><th>Gated by</th></tr></thead><tbody>
   ${plan.modules.procurement.map((i) => `<tr><td>${esc(i.category)}</td><td class="muted">${esc(i.subCategory)}</td><td>${i.criticality}</td><td>${i.orderBy ?? '—'}</td><td>${i.deliveryRequired ?? '—'}</td><td>${esc(i.vendor) || '—'}</td><td>${i.orderStatus}</td><td class="src">${esc(i.gatedBy ?? '—')}</td></tr>`).join('')}
+  </tbody></table>
+
+  <h2>Material at site — delivery register (${plan.modules.materials.summary.items} items)</h2>
+  <div class="note">One level below the procurement packages: what physically has to land, when, and who brings it.
+  ${plan.modules.materials.summary.shortOnSite} item(s) are past their required-on-site date;
+  ${plan.modules.materials.summary.clientSupplied} are client free issue and are not on our purchase orders.</div>
+  <table><thead><tr><th>Cost head</th><th>Material</th><th>Make</th><th>Supply</th><th>Vendor / PO</th><th>Order by</th><th>Required on site</th><th>Status</th><th>Consumed by</th></tr></thead><tbody>
+  ${plan.modules.materials.rows.map((m) => `<tr><td class="muted">${esc(m.category)}</td><td>${esc(m.item)}</td><td class="muted">${esc(m.make) || '—'}</td><td>${m.supply === 'procured' ? 'Procured' : m.supply === 'vendor' ? 'Vendor' : 'Client'}</td><td class="muted">${esc([m.vendor, m.poNumber].filter(Boolean).join(' · ')) || '—'}</td><td>${m.orderBy ?? '—'}</td><td>${m.requiredOnSite ?? '—'}</td><td>${m.status}</td><td class="src">${esc(m.consumedBy ?? '—')}</td></tr>`).join('')}
   </tbody></table>
 
   <h2>Manpower — levelled contractor gangs</h2>

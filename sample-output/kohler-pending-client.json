@@ -67,6 +67,19 @@
       "trades": [],
       "warnings": []
     },
+    "materials": {
+      "rows": [],
+      "summary": {
+        "awaiting": 0,
+        "clientSupplied": 0,
+        "delivered": 0,
+        "inTransit": 0,
+        "items": 0,
+        "nextRequired": null,
+        "orderOverdue": 0,
+        "shortOnSite": 0
+      }
+    },
     "procurement": [],
     "raMilestones": [],
     "resources": [],

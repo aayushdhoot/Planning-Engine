@@ -1,7 +1,9 @@
 import { Fragment, useMemo, useState } from 'react';
 import type { CalendarConfig, EngineConfig, ProjectInputs, ScheduleDates, Traced } from './domain/types';
-import type { DesignRow, TodoRow, TrackStatus } from './domain/trackers';
-import { TRACK_STATUSES, delayDays } from './domain/trackers';
+import type { DesignRow, MaterialInspection, MaterialRow, MaterialStatus, MaterialSupply, TodoRow, TrackStatus } from './domain/trackers';
+import {
+  MATERIAL_INSPECTIONS, MATERIAL_STATUSES, MATERIAL_SUPPLIES, SUPPLY_LABEL, TRACK_STATUSES, delayDays, summariseMaterials,
+} from './domain/trackers';
 import { buildPlan, clientView, type Plan } from './engine/planner';
 import { auditTrace, canonicalJson, validatePlan } from './engine/schema';
 import { buildPertFromPlan } from './engine/pert-build';
@@ -29,7 +31,7 @@ import { buildDeck } from './reports/deck';
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
-const TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'To-do', 'Dependencies', 'RA Milestones', 'Project settings', 'Admin', 'Settings'] as const;
+const TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material at site', 'To-do', 'Dependencies', 'RA Milestones', 'Project settings', 'Admin', 'Settings'] as const;
 type Tab = (typeof TABS)[number];
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -160,6 +162,7 @@ export default function App() {
               setTab(
                 area === 'design' ? 'Design'
                 : area === 'procurement' ? 'Procurement'
+                : area === 'materials' ? 'Material at site'
                 : area === 'billing' ? 'RA Milestones'
                 : area === 'manpower' ? 'Manpower'
                 : 'PERT',
@@ -172,6 +175,7 @@ export default function App() {
         {tab === 'Manpower' && <Manpower plan={plan} />}
         {tab === 'Design' && <Design plan={plan} edit={edit} val={val} />}
         {tab === 'Procurement' && <Procurement plan={plan} view={view} edit={edit} val={val} />}
+        {tab === 'Material at site' && <Materials plan={plan} view={view} today={today} edit={edit} val={val} />}
         {tab === 'To-do' && (
           <Todos
             plan={plan}
@@ -739,6 +743,261 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
           ))}</tbody>
         </table>
       </div>
+    </>
+  );
+}
+
+const materialStatusClass = (s: MaterialStatus): string =>
+  s === 'Delivered' ? 'ok' : s === 'In Transit' ? 'info' : s === 'Partially Delivered' ? 'warn' : s === 'Returned' ? 'crit' : '';
+
+/**
+ * Material tracker at site — one level below the procurement packages.
+ *
+ * Procurement plans the package: "Electrical, order by 12-Jun, on site by 30-Jun". Site does
+ * not receive a package. It receives gypsum boards, ply, wire drums, GI ducting and
+ * workstations, each with its own lead time, its own vendor and its own delivery note — and a
+ * package reading "Partially Delivered" never says which of those the floor is waiting on.
+ *
+ * Every row states how the material arrives. Bought on our own PO, and the vendor is then read
+ * live off the procurement row that raises it rather than typed twice; supplied by the work
+ * contractor against their own PO; or free-issued by the client. Quantities, GRN dates, storage
+ * and inspection are entered by site — the engine computes the dates and the links, nothing else.
+ */
+function Materials({
+  plan, view, today, edit, val,
+}: {
+  plan: Plan; view: string; today: string; edit: EditFn; val: ValFn;
+}) {
+  const [cat, setCat] = useState<string>('all');
+  const [route, setRoute] = useState<'all' | MaterialSupply>('all');
+  const [riskOnly, setRiskOnly] = useState(false);
+  const rows = plan.modules.materials.rows;
+  const procById = useMemo(() => new Map(plan.modules.procurement.map((p) => [p.id, p])), [plan.modules.procurement]);
+
+  // The register is a live document: every count below is computed from what the team has
+  // actually recorded, never from the generated defaults.
+  const live: MaterialRow[] = rows.map((r) => ({
+    ...r,
+    supply: val(r.id, 'supply', r.supply) as MaterialSupply,
+    status: val(r.id, 'status', r.status) as MaterialStatus,
+    inspection: val(r.id, 'inspection', r.inspection) as MaterialInspection,
+    actualDelivery: (val(r.id, 'actualDelivery', r.actualDelivery ?? '') as string) || null,
+  }));
+  const summary = summariseMaterials(live, today);
+
+  if (!rows.length)
+    return <p className="muted">No material register — the programme has not been generated yet.</p>;
+
+  if (view === 'external')
+    return (
+      <>
+        <div className="banner info" style={{ marginBottom: 14 }}>
+          The site material register — vendors, purchase orders, storage bays and goods-received notes — is an
+          internal working document. What is shown here is the material <strong>you supply to us</strong>, with the
+          date each has to be on site for the programme to hold.
+        </div>
+        <h2>Client free-issue material</h2>
+        <div className="tblwrap">
+          <table>
+            <thead><tr><th>Material</th><th>Unit</th><th>Required on site</th><th>Status</th><th>Feeds</th></tr></thead>
+            <tbody>{live.map((r) => (
+              <tr key={r.id}>
+                <td>{r.item}</td>
+                <td className="muted">{r.unit}</td>
+                <td className="mono">{r.requiredOnSite ?? '—'}</td>
+                <td><span className={`tag ${materialStatusClass(r.status)}`}>{r.status}</span></td>
+                <td className="faint" style={{ maxWidth: 240 }}>{r.consumedBy ?? '—'}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </>
+    );
+
+  const categories = [...new Set(rows.map((r) => r.category))];
+  const atRisk = (r: MaterialRow) =>
+    (r.status !== 'Delivered' && r.requiredOnSite !== null && r.requiredOnSite < today) ||
+    (r.status === 'Not Ordered' && r.orderBy !== null && r.orderBy < today) ||
+    r.issues.length > 0;
+  const shown = live.filter(
+    (r) => (cat === 'all' || r.category === cat) && (route === 'all' || r.supply === route) && (!riskOnly || atRisk(r)),
+  );
+  const short = live.filter((r) => r.status !== 'Delivered' && r.requiredOnSite && r.requiredOnSite < today);
+
+  const num = (id: string, field: string, current: number | null): number | null => {
+    const raw = val(id, field, current === null ? '' : String(current)) as string;
+    const n = Number(raw);
+    return raw.trim() === '' || Number.isNaN(n) ? null : n;
+  };
+
+  return (
+    <>
+      <div className="cards">
+        <div className="card"><div className="k">Materials tracked</div><div className="v">{summary.items}</div><div className="s">across {categories.length} cost heads</div></div>
+        <div className="card"><div className="k">Delivered</div><div className="v" style={{ color: 'var(--ok)' }}>{summary.delivered}</div><div className="s">{summary.inTransit} in transit</div></div>
+        <div className="card" style={summary.shortOnSite ? { borderColor: 'var(--crit)', background: 'var(--crit-soft)' } : undefined}>
+          <div className="k">Short on site</div>
+          <div className="v" style={{ color: summary.shortOnSite ? 'var(--crit)' : undefined }}>{summary.shortOnSite}</div>
+          <div className="s">required date passed, not received</div>
+        </div>
+        <div className="card" style={summary.orderOverdue ? { borderColor: 'var(--warn)', background: 'var(--warn-soft)' } : undefined}>
+          <div className="k">Not ordered, past order-by</div>
+          <div className="v" style={{ color: summary.orderOverdue ? 'var(--warn)' : undefined }}>{summary.orderOverdue}</div>
+          <div className="s">the lead time no longer fits</div>
+        </div>
+        <div className="card" style={{ borderColor: 'var(--ext)' }}>
+          <div className="k">Client free issue</div>
+          <div className="v" style={{ color: 'var(--ext)' }}>{summary.clientSupplied}</div>
+          <div className="s">not on our PO — chase the client</div>
+        </div>
+        <div className="card">
+          <div className="k">Next required</div>
+          <div className="v" style={{ fontSize: 14 }}>{summary.nextRequired ? summary.nextRequired.requiredOnSite : '—'}</div>
+          <div className="s">{summary.nextRequired ? summary.nextRequired.item : 'everything received'}</div>
+        </div>
+      </div>
+
+      {short.length > 0 && (
+        <div className="banner" style={{ marginBottom: 12 }}>
+          <strong>{short.length} material{short.length === 1 ? '' : 's'} should already be on site.</strong>
+          <ul style={{ margin: '6px 0 0 18px', padding: 0 }}>
+            {short.slice(0, 5).map((r) => (
+              <li key={r.id}>
+                <strong>{r.item}</strong> — needed {r.requiredOnSite} for {r.consumedBy ?? 'site'}
+                {r.supply === 'client' ? ' · client free issue' : r.supply === 'vendor' ? ' · vendor supplied' : ''}
+              </li>
+            ))}
+          </ul>
+          {short.length > 5 && <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>+{short.length - 5} more in the register.</div>}
+        </div>
+      )}
+
+      <h2>Material delivery register</h2>
+      <p className="muted" style={{ marginTop: -4, fontSize: 12.5, maxWidth: 900 }}>
+        Each material is dated against the activity that consumes it — on site two days before that activity starts,
+        ordered that many days earlier again for its own lead time. Quantities, delivery dates, storage and
+        inspection are recorded by site; the engine does not invent what was unloaded.
+      </p>
+      <div className="row" style={{ margin: '10px 0' }}>
+        {/* nineteen cost heads do not fit a segmented control — this is a list, not a toggle */}
+        <div className="field" style={{ minWidth: 260 }}>
+          <label>Cost head</label>
+          <select value={cat} onChange={(e) => setCat(e.target.value)}>
+            <option value="all">All cost heads ({rows.length})</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>{c} ({rows.filter((r) => r.category === c).length})</option>
+            ))}
+          </select>
+        </div>
+        <div className="field" style={{ minWidth: 210 }}>
+          <label>Supply route</label>
+          <select value={route} onChange={(e) => setRoute(e.target.value as 'all' | MaterialSupply)}>
+            <option value="all">Every route ({rows.length})</option>
+            {MATERIAL_SUPPLIES.map((s) => (
+              <option key={s} value={s}>{SUPPLY_LABEL[s]} ({live.filter((r) => r.supply === s).length})</option>
+            ))}
+          </select>
+        </div>
+        <button className={riskOnly ? 'primary' : ''} onClick={() => setRiskOnly(!riskOnly)}>
+          {riskOnly ? 'Showing at-risk only' : `At risk (${live.filter(atRisk).length})`}
+        </button>
+      </div>
+
+      {!shown.length ? (
+        <p className="muted">Nothing matches that filter.</p>
+      ) : (
+        <div className="tblwrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cost head</th><th>Material</th><th>Make</th><th>Unit</th><th>Supply</th><th>Vendor / PO</th>
+                <th>Ordered</th><th>Received</th><th>Balance</th>
+                <th>Order by</th><th>Required on site</th><th>Expected</th><th>Actual (GRN)</th>
+                <th>Status</th><th>Inspection</th><th>Storage</th><th>Consumed by</th><th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>{shown.map((r) => {
+              const proc = r.procurementId ? procById.get(r.procurementId) ?? null : null;
+              // a material we buy ourselves takes its vendor from the procurement row that raises
+              // the PO, so appointing a vendor once there shows up here rather than being retyped
+              const procVendor = proc ? (val(proc.id, 'vendor', proc.vendor) as string) : '';
+              const ordered = num(r.id, 'orderedQty', r.orderedQty);
+              const received = num(r.id, 'deliveredQty', r.deliveredQty);
+              const balance = ordered === null || received === null ? null : ordered - received;
+              const late = r.status !== 'Delivered' && r.requiredOnSite !== null && r.requiredOnSite < today;
+              return (
+                <tr key={r.id} style={late ? { background: 'var(--crit-soft)' } : r.supply === 'client' ? { background: 'var(--ext-soft)' } : undefined}>
+                  <td className="muted">{r.category}</td>
+                  <td title={[r.basis, ...r.issues].join(' · ')}>
+                    {r.item}
+                    {r.issues.length > 0 && <span className="tag crit" style={{ marginLeft: 6 }}>!</span>}
+                    <div className="faint" style={{ fontSize: 11 }}>{r.leadDays}d lead</div>
+                  </td>
+                  <TextCell id={r.id} field="make" current={r.make} edit={edit} val={val} placeholder="make" />
+                  <td className="muted mono">{r.unit}</td>
+                  <td className="edit">
+                    <select value={r.supply} onChange={(e) => edit(r.id, 'supply', e.target.value)}
+                      className={`tag ${r.supply === 'client' ? 'ext' : r.supply === 'vendor' ? 'warn' : 'info'}`}>
+                      {MATERIAL_SUPPLIES.map((s) => <option key={s} value={s}>{SUPPLY_LABEL[s]}</option>)}
+                    </select>
+                  </td>
+                  <td className="edit" style={{ minWidth: 190 }}>
+                    {r.supply === 'procured' && proc ? (
+                      <div className="faint" style={{ fontSize: 11.5 }}>
+                        {procVendor || <em>vendor not appointed</em>}
+                        <div>via procurement · {proc.category} · {val(proc.id, 'orderStatus', proc.orderStatus) as string}</div>
+                      </div>
+                    ) : (
+                      <input value={val(r.id, 'vendor', r.vendor) as string}
+                        placeholder={r.supply === 'client' ? 'client contact' : 'vendor'}
+                        onChange={(e) => edit(r.id, 'vendor', e.target.value)} />
+                    )}
+                    <input value={val(r.id, 'poNumber', r.poNumber) as string} placeholder="PO / WO no."
+                      onChange={(e) => edit(r.id, 'poNumber', e.target.value)} />
+                  </td>
+                  <td className="edit"><input style={{ width: 70 }} placeholder="—" value={val(r.id, 'orderedQty', r.orderedQty === null ? '' : String(r.orderedQty)) as string}
+                    onChange={(e) => edit(r.id, 'orderedQty', e.target.value)} /></td>
+                  <td className="edit"><input style={{ width: 70 }} placeholder="—" value={val(r.id, 'deliveredQty', r.deliveredQty === null ? '' : String(r.deliveredQty)) as string}
+                    onChange={(e) => edit(r.id, 'deliveredQty', e.target.value)} /></td>
+                  <td className="mono">
+                    {balance === null ? <span className="faint">—</span>
+                      : balance > 0 ? <span className="tag warn">{balance} {r.unit}</span>
+                      : <span className="tag ok">nil</span>}
+                  </td>
+                  <td className="mono" title={r.basis}>
+                    {r.orderBy ?? '—'}
+                    {r.orderBy && r.orderBy < today && r.status === 'Not Ordered' && (
+                      <div className="faint" style={{ fontSize: 11, color: 'var(--crit)' }}>passed</div>
+                    )}
+                  </td>
+                  <td className="mono" title={r.basis}>
+                    <strong style={late ? { color: 'var(--crit)' } : undefined}>{r.requiredOnSite ?? '—'}</strong>
+                  </td>
+                  <DateCell id={r.id} field="expectedDelivery" current={r.expectedDelivery} edit={edit} val={val} />
+                  <DateCell id={r.id} field="actualDelivery" current={r.actualDelivery} edit={edit} val={val} />
+                  <td className="edit">
+                    <select value={r.status} onChange={(e) => edit(r.id, 'status', e.target.value)} className={`tag ${materialStatusClass(r.status)}`}>
+                      {MATERIAL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </td>
+                  <td className="edit">
+                    <select value={r.inspection} onChange={(e) => edit(r.id, 'inspection', e.target.value)}
+                      className={`tag ${r.inspection === 'Accepted' ? 'ok' : r.inspection === 'Rejected' ? 'crit' : r.inspection === 'Accepted with deviation' ? 'warn' : ''}`}>
+                      {MATERIAL_INSPECTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </td>
+                  <TextCell id={r.id} field="storage" current={r.storage} edit={edit} val={val} placeholder="area / bay" />
+                  <td className="faint" style={{ maxWidth: 200 }}>
+                    {r.consumedBy ?? '—'}
+                    {r.gatedBy && <div style={{ fontSize: 11 }}>gated by {r.gatedBy}</div>}
+                  </td>
+                  <TextCell id={r.id} field="remarks" current={r.remarks} edit={edit} val={val} />
+                </tr>
+              );
+            })}</tbody>
+          </table>
+        </div>
+      )}
     </>
   );
 }

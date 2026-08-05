@@ -41,7 +41,7 @@ describe('cockpit', () => {
   });
 
   it('routes every exception to a real module', () => {
-    for (const e of c.exceptions) expect(['schedule', 'design', 'procurement', 'billing', 'manpower']).toContain(e.area);
+    for (const e of c.exceptions) expect(['schedule', 'design', 'procurement', 'materials', 'billing', 'manpower']).toContain(e.area);
   });
 
   it('rolls trades up by work content, biggest first', () => {

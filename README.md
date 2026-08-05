@@ -1,9 +1,9 @@
 # DnB Planning Engine
 
 Turns a fit-out project's inputs — priced BOQ, contract, programme — into a full plan:
-PERT schedule, manpower, resources, design tracker, procurement tracker, to-do list,
-client/builder dependencies and cashflow. Every plan exists in an **Internal** and a
-**Client** view, and the two are genuinely different documents.
+PERT schedule, manpower, resources, design tracker, procurement tracker, site material register,
+to-do list, client/builder dependencies and RA billing milestones. Every plan exists in an
+**Internal** and a **Client** view, and the two are genuinely different documents.
 
 ## Try it in 10 seconds
 
@@ -25,7 +25,7 @@ npm run dev                    # http://localhost:5173
 | Command | What it does |
 |---|---|
 | `npm start` | Builds and serves at http://localhost:4173 **with the Drive proxy**, so link scanning works outside dev |
-| `npm run gates` | The full bar: typecheck → lint → 250 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 272 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -85,21 +85,35 @@ work. Scrolling 182 names in a native dropdown was not a workflow. Carpet area s
 here overrides the BOQ figure and is recorded as an input from project settings.
 
 **Sections.** Cockpit · Overview · PERT (**PERT network / Gantt / S-curve**) · Manpower · Design ·
-Procurement · To-do · Dependencies · RA Milestones · New project · Settings (resource plan,
-calendar, norms, Drive access and the canonical JSON live here).
+Procurement · **Material at site** · To-do · Dependencies · RA Milestones · New project · Settings
+(resource plan, calendar, norms, Drive access and the canonical JSON live here).
 
-**Five live trackers**, in the working formats:
+**Six live trackers**, in the working formats:
 
 | Tracker | Columns |
 |---|---|
 | Design | Category (GFC/MEP/Sampling) · Sub Category · **Zone** · Drawing · Criticality · Revision · **Ready by** · Status (INT) · **Client approval by** · Status (Client) · Releases — two targets only, each validated against the activity it gates |
 | Procurement | Category · Sub Category · Criticality · **Order by** · **Delivery required** · Revised · Vendor · Order status · Delivery status · Responsibility · Gated by · Feeds |
+| Material at site | Cost head · Material · Make · Unit · **Supply route** · **Vendor / PO** · Ordered · Received · Balance · Order by · **Required on site** · Expected · **Actual (GRN)** · Status · Inspection · Storage · Consumed by |
 | To-do | Description · Responsibility · Priority · Status · Start · End · Revised · Notes |
 | Dependencies | Sr · Area · Description · Responsibility · Plan date · Actual date · Delay · Status · Remarks |
 | RA milestones | RA · Day · % · Amount (excl. tax) · Incl. GST · Post retention · Due · Revised · Readiness · Status · Invoice raised · Received · Payment date — each RA expands into its milestones, and each milestone into its sub-milestones |
 
 Every status, date and note is editable in the app. Procurement deliberately carries **no BOQ
 or BCS value** — only when to order and when it must land on site.
+
+**Material at site sits one level below procurement.** Procurement plans the package —
+"Electrical, order by 12-Jun". Site does not receive a package: it receives gypsum boards, ply,
+wire drums, GI ducting and workstations, each with its own lead time, its own vendor and its own
+delivery note, and a package reading *Partially Delivered* never says which of them the floor is
+waiting on. Each material is dated against the activity that consumes it — on site two days
+before it starts, ordered its own lead time earlier again — and every row says **how it arrives**:
+bought on our own PO (the vendor is then read live off the procurement row that raises it, so
+appointing a vendor once shows up on every material under that head), supplied by the work
+contractor against their PO/WO, or **client free issue**. Quantities, GRN dates, storage bay and
+inspection are recorded by site; the engine computes dates and links and nothing else. Cost heads
+are matched to the project's own BOQ coding — by code, then name, then trade — because SKF codes
+HVAC as `HVAC`, KOHLER as `D1` and Emirates as `D`.
 
 **GFC covers what actually has to be drawn.** Technical drawings are raised from the BOQ — every
 carpentry, modular and partition cost head gets a TD — and elevations are raised per zone.

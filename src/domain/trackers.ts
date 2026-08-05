@@ -139,6 +139,8 @@ export function summariseRa(rows: RaMilestoneRow[], today: string): RaSummary {
  */
 export interface ProcurementRow {
   id: string;
+  /** BOQ package code this row buys — the join the material register uses to link back here */
+  packageCode: string;
   category: string;
   subCategory: string;
   criticality: Criticality;
@@ -161,6 +163,120 @@ export interface ProcurementRow {
   /** the site activity this feeds */
   feeds: string | null;
   basis: string;
+}
+
+// ------------------------------------------------------------ site materials
+
+/**
+ * How a material reaches site. The distinction matters because it decides who is chased when
+ * it is late: our own procurement desk, the work contractor, or the client.
+ */
+export type MaterialSupply = 'procured' | 'vendor' | 'client';
+export const MATERIAL_SUPPLIES: MaterialSupply[] = ['procured', 'vendor', 'client'];
+export const SUPPLY_LABEL: Record<MaterialSupply, string> = {
+  procured: 'Procured by us',
+  vendor: 'Vendor supplied',
+  client: 'Client free issue',
+};
+
+/** Where the consignment has got to. Distinct from the package-level procurement status. */
+export type MaterialStatus = 'Not Ordered' | 'Ordered' | 'In Transit' | 'Partially Delivered' | 'Delivered' | 'Returned';
+export const MATERIAL_STATUSES: MaterialStatus[] = ['Not Ordered', 'Ordered', 'In Transit', 'Partially Delivered', 'Delivered', 'Returned'];
+
+/** What site said about it when it was unloaded. */
+export type MaterialInspection = 'Pending' | 'Accepted' | 'Accepted with deviation' | 'Rejected';
+export const MATERIAL_INSPECTIONS: MaterialInspection[] = ['Pending', 'Accepted', 'Accepted with deviation', 'Rejected'];
+
+/**
+ * Site material register — what physically has to land at site, when, and from whom.
+ *
+ * The procurement tracker works one level up, at BOQ-package level: "Electrical, order by
+ * 12-Jun". Site does not receive a package; it receives gypsum boards, ply, wire drums, GI
+ * ducting and workstations, each with its own lead time, its own vendor and its own delivery
+ * note. This is that register.
+ *
+ * Every row states how it arrives: bought on our own PO (and therefore linked to the
+ * procurement row that raises it, inheriting its vendor), supplied by the work contractor
+ * against their own PO/WO, or free-issued by the client. Quantities and GRN dates are entered
+ * by site — the engine has no way to know what was unloaded, so it computes only the dates.
+ */
+export interface MaterialRow {
+  id: string;
+  /** BOQ package this material is bought under; '' for client free-issue items outside the BOQ */
+  packageCode: string;
+  /** the procurement row that raises the PO for it, when we buy it ourselves */
+  procurementId: string | null;
+  /** package name, used as the grouping heading */
+  category: string;
+  /** the material itself, e.g. "Gypsum board 12.5mm" */
+  item: string;
+  /** make from the approved make list / norms; blank when not fixed yet */
+  make: string;
+  unit: string;
+  supply: MaterialSupply;
+  /** vendor for a contractor- or client-supplied material; ours comes from the procurement row */
+  vendor: string;
+  /** PO / WO reference — ours when procured, theirs when supplied */
+  poNumber: string;
+  /** entered by site; the engine does not derive quantities from a value-only BOQ */
+  orderedQty: number | null;
+  deliveredQty: number | null;
+  /** lead time used to back-schedule the order-by date */
+  leadDays: number;
+  /** latest date the order can be placed for it to land on time */
+  orderBy: string | null;
+  /** date it must be on site — two days before the activity that consumes it starts */
+  requiredOnSite: string | null;
+  expectedDelivery: string | null;
+  actualDelivery: string | null;
+  status: MaterialStatus;
+  inspection: MaterialInspection;
+  /** where it is stacked once it lands */
+  storage: string;
+  /** the site activity that consumes it */
+  consumedBy: string | null;
+  /** the drawing or sample approval that must land before it can be ordered */
+  gatedBy: string | null;
+  responsibility: string;
+  remarks: string;
+  /** provenance for the computed dates */
+  basis: string;
+  /** ways this row's dates cannot work as scheduled */
+  issues: string[];
+}
+
+export interface MaterialSummary {
+  items: number;
+  delivered: number;
+  inTransit: number;
+  /** anything not fully delivered */
+  awaiting: number;
+  /** required date has passed and it is not on site — the register's whole point */
+  shortOnSite: number;
+  /** order-by has passed and nothing has been ordered */
+  orderOverdue: number;
+  clientSupplied: number;
+  /** earliest not-yet-delivered material, by required date */
+  nextRequired: MaterialRow | null;
+}
+
+const DELIVERED: MaterialStatus[] = ['Delivered'];
+
+export function summariseMaterials(rows: MaterialRow[], today: string): MaterialSummary {
+  const outstanding = rows.filter((r) => !DELIVERED.includes(r.status));
+  return {
+    items: rows.length,
+    delivered: rows.filter((r) => DELIVERED.includes(r.status)).length,
+    inTransit: rows.filter((r) => r.status === 'In Transit').length,
+    awaiting: outstanding.length,
+    shortOnSite: outstanding.filter((r) => r.requiredOnSite && r.requiredOnSite < today).length,
+    orderOverdue: rows.filter((r) => r.status === 'Not Ordered' && r.orderBy && r.orderBy < today).length,
+    clientSupplied: rows.filter((r) => r.supply === 'client').length,
+    nextRequired:
+      outstanding
+        .filter((r) => r.requiredOnSite)
+        .sort((a, b) => (a.requiredOnSite! < b.requiredOnSite! ? -1 : 1))[0] ?? null,
+  };
 }
 
 /**

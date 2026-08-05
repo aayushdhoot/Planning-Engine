@@ -34,15 +34,16 @@ src/domain/types.ts        Traced<T>, Activity, BoqPackage, EngineConfig …
 src/engine/calendar.ts     working-day arithmetic (off-days, holidays)
 src/engine/cpm.ts          forward/backward pass, FS/SS/FF + lags, float, critical path
 src/engine/wbs.ts          scope → WBS when no schedule is supplied (per-unit norms, value fallback)
-src/engine/planner.ts      orchestrator → Plan (8 modules) + clientView() redaction
+src/engine/planner.ts      orchestrator → Plan (9 modules) + clientView() redaction
+src/engine/materials.ts    site material register: cost heads → materials, dated off the consuming activity
 src/engine/schema.ts       canonical key-sorted JSON, validation, traceability audit
 src/norms/norms-v1.json    ALL norms — versioned data, never code
 src/services/ingestion.ts  IngestionService: xlsx/CSV BOQ parser
 src/services/persistence.ts PersistenceService: memory + file-based workspace
 src/reports/render.ts      branded HTML reports (client ≠ internal)
 src/reports/deck.ts        branded PPTX decks (client ≠ internal)
-src/App.tsx, src/ui/       React app: 11 tabs, I/E toggle, SVG Gantt
-tests/                     54 tests — the Tier-1 gates live here
+src/App.tsx, src/ui/       React app: 13 tabs, I/E toggle, SVG Gantt
+tests/                     272 tests — the Tier-1 gates live here
 scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
 ```
 
@@ -153,6 +154,36 @@ rows as "Summary" and looked broken. Hand expand/collapse still works — the le
   resource allocation, site verification, tool creation, Wispr onboarding, client group,
   welcome email…). They are seeded from the project start and, unlike the derived rows, are
   NOT horizon-filtered — a mobilisation task nobody did stays on the list until it is closed.
+
+## Material at site (`modules.materials`, `src/engine/materials.ts`)
+The register one level below procurement. Procurement plans the *package*; site receives
+*materials* — gypsum board, ply, wire, ducting, workstations — each with its own lead time,
+vendor and delivery note.
+- **Cost heads are matched to the project's own BOQ coding**, by `code` → `match` (name regex)
+  → sole package of the head's `trade`. This is the part to be careful with: BOQ coding is
+  per-project. SKF codes HVAC `HVAC` and networking `PN`; KOHLER uses `D1` / `E1`; Emirates runs
+  `A`–`J`. The first cut keyed on codes alone and silently dropped every duct, pipe and cable
+  from two of the three projects. `tests/materials.test.ts` pins all three schemes.
+- **A head nobody can confidently attribute is left unowned** rather than guessed onto the
+  nearest package: the row still carries its dates, `packageCode` is `''`, and the team picks
+  the supply route. Emirates has no separate glass head, so its glass rows are unlinked.
+- **`supply` decides who is chased.** `procured` links to the `ProcurementRow` that raises the
+  PO and the UI reads that row's vendor **live**, so appointing a vendor once on Procurement
+  shows up on every material under that head. `vendor` and `client` (free issue) carry their own
+  name and PO instead. Free issue is raised on every project — it is outside the BOQ by
+  definition, and it is what holds up handover when nobody tracked it.
+- **Dates**: on site `ON_SITE_AHEAD_DAYS` (2) before the consuming activity starts — the same
+  rule procurement uses — and order-by is that date less the material's own lead time, taken
+  from `norms.materialLeadTimesDays` when that list carries the item, else the catalogue, else
+  the package lead time. Always stated in `basis`.
+- **`issues[]` is structural only** (no consuming activity; order-by before the project start).
+  Ordering ahead of a design approval is true of ~70% of rows on a compressed fit-out, so it is
+  seeded into `remarks` instead — the same mistake the design tracker already learned not to
+  make. The plan-level assumption reports the band once, not thirty times.
+- **Quantities, GRN dates, storage and inspection are entered, never computed.** A value-only
+  BOQ says nothing about how many boards are coming.
+- `clientView()` keeps **only the client's own free issue**, redacted like procurement;
+  `validatePlan()` fails a client plan carrying anything else, or any vendor/PO/storage.
 
 ## Actual dates vs contract dates
 `cfg.dates` (`ScheduleDates`) carries four optional overrides. A contract states a start and a

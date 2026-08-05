@@ -126,6 +126,10 @@ export function clientDeck(plan: Plan): Pptx {
   tableSlides(pptx, 'Procurement — delivery dates required on site', ['Package', 'Criticality', 'Delivery required'],
     plan.modules.procurement.map((i) => [i.category, i.criticality, i.deliveryRequired ?? '—']), brand, [7, 2.6, 2.7], 14);
 
+  if (plan.modules.materials.rows.length)
+    tableSlides(pptx, 'Material you supply to us — free issue', ['Material', 'Unit', 'Required on site', 'Status'],
+      plan.modules.materials.rows.map((m) => [m.item, m.unit, m.requiredOnSite ?? '—', m.status]), brand, [6.2, 1.4, 2.4, 2.3], 12);
+
   tableSlides(pptx, 'Billing milestones', ['RA', 'Due', '%', 'Status'],
     plan.modules.raMilestones.map((m) => [m.code, m.dueDate, `${m.percent}%`, m.status]), brand, [2, 3.4, 2.4, 4.5], 14);
 
@@ -171,6 +175,24 @@ export function internalDeck(plan: Plan): Pptx {
     ['Category', 'Sub', 'Criticality', 'Order by', 'Delivery required', 'Order status', 'Gated by'],
     plan.modules.procurement.map((i) => [i.category, i.subCategory, i.criticality, i.orderBy ?? '—', i.deliveryRequired ?? '—', i.orderStatus, i.gatedBy ?? '—']),
     brand, [2.2, 2.0, 1.4, 1.3, 1.6, 1.3, 2.5], 14);
+
+  const mat = plan.modules.materials;
+  const matSlide = pptx.addSlide();
+  titleBar(matSlide, 'Material at site — delivery register', brand);
+  kpis(matSlide, [
+    ['Materials tracked', String(mat.summary.items)],
+    ['Short on site', String(mat.summary.shortOnSite), 'required date passed'],
+    ['Past order-by', String(mat.summary.orderOverdue), 'lead time no longer fits'],
+    ['Client free issue', String(mat.summary.clientSupplied), 'not on our PO'],
+  ], brand);
+  matSlide.addText(
+    'One level below the procurement packages: each material is dated against the activity that consumes it, and carries the vendor or PO that brings it.',
+    { x: 0.5, y: 2.3, w: 12.3, h: 0.3, fontSize: 10, color: MUTED },
+  );
+  tableSlides(pptx, 'Material register — order-by, delivery and supply route',
+    ['Cost head', 'Material', 'Make', 'Supply', 'Order by', 'Required on site', 'Status'],
+    mat.rows.map((m) => [m.category, m.item, m.make || '—', m.supply === 'procured' ? 'Procured' : m.supply === 'vendor' ? 'Vendor' : 'Client', m.orderBy ?? '—', m.requiredOnSite ?? '—', m.status]),
+    brand, [2.0, 3.9, 1.6, 1.2, 1.2, 1.5, 0.9], 15);
 
   tableSlides(pptx, 'Manpower — levelled contractor gangs',
     ['Trade', 'From', 'To', 'Days', 'Man-days', 'Core gang', 'Peak'],

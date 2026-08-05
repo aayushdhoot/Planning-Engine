@@ -24,7 +24,7 @@ export interface ValidationResult {
 }
 
 const REQUIRED_TOP = ['audience', 'engine', 'project', 'calendar', 'buffer', 'internal', 'external', 'ieInvariant', 'modules', 'assumptions', 'confidence', 'missingInputs'] as const;
-const REQUIRED_MODULES = ['timeline', 'manpower', 'resources', 'procurement', 'design', 'todos', 'dependencies', 'raMilestones'] as const;
+const REQUIRED_MODULES = ['timeline', 'manpower', 'resources', 'procurement', 'materials', 'design', 'todos', 'dependencies', 'raMilestones'] as const;
 
 /** Validate a plan object against the canonical schema (SPEC §7). */
 export function validatePlan(plan: Plan): ValidationResult {
@@ -49,6 +49,11 @@ export function validatePlan(plan: Plan): ValidationResult {
     if (plan.modules.raMilestones.some((m) => m.checkpoints.some((c) => c.responsibility || c.remarks || c.activityId)))
       errors.push('client plan must not expose internal RA checkpoint working');
     if (plan.modules.procurement.some((x) => x.vendor || x.remarks)) errors.push('client plan must not expose vendor or internal procurement remarks');
+    // the site material register is an internal document; only the client's own free issue survives
+    if (plan.modules.materials.rows.some((m) => m.supply !== 'client'))
+      errors.push('client plan must not expose the site material register beyond client free-issue items');
+    if (plan.modules.materials.rows.some((m) => m.vendor || m.poNumber || m.remarks || m.storage))
+      errors.push('client plan must not expose material vendors, POs, storage or internal remarks');
     if (plan.modules.manpower.days.length) errors.push('client plan must not expose manpower loading');
     if (plan.assumptions.some((a) => a.internalOnly)) errors.push('client plan must not expose internal-only assumptions');
     if (plan.modules.timeline.activities.some((a) => a.totalFloat !== 0 || a.critical)) errors.push('client plan must not expose float / critical flags');

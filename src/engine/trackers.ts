@@ -249,6 +249,7 @@ export function buildProcurementTracker(
 
     return {
       id: `p${i + 1}`,
+      packageCode: pkg.code,
       category: pkg.name,
       subCategory: base.label,
       criticality: criticalityFor(leadDays, base.longLead),
