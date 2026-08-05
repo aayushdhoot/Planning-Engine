@@ -2,7 +2,7 @@
 // deadlines are pinned here rather than left to whatever the generator happens to emit.
 import { describe, expect, it } from 'vitest';
 import { buildPlan } from '../src/engine/planner';
-import { parseMilestoneClauses } from '../src/engine/trackers';
+import { DESIGN_CATALOGUE, parseMilestoneClauses } from '../src/engine/trackers';
 import { skf } from '../src/data/skf';
 import { kohler } from '../src/data/kohler';
 import type { CalendarConfig, EngineConfig } from '../src/domain/types';
@@ -61,6 +61,94 @@ describe('design tracker carries two targets and no orphan dates (#6)', () => {
       // the structural checks survive: readiness must precede approval
       if (d.readyBy >= d.approvalBy) expect(d.issues.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('the design programme comes out in an order a designer could work in', () => {
+  // Back-scheduling each drawing from the site activity it releases gets every one in front of
+  // the work that needs it, and says nothing about the order the DRAWINGS have to come in. That
+  // produced a partition layout ready a month before the furniture layout it is set out from,
+  // and a lighting layout issued before the RCP it is drawn on.
+  const EDGES: [string, string][] = [
+    ['Base Build Layout', 'Furniture Layout'],
+    ['Furniture Layout', 'Partition Layout'],
+    ['Furniture Layout', 'Furniture Dimensions Layout'],
+    ['Furniture Dimensions Layout', 'Modular Layout'],
+    ['Partition Layout', 'RCP Layout'],
+    ['Partition Layout', 'Flooring Layout'],
+    ['Partition Layout', '3D Views — Detailed & Client Approval'],
+    ['Flooring Layout', 'Floor Marking Layout'],
+    ['RCP Layout', 'Lighting Layout (with dimensions)'],
+    ['Lighting Layout (with dimensions)', 'Lighting Looping Layout'],
+    ['Electrical Load Calculation', 'Electrical SLD Layout'],
+    ['HVAC Heat Load', 'HVAC Layout'],
+    ['Partition Layout', 'PHE DBR & Plumbing Layout'],
+  ];
+
+  const check = (rows: typeof design, label: string) => {
+    for (const [up, down] of EDGES) {
+      const u = rows.find((r) => r.drawingName === up);
+      const d = rows.find((r) => r.drawingName === down);
+      expect(`${label} ${up}→${down}:${u && d ? 'both raised' : 'missing'}`).toBe(`${label} ${up}→${down}:both raised`);
+      // a drawing cannot be issued for approval before its own input is approved
+      expect(`${label}: "${up}" approved ${u!.approvalBy} vs "${down}" issued ${d!.readyBy} — ordered:${u!.approvalBy! <= d!.readyBy!}`)
+        .toBe(`${label}: "${up}" approved ${u!.approvalBy} vs "${down}" issued ${d!.readyBy} — ordered:true`);
+    }
+  };
+
+  it('never approves a drawing after something drawn from it is issued', () => {
+    check(design, 'SKF');
+    check(buildPlan(kohler, cfg, '2026-07-29').modules.design.rows, 'KOHLER');
+  });
+
+  it('puts the furniture layout ahead of the partition layout it dimensions', () => {
+    const furniture = design.find((r) => r.drawingName === 'Furniture Layout')!;
+    const partition = design.find((r) => r.drawingName === 'Partition Layout')!;
+    expect(furniture.readyBy! < partition.readyBy!).toBe(true);
+    expect(furniture.approvalBy! <= partition.readyBy!).toBe(true);
+  });
+
+  it('says in the basis when a drawing was pulled forward, and what pulled it', () => {
+    const pulled = design.filter((r) => /pulled forward from/.test(r.basis));
+    expect(pulled.length).toBeGreaterThan(0);
+    for (const r of pulled) expect(r.basis).toMatch(/pulled forward from \d{4}-\d{2}-\d{2} because .+ drawn from it/);
+  });
+
+  it('does not let an enabling activity drive a drawing', () => {
+    // "Temporary Power" is the first electrical activity on site and gates nothing anybody drew;
+    // letting it drive the lighting layout dated that drawing before the project started, and
+    // dragged the whole architectural chain back with it.
+    for (const r of design)
+      expect(`${r.drawingName}:${/temporary|dilapidation|demolition|debris/i.test(r.basis)}`).toBe(`${r.drawingName}:false`);
+  });
+
+  it('has a well-formed precedence graph — every input exists, and nothing is circular', () => {
+    const names = new Set(DESIGN_CATALOGUE.map((s) => s.name));
+    for (const s of DESIGN_CATALOGUE)
+      for (const up of s.dependsOn ?? [])
+        expect(`${s.name} depends on "${up}":${names.has(up) ? 'exists' : 'UNKNOWN'}`).toBe(`${s.name} depends on "${up}":exists`);
+
+    // a cycle would leave the re-timing pass unable to settle, and would mean two drawings each
+    // claim to be drawn from the other
+    const upstream = new Map(DESIGN_CATALOGUE.map((s) => [s.name, s.dependsOn ?? []]));
+    const state = new Map<string, 'open' | 'done'>();
+    const walk = (name: string, trail: string[]): void => {
+      if (state.get(name) === 'done') return;
+      expect(`cycle at ${[...trail, name].join(' → ')}:${state.get(name) === 'open'}`).toBe(`cycle at ${[...trail, name].join(' → ')}:false`);
+      state.set(name, 'open');
+      for (const up of upstream.get(name) ?? []) walk(up, [...trail, name]);
+      state.set(name, 'done');
+    };
+    for (const s of DESIGN_CATALOGUE) walk(s.name, []);
+  });
+
+  it('keeps the design front-end honest rather than hiding an impossible sequence', () => {
+    // Where the chain does not fit before mobilisation the rows say so — that is a real finding
+    // about the front-end, not something to bury by relaxing the order.
+    const early = design.filter((r) => r.readyBy! < plan.internal!.start);
+    for (const r of early) expect(r.issues.some((i) => /already late on day one/.test(i))).toBe(true);
+    // but it stays a handful of root drawings, not a red badge on all 93
+    expect(early.length).toBeLessThan(design.length / 4);
   });
 });
 

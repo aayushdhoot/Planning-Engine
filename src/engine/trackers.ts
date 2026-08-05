@@ -13,6 +13,16 @@ interface DesignSpec {
   criticality: Criticality;
   /** trades whose first activity this drawing must precede */
   gates: string[];
+  /**
+   * The deliverables this one is drawn FROM, by name.
+   *
+   * Site dates alone do not order a design programme. A partition layout is set out from the
+   * approved furniture layout, and a lighting layout is drawn on the RCP — so each of those has
+   * to be approved before this one can be issued, whatever the site sequence happens to be.
+   * Without this the tracker produced impossible orders: a partition layout ready a month
+   * before the furniture layout it is dimensioned from.
+   */
+  dependsOn?: string[];
   /** working days the internal team needs before issue */
   prepDays: number;
   /** days the client/consultant needs to approve after issue */
@@ -21,60 +31,76 @@ interface DesignSpec {
   perZone?: boolean;
 }
 
-const DESIGN_CATALOGUE: DesignSpec[] = [
+/** Exported so `tests/trackers.test.ts` can assert the precedence graph is well-formed. */
+export const DESIGN_CATALOGUE: DesignSpec[] = [
   // GFC — architectural
   { category: 'GFC', subCategory: 'GFC', name: 'Base Build Layout', criticality: 'Very Critical', gates: ['civil'], prepDays: 10, approvalDays: 5 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Furniture Layout', criticality: 'Very Critical', gates: ['modular'], prepDays: 14, approvalDays: 7 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Furniture Dimensions Layout', criticality: 'High', gates: ['modular'], prepDays: 12, approvalDays: 5 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Partition Layout', criticality: 'Very Critical', gates: ['partition'], prepDays: 12, approvalDays: 5 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Flooring Layout', criticality: 'High', gates: ['flooring'], prepDays: 12, approvalDays: 5 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Floor Marking Layout', criticality: 'Medium', gates: ['flooring'], prepDays: 10, approvalDays: 4 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Raised Flooring Layout', criticality: 'High', gates: ['flooring'], prepDays: 12, approvalDays: 5 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Door Schedule Layout', criticality: 'High', gates: ['carpentry'], prepDays: 12, approvalDays: 5 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Wall Finishes Layout', criticality: 'High', gates: ['painting'], prepDays: 12, approvalDays: 5 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Modular Layout', criticality: 'Very Critical', gates: ['modular'], prepDays: 14, approvalDays: 7 },
-  { category: 'GFC', subCategory: 'GFC', name: 'RCP Layout', criticality: 'Very Critical', gates: ['ceiling'], prepDays: 14, approvalDays: 7 },
-  { category: 'GFC', subCategory: 'GFC', name: 'Lighting Layout (with dimensions)', criticality: 'Very Critical', gates: ['electrical'], prepDays: 14, approvalDays: 7 },
-  { category: 'GFC', subCategory: 'GENERAL', name: 'Wallpaper & Graphics', criticality: 'Low', gates: ['finishing'], prepDays: 10, approvalDays: 5 },
-  { category: 'GFC', subCategory: 'GENERAL', name: 'Fire Evacuation Plan', criticality: 'Medium', gates: ['finishing'], prepDays: 8, approvalDays: 5 },
-  { category: 'GFC', subCategory: '3D', name: '3D Views — Detailed & Client Approval', criticality: 'Very Critical', gates: ['partition'], prepDays: 20, approvalDays: 10 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Furniture Layout', criticality: 'Very Critical', dependsOn: ['Base Build Layout'], gates: ['modular'], prepDays: 14, approvalDays: 7 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Furniture Dimensions Layout', criticality: 'High', dependsOn: ['Furniture Layout'], gates: ['modular'], prepDays: 12, approvalDays: 5 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Partition Layout', criticality: 'Very Critical', dependsOn: ['Furniture Layout'], gates: ['partition'], prepDays: 12, approvalDays: 5 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Flooring Layout', criticality: 'High', dependsOn: ['Partition Layout'], gates: ['flooring'], prepDays: 12, approvalDays: 5 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Floor Marking Layout', criticality: 'Medium', dependsOn: ['Flooring Layout'], gates: ['flooring'], prepDays: 10, approvalDays: 4 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Raised Flooring Layout', criticality: 'High', dependsOn: ['Partition Layout'], gates: ['flooring'], prepDays: 12, approvalDays: 5 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Door Schedule Layout', criticality: 'High', dependsOn: ['Partition Layout'], gates: ['carpentry'], prepDays: 12, approvalDays: 5 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Wall Finishes Layout', criticality: 'High', dependsOn: ['Partition Layout', '3D Views — Detailed & Client Approval'], gates: ['painting'], prepDays: 12, approvalDays: 5 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Modular Layout', criticality: 'Very Critical', dependsOn: ['Furniture Dimensions Layout'], gates: ['modular'], prepDays: 14, approvalDays: 7 },
+  { category: 'GFC', subCategory: 'GFC', name: 'RCP Layout', criticality: 'Very Critical', dependsOn: ['Partition Layout'], gates: ['ceiling'], prepDays: 14, approvalDays: 7 },
+  { category: 'GFC', subCategory: 'GFC', name: 'Lighting Layout (with dimensions)', criticality: 'Very Critical', dependsOn: ['RCP Layout'], gates: ['electrical'], prepDays: 14, approvalDays: 7 },
+  { category: 'GFC', subCategory: 'GENERAL', name: 'Wallpaper & Graphics', criticality: 'Low', dependsOn: ['Wall Finishes Layout'], gates: ['finishing'], prepDays: 10, approvalDays: 5 },
+  { category: 'GFC', subCategory: 'GENERAL', name: 'Fire Evacuation Plan', criticality: 'Medium', dependsOn: ['Partition Layout'], gates: ['finishing'], prepDays: 8, approvalDays: 5 },
+  { category: 'GFC', subCategory: '3D', name: '3D Views — Detailed & Client Approval', criticality: 'Very Critical', dependsOn: ['Partition Layout'], gates: ['partition'], prepDays: 20, approvalDays: 10 },
   // MEP
-  { category: 'MEP', subCategory: 'MEP', name: 'Electrical DBR', criticality: 'Very Critical', gates: ['electrical'], prepDays: 14, approvalDays: 5 },
-  { category: 'MEP', subCategory: 'MEP', name: 'Electrical SLD Layout', criticality: 'Very Critical', gates: ['electrical'], prepDays: 14, approvalDays: 7 },
-  { category: 'MEP', subCategory: 'MEP', name: 'Electrical Load Calculation', criticality: 'Very Critical', gates: ['electrical'], prepDays: 14, approvalDays: 7 },
-  { category: 'MEP', subCategory: 'MEP', name: 'Power, Data & Switch Board Layout', criticality: 'Very Critical', gates: ['electrical'], prepDays: 14, approvalDays: 7 },
-  { category: 'MEP', subCategory: 'MEP', name: 'Raceway Layout', criticality: 'Very Critical', gates: ['electrical'], prepDays: 12, approvalDays: 5 },
-  { category: 'MEP', subCategory: 'MEP', name: 'Cable Tray Layout', criticality: 'High', gates: ['electrical'], prepDays: 12, approvalDays: 5 },
-  { category: 'MEP', subCategory: 'MEP', name: 'Lighting Looping Layout', criticality: 'High', gates: ['electrical'], prepDays: 12, approvalDays: 5 },
-  { category: 'MEP', subCategory: 'MEP', name: 'Panel & DB Position Layout', criticality: 'High', gates: ['electrical'], prepDays: 12, approvalDays: 5 },
-  { category: 'MEP', subCategory: 'MEP', name: 'UPS Calculation & Specification', criticality: 'High', gates: ['electrical'], prepDays: 14, approvalDays: 7 },
-  { category: 'MEP', subCategory: 'MEP', name: 'HVAC DBR', criticality: 'Very Critical', gates: ['hvac'], prepDays: 14, approvalDays: 5 },
-  { category: 'MEP', subCategory: 'MEP', name: 'HVAC Heat Load', criticality: 'Very Critical', gates: ['hvac'], prepDays: 14, approvalDays: 7 },
-  { category: 'MEP', subCategory: 'MEP', name: 'HVAC Layout', criticality: 'Very Critical', gates: ['hvac'], prepDays: 14, approvalDays: 7 },
-  { category: 'MEP', subCategory: 'MEP', name: 'PHE DBR & Plumbing Layout', criticality: 'High', gates: ['plumbing'], prepDays: 12, approvalDays: 5 },
-  { category: 'MEP', subCategory: 'MEP', name: 'Fire Sprinkler Layout', criticality: 'Very Critical', gates: ['sprinkler'], prepDays: 14, approvalDays: 10 },
-  { category: 'MEP', subCategory: 'MEP', name: 'FA / PA System Layout', criticality: 'High', gates: ['lv'], prepDays: 12, approvalDays: 7 },
-  { category: 'MEP', subCategory: 'MEP', name: 'ACS / CCTV / WiFi Layout', criticality: 'High', gates: ['lv'], prepDays: 12, approvalDays: 7 },
-  { category: 'MEP', subCategory: 'MEP', name: 'LV DBR', criticality: 'High', gates: ['lv'], prepDays: 12, approvalDays: 5 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Electrical DBR', criticality: 'Very Critical', dependsOn: ['Base Build Layout'], gates: ['electrical'], prepDays: 14, approvalDays: 5 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Electrical SLD Layout', criticality: 'Very Critical', dependsOn: ['Electrical Load Calculation'], gates: ['electrical'], prepDays: 14, approvalDays: 7 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Electrical Load Calculation', criticality: 'Very Critical', dependsOn: ['Electrical DBR', 'Power, Data & Switch Board Layout'], gates: ['electrical'], prepDays: 14, approvalDays: 7 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Power, Data & Switch Board Layout', criticality: 'Very Critical', dependsOn: ['Furniture Dimensions Layout', 'Partition Layout'], gates: ['electrical'], prepDays: 14, approvalDays: 7 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Raceway Layout', criticality: 'Very Critical', dependsOn: ['Power, Data & Switch Board Layout'], gates: ['electrical'], prepDays: 12, approvalDays: 5 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Cable Tray Layout', criticality: 'High', dependsOn: ['Electrical SLD Layout', 'RCP Layout'], gates: ['electrical'], prepDays: 12, approvalDays: 5 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Lighting Looping Layout', criticality: 'High', dependsOn: ['Lighting Layout (with dimensions)'], gates: ['electrical'], prepDays: 12, approvalDays: 5 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Panel & DB Position Layout', criticality: 'High', dependsOn: ['Electrical SLD Layout'], gates: ['electrical'], prepDays: 12, approvalDays: 5 },
+  { category: 'MEP', subCategory: 'MEP', name: 'UPS Calculation & Specification', criticality: 'High', dependsOn: ['Electrical Load Calculation'], gates: ['electrical'], prepDays: 14, approvalDays: 7 },
+  { category: 'MEP', subCategory: 'MEP', name: 'HVAC DBR', criticality: 'Very Critical', dependsOn: ['Base Build Layout'], gates: ['hvac'], prepDays: 14, approvalDays: 5 },
+  { category: 'MEP', subCategory: 'MEP', name: 'HVAC Heat Load', criticality: 'Very Critical', dependsOn: ['HVAC DBR', 'Partition Layout'], gates: ['hvac'], prepDays: 14, approvalDays: 7 },
+  { category: 'MEP', subCategory: 'MEP', name: 'HVAC Layout', criticality: 'Very Critical', dependsOn: ['HVAC Heat Load', 'RCP Layout'], gates: ['hvac'], prepDays: 14, approvalDays: 7 },
+  { category: 'MEP', subCategory: 'MEP', name: 'PHE DBR & Plumbing Layout', criticality: 'High', dependsOn: ['Partition Layout'], gates: ['plumbing'], prepDays: 12, approvalDays: 5 },
+  { category: 'MEP', subCategory: 'MEP', name: 'Fire Sprinkler Layout', criticality: 'Very Critical', dependsOn: ['RCP Layout'], gates: ['sprinkler'], prepDays: 14, approvalDays: 10 },
+  { category: 'MEP', subCategory: 'MEP', name: 'FA / PA System Layout', criticality: 'High', dependsOn: ['RCP Layout'], gates: ['lv'], prepDays: 12, approvalDays: 7 },
+  { category: 'MEP', subCategory: 'MEP', name: 'ACS / CCTV / WiFi Layout', criticality: 'High', dependsOn: ['Partition Layout', 'RCP Layout'], gates: ['lv'], prepDays: 12, approvalDays: 7 },
+  { category: 'MEP', subCategory: 'MEP', name: 'LV DBR', criticality: 'High', dependsOn: ['Base Build Layout'], gates: ['lv'], prepDays: 12, approvalDays: 5 },
   // SAMPLING
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Floor and Dado Tiles', perZone: true, criticality: 'High', gates: ['flooring'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Carpentry Laminates & Veneer Shades', perZone: true, criticality: 'High', gates: ['carpentry'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Paint Shades', perZone: true, criticality: 'Medium', gates: ['painting'], prepDays: 8, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Carpet / SPC Flooring', perZone: true, criticality: 'High', gates: ['flooring'], prepDays: 10, approvalDays: 7 },
-  { category: 'SAMPLING', subCategory: 'Partitions', name: 'Demountable Glass Partition', criticality: 'Very Critical', gates: ['glass'], prepDays: 12, approvalDays: 7 },
-  { category: 'SAMPLING', subCategory: 'Partitions', name: 'Backpainted Glass', criticality: 'Medium', gates: ['glass'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Ceiling', name: 'Grid & Stretch Ceiling', perZone: true, criticality: 'High', gates: ['ceiling'], prepDays: 10, approvalDays: 7 },
-  { category: 'SAMPLING', subCategory: 'Ceiling', name: 'Acoustics / Fluted Panel', perZone: true, criticality: 'Medium', gates: ['ceiling'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'MEP', name: 'Switch Sockets', criticality: 'Medium', gates: ['electrical'], prepDays: 8, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'MEP', name: 'Decorative Lights', criticality: 'High', gates: ['electrical'], prepDays: 10, approvalDays: 7 },
-  { category: 'SAMPLING', subCategory: 'MEP', name: 'Sanitary Fixtures', criticality: 'Medium', gates: ['plumbing'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Furniture', name: 'Chairs & Loose Furniture', criticality: 'High', gates: ['modular'], prepDays: 12, approvalDays: 7 },
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Blinds', criticality: 'Medium', gates: ['finishing'], prepDays: 10, approvalDays: 5 },
-  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Skirting & T Profile', criticality: 'Low', gates: ['finishing'], prepDays: 8, approvalDays: 4 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Floor and Dado Tiles', perZone: true, criticality: 'High', dependsOn: ['Flooring Layout'], gates: ['flooring'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Carpentry Laminates & Veneer Shades', perZone: true, criticality: 'High', dependsOn: ['3D Views — Detailed & Client Approval'], gates: ['carpentry'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Paint Shades', perZone: true, criticality: 'Medium', dependsOn: ['Wall Finishes Layout'], gates: ['painting'], prepDays: 8, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Carpet / SPC Flooring', perZone: true, criticality: 'High', dependsOn: ['Flooring Layout'], gates: ['flooring'], prepDays: 10, approvalDays: 7 },
+  { category: 'SAMPLING', subCategory: 'Partitions', name: 'Demountable Glass Partition', criticality: 'Very Critical', dependsOn: ['Partition Layout'], gates: ['glass'], prepDays: 12, approvalDays: 7 },
+  { category: 'SAMPLING', subCategory: 'Partitions', name: 'Backpainted Glass', criticality: 'Medium', dependsOn: ['Wall Finishes Layout'], gates: ['glass'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Ceiling', name: 'Grid & Stretch Ceiling', perZone: true, criticality: 'High', dependsOn: ['RCP Layout'], gates: ['ceiling'], prepDays: 10, approvalDays: 7 },
+  { category: 'SAMPLING', subCategory: 'Ceiling', name: 'Acoustics / Fluted Panel', perZone: true, criticality: 'Medium', dependsOn: ['RCP Layout'], gates: ['ceiling'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'MEP', name: 'Switch Sockets', criticality: 'Medium', dependsOn: ['Power, Data & Switch Board Layout'], gates: ['electrical'], prepDays: 8, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'MEP', name: 'Decorative Lights', criticality: 'High', dependsOn: ['Lighting Layout (with dimensions)'], gates: ['electrical'], prepDays: 10, approvalDays: 7 },
+  { category: 'SAMPLING', subCategory: 'MEP', name: 'Sanitary Fixtures', criticality: 'Medium', dependsOn: ['PHE DBR & Plumbing Layout'], gates: ['plumbing'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Furniture', name: 'Chairs & Loose Furniture', criticality: 'High', dependsOn: ['Furniture Layout'], gates: ['modular'], prepDays: 12, approvalDays: 7 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Blinds', criticality: 'Medium', dependsOn: ['Base Build Layout'], gates: ['finishing'], prepDays: 10, approvalDays: 5 },
+  { category: 'SAMPLING', subCategory: 'Finishes', name: 'Skirting & T Profile', criticality: 'Low', dependsOn: ['Flooring Layout'], gates: ['finishing'], prepDays: 8, approvalDays: 4 },
 ];
 
-const firstOfTrade = (acts: ScheduledActivity[], trade: string): ScheduledActivity | null =>
-  acts.filter((a) => a.trade === trade).sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0] ?? null;
+/**
+ * Enabling works: surveys, temporary services, marking, demolition, debris clearance.
+ *
+ * They are the first activity of their trade but they do not wait on a design deliverable —
+ * temporary power is pulled before anybody has drawn a lighting layout. Letting them drive the
+ * back-scheduling produced drawings due before the project even started, and dragged every
+ * upstream drawing back with them.
+ */
+const ENABLING = /temporary|dilapidation|survey|demolition|debris|barricad|hoarding|mobilis|marking/i;
+const isEnabling = (a: ScheduledActivity) => a.phase === 'Site Prep' || ENABLING.test(a.name);
+
+const firstOfTrade = (acts: ScheduledActivity[], trade: string): ScheduledActivity | null => {
+  const own = acts.filter((a) => a.trade === trade);
+  const real = own.filter((a) => !isEnabling(a));
+  // fall back to the enabling activity rather than leaving the row dateless
+  return (real.length ? real : own).sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0] ?? null;
+};
 
 const statusFor = (target: string | null, today: string): 'Not Started' | 'WIP' | 'Delayed' => {
   if (!target) return 'Not Started';
@@ -161,6 +187,9 @@ export function buildDesignTracker(
       }
     : null;
   let n = 0;
+  // the row(s) each catalogue entry produced, plus what is needed to re-time them once the
+  // design precedence is applied — a per-zone spec makes several rows that move together
+  const placed: { spec: DesignSpec; key: string; driver: ScheduledActivity | null; row: DesignRow }[] = [];
 
   const push = (
     spec: DesignSpec,
@@ -168,9 +197,10 @@ export function buildDesignTracker(
     zone: string | null,
     driver: ScheduledActivity | null,
     gated: ScheduledActivity[],
+    key = spec.name,
   ) => {
     const { readyBy, approvalBy, basis } = windowFor(driver, spec, window);
-    rows.push({
+    const row: DesignRow = {
       id: `d${++n}`,
       category: spec.category,
       subCategory: spec.subCategory,
@@ -184,8 +214,10 @@ export function buildDesignTracker(
       statusClient: statusFor(approvalBy, today),
       releases: gated.map((g) => g.name),
       basis,
-      issues: validateDesignRow(readyBy, approvalBy, driver, window?.start ?? null),
-    });
+      issues: [],
+    };
+    rows.push(row);
+    placed.push({ spec, key, driver, row });
   };
 
   for (const spec of DESIGN_CATALOGUE) {
@@ -200,11 +232,18 @@ export function buildDesignTracker(
   for (const pk of carpentry) {
     const driver = firstOfTrade(acts, pk.trade);
     push(
-      { category: 'GFC', subCategory: 'TD', name: '', criticality: 'Very Critical', gates: [pk.trade], prepDays: 12, approvalDays: 5 },
+      {
+        category: 'GFC', subCategory: 'TD', name: '', criticality: 'Very Critical', gates: [pk.trade],
+        // a technical drawing details what the layout already fixed, so the layout has to be
+        // approved before the TD can be issued
+        dependsOn: [TD_PARENT[pk.trade] ?? 'Partition Layout'],
+        prepDays: 12, approvalDays: 5,
+      },
       `TD — ${pk.name}`,
       null,
       driver,
       driver ? [driver] : [],
+      `TD:${pk.code}`,
     );
   }
 
@@ -212,15 +251,105 @@ export function buildDesignTracker(
   for (const z of zones) {
     const driver = firstOfTrade(acts, 'partition') ?? firstOfTrade(acts, 'carpentry');
     push(
-      { category: 'GFC', subCategory: 'Elevations', name: '', criticality: 'High', gates: ['partition'], prepDays: ELEVATION_PREP_DAYS, approvalDays: ELEVATION_APPROVAL_DAYS },
+      {
+        category: 'GFC', subCategory: 'Elevations', name: '', criticality: 'High', gates: ['partition'],
+        dependsOn: ['Partition Layout'],
+        prepDays: ELEVATION_PREP_DAYS, approvalDays: ELEVATION_APPROVAL_DAYS,
+      },
       `Elevation — ${z}`,
       z,
       driver,
       driver ? [driver] : [],
+      'Elevations',
     );
   }
 
+  applyDesignPrecedence(placed);
+
+  for (const { row, driver } of placed)
+    row.issues = validateDesignRow(row.readyBy, row.approvalBy, driver, window?.start ?? null);
+
   return rows;
+}
+
+/** The GFC layout a technical drawing details, by the trade of its cost head. */
+const TD_PARENT: Record<string, string> = {
+  partition: 'Partition Layout',
+  modular: 'Modular Layout',
+  carpentry: 'Furniture Layout',
+};
+
+/**
+ * Re-time the design programme so no drawing is approved after something drawn from it is issued.
+ *
+ * Back-scheduling each deliverable from the site activity it releases gets every drawing in
+ * front of the work that needs it, but says nothing about the order the drawings themselves
+ * have to come in — which produced a partition layout ready a month before the furniture layout
+ * it is set out from, and a lighting layout issued before the RCP it is drawn on.
+ *
+ * The site dates are the hard constraint: they come from the programme. So the repair pulls the
+ * UPSTREAM drawing earlier rather than pushing the dependent later — the answer to "the
+ * furniture layout is needed by 10-Aug, not 16-Sept" is to draw it sooner, not to let site wait.
+ * Walking the graph dependents-first means one pass settles the whole chain. Where the result
+ * lands before the project starts, `validateDesignRow` flags it: that is a real finding about
+ * a front-end that does not fit, not something to hide by relaxing the sequence.
+ */
+function applyDesignPrecedence(placed: { spec: DesignSpec; key: string; row: DesignRow }[]): void {
+  const byKey = new Map<string, typeof placed>();
+  for (const p of placed) byKey.set(p.key, [...(byKey.get(p.key) ?? []), p]);
+
+  // upstream key -> the rows drawn from it
+  const dependents = new Map<string, DesignRow[]>();
+  for (const p of placed)
+    for (const up of p.spec.dependsOn ?? [])
+      if (byKey.has(up)) dependents.set(up, [...(dependents.get(up) ?? []), p.row]);
+
+  for (const key of reverseTopological(byKey, placed)) {
+    const drawnFromIt = dependents.get(key);
+    if (!drawnFromIt?.length) continue;
+    const needed = drawnFromIt.reduce<string | null>((m, r) => (r.readyBy && (m === null || r.readyBy < m) ? r.readyBy : m), null);
+    if (!needed) continue;
+    for (const { spec, row } of byKey.get(key)!) {
+      if (!row.approvalBy || row.approvalBy <= needed) continue;
+      const was = row.approvalBy;
+      row.approvalBy = needed;
+      row.readyBy = addCalendarDays(needed, -spec.approvalDays);
+      row.basis += `; pulled forward from ${was} because ${drawnFromIt.length === 1 ? `"${drawnFromIt[0].drawingName}" is` : `${drawnFromIt.length} drawings are`} drawn from it and issued by ${needed}`;
+    }
+  }
+}
+
+/**
+ * Deliverable keys, dependents before the things they are drawn from. Kahn's algorithm over the
+ * reversed graph; the catalogue is authored data, so a cycle would be an authoring error —
+ * anything left over when no node has zero in-degree is appended rather than dropped, and
+ * `tests/trackers.test.ts` asserts the graph is acyclic.
+ */
+function reverseTopological(
+  byKey: Map<string, { spec: DesignSpec; key: string }[]>,
+  placed: { spec: DesignSpec; key: string }[],
+): string[] {
+  const upstreamsOf = new Map<string, Set<string>>();
+  for (const p of placed) {
+    const ups = upstreamsOf.get(p.key) ?? new Set<string>();
+    for (const u of p.spec.dependsOn ?? []) if (byKey.has(u) && u !== p.key) ups.add(u);
+    upstreamsOf.set(p.key, ups);
+  }
+  // process a key once nothing that depends on it is still waiting
+  const pending = new Map([...upstreamsOf.keys()].map((k) => [k, [...upstreamsOf].filter(([, u]) => u.has(k)).length]));
+  const order: string[] = [];
+  const ready = [...pending].filter(([, c]) => c === 0).map(([k]) => k);
+  while (ready.length) {
+    const k = ready.shift()!;
+    order.push(k);
+    for (const up of upstreamsOf.get(k) ?? []) {
+      const left = (pending.get(up) ?? 0) - 1;
+      pending.set(up, left);
+      if (left === 0) ready.push(up);
+    }
+  }
+  for (const k of upstreamsOf.keys()) if (!order.includes(k)) order.push(k);
+  return order;
 }
 
 /** Procurement rows: order-by and delivery-required only, gated by the design release. */

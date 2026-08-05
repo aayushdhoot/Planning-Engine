@@ -590,9 +590,10 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
             <button key={c} className={cat === c ? 'on' : ''} onClick={() => setCat(c)}>{c === 'all' ? 'All' : c}</button>
           ))}
         </div>
-        <span className="muted" style={{ fontSize: 12 }}>
+        <span className="muted" style={{ fontSize: 12, maxWidth: 640 }}>
           Two targets only: when the drawing is ready to issue, and when the client must have approved it. Both are
-          back-scheduled from the site activity the drawing releases.
+          back-scheduled from the site activity the drawing releases, then re-timed so no drawing is approved after
+          something drawn from it is issued — a partition layout cannot precede the furniture layout it is set out from.
         </span>
       </div>
 

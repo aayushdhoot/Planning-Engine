@@ -25,7 +25,7 @@ npm run dev                    # http://localhost:5173
 | Command | What it does |
 |---|---|
 | `npm start` | Builds and serves at http://localhost:4173 **with the Drive proxy**, so link scanning works outside dev |
-| `npm run gates` | The full bar: typecheck → lint → 272 tests → build → sample run |
+| `npm run gates` | The full bar: typecheck → lint → 278 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
 
@@ -92,7 +92,7 @@ Procurement · **Material at site** · To-do · Dependencies · RA Milestones ·
 
 | Tracker | Columns |
 |---|---|
-| Design | Category (GFC/MEP/Sampling) · Sub Category · **Zone** · Drawing · Criticality · Revision · **Ready by** · Status (INT) · **Client approval by** · Status (Client) · Releases — two targets only, each validated against the activity it gates |
+| Design | Category (GFC/MEP/Sampling) · Sub Category · **Zone** · Drawing · Criticality · Revision · **Ready by** · Status (INT) · **Client approval by** · Status (Client) · Releases — two targets only, each validated against the activity it gates **and against the drawings it is drawn from** |
 | Procurement | Category · Sub Category · Criticality · **Order by** · **Delivery required** · Revised · Vendor · Order status · Delivery status · Responsibility · Gated by · Feeds |
 | Material at site | Cost head · Material · Make · Unit · **Supply route** · **Vendor / PO** · Ordered · Received · Balance · Order by · **Required on site** · Expected · **Actual (GRN)** · Status · Inspection · Storage · Consumed by |
 | To-do | Description · Responsibility · Priority · Status · Start · End · Revised · Notes |
@@ -114,6 +114,18 @@ contractor against their PO/WO, or **client free issue**. Quantities, GRN dates,
 inspection are recorded by site; the engine computes dates and links and nothing else. Cost heads
 are matched to the project's own BOQ coding — by code, then name, then trade — because SKF codes
 HVAC as `HVAC`, KOHLER as `D1` and Emirates as `D`.
+
+**The design programme comes out in an order a designer could work in.** Back-scheduling each
+drawing from the site activity it releases gets every one in front of the work that needs it, but
+says nothing about the order the *drawings* have to come in — so the tracker used to show a
+partition layout ready a month before the furniture layout it is set out from, and a lighting
+layout issued before the RCP it is drawn on. Each deliverable now declares what it is drawn from,
+and a second pass pulls every upstream drawing earlier until it is approved by the time anything
+drawn from it is issued. The site dates are the hard constraint, so nothing is ever pushed later
+to make the sequence fit; where the chain lands before mobilisation the rows say so, which is a
+real finding about the design front-end. Enabling works — surveys, temporary power, marking,
+demolition — no longer drive a drawing either: "Temporary Power" being the first electrical
+activity had the lighting layout due before the project started.
 
 **GFC covers what actually has to be drawn.** Technical drawings are raised from the BOQ — every
 carpentry, modular and partition cost head gets a TD — and elevations are raised per zone.

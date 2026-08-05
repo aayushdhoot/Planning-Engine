@@ -212,11 +212,11 @@
       {
         "actualDate": null,
         "area": "Design",
-        "blocks": "Temporary Power",
+        "blocks": "Raceway Trunking & Installation",
         "description": "MEP drawings approval",
         "id": "x7",
-        "planDate": "2026-05-27",
-        "remarks": "Blocks \"Temporary Power\" starting 2026-06-10.",
+        "planDate": "2026-06-11",
+        "remarks": "Blocks \"Raceway Trunking & Installation\" starting 2026-06-25.",
         "responsibility": "Client/PMC",
         "sr": 7,
         "status": "Delayed"
@@ -224,11 +224,11 @@
       {
         "actualDate": null,
         "area": "Design",
-        "blocks": "Temporary Power",
+        "blocks": "Raceway Trunking & Installation",
         "description": "Electrical / IT requirement and load confirmation",
         "id": "x8",
-        "planDate": "2026-05-27",
-        "remarks": "Blocks \"Temporary Power\" starting 2026-06-10.",
+        "planDate": "2026-06-11",
+        "remarks": "Blocks \"Raceway Trunking & Installation\" starting 2026-06-25.",
         "responsibility": "Client",
         "sr": 8,
         "status": "Delayed"
@@ -284,11 +284,11 @@
       {
         "actualDate": null,
         "area": "Operation",
-        "blocks": "Temporary Power",
+        "blocks": "Raceway Trunking & Installation",
         "description": "Temporary power and water availability",
         "id": "x13",
-        "planDate": "2026-06-05",
-        "remarks": "Blocks \"Temporary Power\" starting 2026-06-10.",
+        "planDate": "2026-06-20",
+        "remarks": "Blocks \"Raceway Trunking & Installation\" starting 2026-06-25.",
         "responsibility": "Builder",
         "sr": 13,
         "status": "Delayed"
@@ -381,14 +381,16 @@
     "design": {
       "rows": [
         {
-          "approvalBy": "2026-06-20",
-          "basis": "back-scheduled from \"Blockwork, AAC Blocks & Plastering\" starting 2026-06-21, less 5d client approval",
+          "approvalBy": "2026-05-17",
+          "basis": "back-scheduled from \"Blockwork, AAC Blocks & Plastering\" starting 2026-06-21, less 5d client approval; pulled forward from 2026-06-20 because 5 drawings are drawn from it and issued by 2026-05-17",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Base Build Layout",
           "id": "d1",
-          "issues": [],
-          "readyBy": "2026-06-15",
+          "issues": [
+            "Drawing readiness (2026-05-12) is before the project starts (2026-06-08) — this drawing is already late on day one."
+          ],
+          "readyBy": "2026-05-12",
           "releases": [
             "Blockwork, AAC Blocks & Plastering"
           ],
@@ -399,14 +401,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-07-24",
-          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d client approval",
+          "approvalBy": "2026-05-24",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d client approval; pulled forward from 2026-07-24 because 4 drawings are drawn from it and issued by 2026-05-24",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Furniture Layout",
           "id": "d2",
-          "issues": [],
-          "readyBy": "2026-07-17",
+          "issues": [
+            "Drawing readiness (2026-05-17) is before the project starts (2026-06-08) — this drawing is already late on day one."
+          ],
+          "readyBy": "2026-05-17",
           "releases": [
             "Manager/Meeting Room Tables"
           ],
@@ -417,14 +421,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-07-24",
-          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 5d client approval",
+          "approvalBy": "2026-05-29",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 5d client approval; pulled forward from 2026-07-24 because 2 drawings are drawn from it and issued by 2026-05-29",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Furniture Dimensions Layout",
           "id": "d3",
-          "issues": [],
-          "readyBy": "2026-07-19",
+          "issues": [
+            "Drawing readiness (2026-05-24) is before the project starts (2026-06-08) — this drawing is already late on day one."
+          ],
+          "readyBy": "2026-05-24",
           "releases": [
             "Manager/Meeting Room Tables"
           ],
@@ -435,14 +441,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-22",
-          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval",
+          "approvalBy": "2026-05-29",
+          "basis": "back-scheduled from \"100mm Partition Framing\" starting 2026-06-23, less 5d client approval; pulled forward from 2026-06-22 because 20 drawings are drawn from it and issued by 2026-05-29",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Partition Layout",
           "id": "d4",
-          "issues": [],
-          "readyBy": "2026-06-17",
+          "issues": [
+            "Drawing readiness (2026-05-24) is before the project starts (2026-06-08) — this drawing is already late on day one."
+          ],
+          "readyBy": "2026-05-24",
           "releases": [
             "100mm Partition Framing"
           ],
@@ -453,14 +461,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-07-19",
-          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval",
+          "approvalBy": "2026-07-12",
+          "basis": "back-scheduled from \"Vitrified Tile Works\" starting 2026-07-20, less 5d client approval; pulled forward from 2026-07-19 because 16 drawings are drawn from it and issued by 2026-07-12",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Flooring Layout",
           "id": "d5",
           "issues": [],
-          "readyBy": "2026-07-14",
+          "readyBy": "2026-07-07",
           "releases": [
             "Vitrified Tile Works"
           ],
@@ -525,14 +533,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-07-22",
-          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval",
+          "approvalBy": "2026-07-02",
+          "basis": "back-scheduled from \"Internal Walls (Putty + Paint)\" starting 2026-07-23, less 5d client approval; pulled forward from 2026-07-22 because 9 drawings are drawn from it and issued by 2026-07-02",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Wall Finishes Layout",
           "id": "d9",
           "issues": [],
-          "readyBy": "2026-07-17",
+          "readyBy": "2026-06-27",
           "releases": [
             "Internal Walls (Putty + Paint)"
           ],
@@ -543,14 +551,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-07-24",
-          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d client approval",
+          "approvalBy": "2026-07-19",
+          "basis": "back-scheduled from \"Manager/Meeting Room Tables\" starting 2026-07-25, less 7d client approval; pulled forward from 2026-07-24 because 2 drawings are drawn from it and issued by 2026-07-19",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Modular Layout",
           "id": "d10",
           "issues": [],
-          "readyBy": "2026-07-17",
+          "readyBy": "2026-07-12",
           "releases": [
             "Manager/Meeting Room Tables"
           ],
@@ -561,14 +569,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-07-05",
-          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval",
+          "approvalBy": "2026-06-10",
+          "basis": "back-scheduled from \"Gypsum False Ceiling\" starting 2026-07-06, less 7d client approval; pulled forward from 2026-07-05 because 20 drawings are drawn from it and issued by 2026-06-10",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "RCP Layout",
           "id": "d11",
-          "issues": [],
-          "readyBy": "2026-06-28",
+          "issues": [
+            "Drawing readiness (2026-06-03) is before the project starts (2026-06-08) — this drawing is already late on day one."
+          ],
+          "readyBy": "2026-06-03",
           "releases": [
             "Gypsum False Ceiling"
           ],
@@ -579,18 +589,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
+          "approvalBy": "2026-06-17",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 7d client approval; pulled forward from 2026-06-24 because 2 drawings are drawn from it and issued by 2026-06-17",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Lighting Layout (with dimensions)",
           "id": "d12",
-          "issues": [
-            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-02",
+          "issues": [],
+          "readyBy": "2026-06-10",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -653,18 +661,18 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
+          "approvalBy": "2026-06-05",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 5d client approval; pulled forward from 2026-06-24 because \"Electrical Load Calculation\" is drawn from it and issued by 2026-06-05",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical DBR",
           "id": "d16",
           "issues": [
-            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one."
+            "Drawing readiness (2026-05-31) is before the project starts (2026-06-08) — this drawing is already late on day one."
           ],
-          "readyBy": "2026-06-04",
+          "readyBy": "2026-05-31",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -673,18 +681,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
+          "approvalBy": "2026-06-19",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 7d client approval; pulled forward from 2026-06-24 because 2 drawings are drawn from it and issued by 2026-06-19",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical SLD Layout",
           "id": "d17",
-          "issues": [
-            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-02",
+          "issues": [],
+          "readyBy": "2026-06-12",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -693,18 +699,18 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
+          "approvalBy": "2026-06-12",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 7d client approval; pulled forward from 2026-06-24 because 2 drawings are drawn from it and issued by 2026-06-12",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical Load Calculation",
           "id": "d18",
           "issues": [
-            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one."
+            "Drawing readiness (2026-06-05) is before the project starts (2026-06-08) — this drawing is already late on day one."
           ],
-          "readyBy": "2026-06-02",
+          "readyBy": "2026-06-05",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -713,18 +719,18 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
+          "approvalBy": "2026-06-05",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 7d client approval; pulled forward from 2026-06-24 because 3 drawings are drawn from it and issued by 2026-06-05",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Power, Data & Switch Board Layout",
           "id": "d19",
           "issues": [
-            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one."
+            "Drawing readiness (2026-05-29) is before the project starts (2026-06-08) — this drawing is already late on day one."
           ],
-          "readyBy": "2026-06-02",
+          "readyBy": "2026-05-29",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -733,18 +739,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
+          "approvalBy": "2026-06-24",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 5d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Raceway Layout",
           "id": "d20",
-          "issues": [
-            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-04",
+          "issues": [],
+          "readyBy": "2026-06-19",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -753,18 +757,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
+          "approvalBy": "2026-06-24",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 5d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "Cable Tray Layout",
           "id": "d21",
-          "issues": [
-            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-04",
+          "issues": [],
+          "readyBy": "2026-06-19",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -773,18 +775,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
+          "approvalBy": "2026-06-24",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 5d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "Lighting Looping Layout",
           "id": "d22",
-          "issues": [
-            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-04",
+          "issues": [],
+          "readyBy": "2026-06-19",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -793,18 +793,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
+          "approvalBy": "2026-06-24",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 5d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "Panel & DB Position Layout",
           "id": "d23",
-          "issues": [
-            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-04",
+          "issues": [],
+          "readyBy": "2026-06-19",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -813,18 +811,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
+          "approvalBy": "2026-06-24",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 7d client approval",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "UPS Calculation & Specification",
           "id": "d24",
-          "issues": [
-            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-02",
+          "issues": [],
+          "readyBy": "2026-06-17",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -833,14 +829,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-07-03",
-          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 5d client approval",
+          "approvalBy": "2026-06-19",
+          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 5d client approval; pulled forward from 2026-07-03 because \"HVAC Heat Load\" is drawn from it and issued by 2026-06-19",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "HVAC DBR",
           "id": "d25",
           "issues": [],
-          "readyBy": "2026-06-28",
+          "readyBy": "2026-06-14",
           "releases": [
             "GI Sheet Ducting Fabrication & Installation"
           ],
@@ -851,14 +847,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-07-03",
-          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 7d client approval",
+          "approvalBy": "2026-06-26",
+          "basis": "back-scheduled from \"GI Sheet Ducting Fabrication & Installation\" starting 2026-07-04, less 7d client approval; pulled forward from 2026-07-03 because \"HVAC Layout\" is drawn from it and issued by 2026-06-26",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "HVAC Heat Load",
           "id": "d26",
           "issues": [],
-          "readyBy": "2026-06-26",
+          "readyBy": "2026-06-19",
           "releases": [
             "GI Sheet Ducting Fabrication & Installation"
           ],
@@ -887,14 +883,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-29",
-          "basis": "back-scheduled from \"Plumbing Internal Piping\" starting 2026-06-30, less 5d client approval",
+          "approvalBy": "2026-06-24",
+          "basis": "back-scheduled from \"Plumbing Internal Piping\" starting 2026-06-30, less 5d client approval; pulled forward from 2026-06-29 because \"Sanitary Fixtures\" is drawn from it and issued by 2026-06-24",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "PHE DBR & Plumbing Layout",
           "id": "d28",
           "issues": [],
-          "readyBy": "2026-06-24",
+          "readyBy": "2026-06-19",
           "releases": [
             "Plumbing Internal Piping"
           ],
@@ -1769,18 +1765,16 @@
           "zone": "Support & Server"
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 5d client approval",
+          "approvalBy": "2026-06-24",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "Medium",
           "drawingName": "Switch Sockets",
           "id": "d77",
-          "issues": [
-            "Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-04",
+          "issues": [],
+          "readyBy": "2026-06-19",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -1789,18 +1783,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2026-06-09",
-          "basis": "back-scheduled from \"Temporary Power\" starting 2026-06-10, less 7d client approval",
+          "approvalBy": "2026-06-24",
+          "basis": "back-scheduled from \"Raceway Trunking & Installation\" starting 2026-06-25, less 7d client approval",
           "category": "SAMPLING",
           "criticality": "High",
           "drawingName": "Decorative Lights",
           "id": "d78",
-          "issues": [
-            "Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one."
-          ],
-          "readyBy": "2026-06-02",
+          "issues": [],
+          "readyBy": "2026-06-17",
           "releases": [
-            "Temporary Power"
+            "Raceway Trunking & Installation"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -3181,7 +3173,7 @@
           "consumedBy": "Blockwork, AAC Blocks & Plastering (2026-06-21)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Base Build Layout (client approval 2026-06-20)",
+          "gatedBy": "Base Build Layout (client approval 2026-05-17)",
           "id": "m1",
           "inspection": "Pending",
           "issues": [],
@@ -3209,7 +3201,7 @@
           "consumedBy": "Blockwork, AAC Blocks & Plastering (2026-06-21)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Base Build Layout (client approval 2026-06-20)",
+          "gatedBy": "Base Build Layout (client approval 2026-05-17)",
           "id": "m2",
           "inspection": "Pending",
           "issues": [],
@@ -3237,7 +3229,7 @@
           "consumedBy": "Blockwork, AAC Blocks & Plastering (2026-06-21)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Base Build Layout (client approval 2026-06-20)",
+          "gatedBy": "Base Build Layout (client approval 2026-05-17)",
           "id": "m3",
           "inspection": "Pending",
           "issues": [],
@@ -3265,7 +3257,7 @@
           "consumedBy": "Blockwork, AAC Blocks & Plastering (2026-06-21)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Base Build Layout (client approval 2026-06-20)",
+          "gatedBy": "Base Build Layout (client approval 2026-05-17)",
           "id": "m4",
           "inspection": "Pending",
           "issues": [],
@@ -3293,7 +3285,7 @@
           "consumedBy": "Blockwork, AAC Blocks & Plastering (2026-06-21)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Base Build Layout (client approval 2026-06-20)",
+          "gatedBy": "Base Build Layout (client approval 2026-05-17)",
           "id": "m5",
           "inspection": "Pending",
           "issues": [],
@@ -3321,7 +3313,7 @@
           "consumedBy": "Vitrified Tile Works (2026-07-20)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Flooring Layout (client approval 2026-07-19)",
+          "gatedBy": "Flooring Layout (client approval 2026-07-12)",
           "id": "m6",
           "inspection": "Pending",
           "issues": [],
@@ -3349,7 +3341,7 @@
           "consumedBy": "100mm Partition Framing (2026-06-23)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Partition Layout (client approval 2026-06-22)",
+          "gatedBy": "Partition Layout (client approval 2026-05-29)",
           "id": "m7",
           "inspection": "Pending",
           "issues": [],
@@ -3377,7 +3369,7 @@
           "consumedBy": "100mm Partition Framing (2026-06-23)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Partition Layout (client approval 2026-06-22)",
+          "gatedBy": "Partition Layout (client approval 2026-05-29)",
           "id": "m8",
           "inspection": "Pending",
           "issues": [],
@@ -3405,7 +3397,7 @@
           "consumedBy": "100mm Partition Framing (2026-06-23)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Partition Layout (client approval 2026-06-22)",
+          "gatedBy": "Partition Layout (client approval 2026-05-29)",
           "id": "m9",
           "inspection": "Pending",
           "issues": [],
@@ -3545,7 +3537,7 @@
           "consumedBy": "Gypsum False Ceiling (2026-07-06)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "RCP Layout (client approval 2026-07-05)",
+          "gatedBy": "RCP Layout (client approval 2026-06-10)",
           "id": "m14",
           "inspection": "Pending",
           "issues": [],
@@ -3573,7 +3565,7 @@
           "consumedBy": "Gypsum False Ceiling (2026-07-06)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "RCP Layout (client approval 2026-07-05)",
+          "gatedBy": "RCP Layout (client approval 2026-06-10)",
           "id": "m15",
           "inspection": "Pending",
           "issues": [],
@@ -3601,7 +3593,7 @@
           "consumedBy": "Gypsum False Ceiling (2026-07-06)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "RCP Layout (client approval 2026-07-05)",
+          "gatedBy": "RCP Layout (client approval 2026-06-10)",
           "id": "m16",
           "inspection": "Pending",
           "issues": [
@@ -3631,7 +3623,7 @@
           "consumedBy": "Internal Walls (Putty + Paint) (2026-07-23)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Wall Finishes Layout (client approval 2026-07-22)",
+          "gatedBy": "Wall Finishes Layout (client approval 2026-07-02)",
           "id": "m17",
           "inspection": "Pending",
           "issues": [],
@@ -4115,7 +4107,7 @@
           "consumedBy": "Manager/Meeting Room Tables (2026-07-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Furniture Layout (client approval 2026-07-24)",
+          "gatedBy": "Furniture Layout (client approval 2026-05-24)",
           "id": "m34",
           "inspection": "Pending",
           "issues": [],
@@ -4143,7 +4135,7 @@
           "consumedBy": "Manager/Meeting Room Tables (2026-07-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Furniture Layout (client approval 2026-07-24)",
+          "gatedBy": "Furniture Layout (client approval 2026-05-24)",
           "id": "m35",
           "inspection": "Pending",
           "issues": [],
@@ -4171,7 +4163,7 @@
           "consumedBy": "Manager/Meeting Room Tables (2026-07-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Furniture Layout (client approval 2026-07-24)",
+          "gatedBy": "Furniture Layout (client approval 2026-05-24)",
           "id": "m36",
           "inspection": "Pending",
           "issues": [],
@@ -4283,7 +4275,7 @@
           "consumedBy": "Raceway Trunking & Installation (2026-06-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": null,
+          "gatedBy": "Electrical DBR (client approval 2026-06-05)",
           "id": "m40",
           "inspection": "Pending",
           "issues": [
@@ -4313,7 +4305,7 @@
           "consumedBy": "Raceway Trunking & Installation (2026-06-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": null,
+          "gatedBy": "Electrical DBR (client approval 2026-06-05)",
           "id": "m41",
           "inspection": "Pending",
           "issues": [
@@ -4343,7 +4335,7 @@
           "consumedBy": "Raceway Trunking & Installation (2026-06-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": null,
+          "gatedBy": "Electrical DBR (client approval 2026-06-05)",
           "id": "m42",
           "inspection": "Pending",
           "issues": [
@@ -4373,7 +4365,7 @@
           "consumedBy": "Raceway Trunking & Installation (2026-06-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": null,
+          "gatedBy": "Electrical DBR (client approval 2026-06-05)",
           "id": "m43",
           "inspection": "Pending",
           "issues": [],
@@ -4401,7 +4393,7 @@
           "consumedBy": "Raceway Trunking & Installation (2026-06-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": null,
+          "gatedBy": "Electrical DBR (client approval 2026-06-05)",
           "id": "m44",
           "inspection": "Pending",
           "issues": [
@@ -4431,7 +4423,7 @@
           "consumedBy": "Raceway Trunking & Installation (2026-06-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": null,
+          "gatedBy": "Electrical DBR (client approval 2026-06-05)",
           "id": "m45",
           "inspection": "Pending",
           "issues": [
@@ -4461,7 +4453,7 @@
           "consumedBy": "Raceway Trunking & Installation (2026-06-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": null,
+          "gatedBy": "Electrical DBR (client approval 2026-06-05)",
           "id": "m46",
           "inspection": "Pending",
           "issues": [
@@ -4491,7 +4483,7 @@
           "consumedBy": "Temporary Power (2026-06-10)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Lighting Layout (with dimensions) (client approval 2026-06-09)",
+          "gatedBy": null,
           "id": "m47",
           "inspection": "Pending",
           "issues": [
@@ -4521,7 +4513,7 @@
           "consumedBy": "Temporary Power (2026-06-10)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Lighting Layout (with dimensions) (client approval 2026-06-09)",
+          "gatedBy": null,
           "id": "m48",
           "inspection": "Pending",
           "issues": [
@@ -4551,7 +4543,7 @@
           "consumedBy": "Temporary Power (2026-06-10)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Lighting Layout (with dimensions) (client approval 2026-06-09)",
+          "gatedBy": null,
           "id": "m49",
           "inspection": "Pending",
           "issues": [
@@ -4581,7 +4573,7 @@
           "consumedBy": "Temporary Power (2026-06-10)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Lighting Layout (with dimensions) (client approval 2026-06-09)",
+          "gatedBy": null,
           "id": "m50",
           "inspection": "Pending",
           "issues": [
@@ -4611,7 +4603,7 @@
           "consumedBy": "Plumbing Internal Piping (2026-06-30)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-29)",
+          "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-24)",
           "id": "m51",
           "inspection": "Pending",
           "issues": [],
@@ -4639,7 +4631,7 @@
           "consumedBy": "Plumbing Internal Piping (2026-06-30)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-29)",
+          "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-24)",
           "id": "m52",
           "inspection": "Pending",
           "issues": [
@@ -4669,7 +4661,7 @@
           "consumedBy": "Plumbing Internal Piping (2026-06-30)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-29)",
+          "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-24)",
           "id": "m53",
           "inspection": "Pending",
           "issues": [
@@ -4699,7 +4691,7 @@
           "consumedBy": "Plumbing Internal Piping (2026-06-30)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-29)",
+          "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-24)",
           "id": "m54",
           "inspection": "Pending",
           "issues": [
@@ -4729,7 +4721,7 @@
           "consumedBy": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+          "gatedBy": "HVAC DBR (client approval 2026-06-19)",
           "id": "m55",
           "inspection": "Pending",
           "issues": [],
@@ -4757,7 +4749,7 @@
           "consumedBy": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+          "gatedBy": "HVAC DBR (client approval 2026-06-19)",
           "id": "m56",
           "inspection": "Pending",
           "issues": [],
@@ -4785,7 +4777,7 @@
           "consumedBy": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+          "gatedBy": "HVAC DBR (client approval 2026-06-19)",
           "id": "m57",
           "inspection": "Pending",
           "issues": [
@@ -4815,7 +4807,7 @@
           "consumedBy": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+          "gatedBy": "HVAC DBR (client approval 2026-06-19)",
           "id": "m58",
           "inspection": "Pending",
           "issues": [
@@ -4845,7 +4837,7 @@
           "consumedBy": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+          "gatedBy": "HVAC DBR (client approval 2026-06-19)",
           "id": "m59",
           "inspection": "Pending",
           "issues": [
@@ -4875,7 +4867,7 @@
           "consumedBy": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+          "gatedBy": "HVAC DBR (client approval 2026-06-19)",
           "id": "m60",
           "inspection": "Pending",
           "issues": [
@@ -4905,7 +4897,7 @@
           "consumedBy": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+          "gatedBy": "HVAC DBR (client approval 2026-06-19)",
           "id": "m61",
           "inspection": "Pending",
           "issues": [
@@ -4935,7 +4927,7 @@
           "consumedBy": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+          "gatedBy": "HVAC DBR (client approval 2026-06-19)",
           "id": "m62",
           "inspection": "Pending",
           "issues": [
@@ -5573,7 +5565,7 @@
           "consumedBy": "Manager/Meeting Room Tables (2026-07-25)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Furniture Layout (client approval 2026-07-24)",
+          "gatedBy": "Furniture Layout (client approval 2026-05-24)",
           "id": "m84",
           "inspection": "Pending",
           "issues": [],
@@ -5643,7 +5635,7 @@
         "deliveryRequired": "2026-06-19",
         "deliveryStatus": "Not Started",
         "feeds": "Blockwork, AAC Blocks & Plastering (2026-06-21)",
-        "gatedBy": "Base Build Layout (client approval 2026-06-20)",
+        "gatedBy": "Base Build Layout (client approval 2026-05-17)",
         "id": "p1",
         "leadDays": 7,
         "longLead": false,
@@ -5663,7 +5655,7 @@
         "deliveryRequired": "2026-06-21",
         "deliveryStatus": "Not Started",
         "feeds": "100mm Partition Framing (2026-06-23)",
-        "gatedBy": "Partition Layout (client approval 2026-06-22)",
+        "gatedBy": "Partition Layout (client approval 2026-05-29)",
         "id": "p2",
         "leadDays": 12,
         "longLead": false,
@@ -5803,7 +5795,7 @@
         "deliveryRequired": "2026-07-23",
         "deliveryStatus": "Not Started",
         "feeds": "Manager/Meeting Room Tables (2026-07-25)",
-        "gatedBy": "Furniture Layout (client approval 2026-07-24)",
+        "gatedBy": "Furniture Layout (client approval 2026-05-24)",
         "id": "p9",
         "leadDays": 45,
         "longLead": true,
@@ -5843,7 +5835,7 @@
         "deliveryRequired": "2026-06-23",
         "deliveryStatus": "Not Started",
         "feeds": "Raceway Trunking & Installation (2026-06-25)",
-        "gatedBy": null,
+        "gatedBy": "Electrical DBR (client approval 2026-06-05)",
         "id": "p11",
         "leadDays": 30,
         "longLead": true,
@@ -5903,7 +5895,7 @@
         "deliveryRequired": "2026-06-28",
         "deliveryStatus": "Not Started",
         "feeds": "Plumbing Internal Piping (2026-06-30)",
-        "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-29)",
+        "gatedBy": "PHE DBR & Plumbing Layout (client approval 2026-06-24)",
         "id": "p14",
         "leadDays": 14,
         "longLead": false,
@@ -5923,7 +5915,7 @@
         "deliveryRequired": "2026-07-02",
         "deliveryStatus": "Not Started",
         "feeds": "GI Sheet Ducting Fabrication & Installation (2026-07-04)",
-        "gatedBy": "HVAC DBR (client approval 2026-07-03)",
+        "gatedBy": "HVAC DBR (client approval 2026-06-19)",
         "id": "p15",
         "leadDays": 35,
         "longLead": true,
@@ -9104,6 +9096,19 @@
     },
     "todos": [
       {
+        "category": "design",
+        "description": "Issue for approval: Base Build Layout",
+        "endDate": "2026-05-12",
+        "id": "t59",
+        "notes": "Releases: Blockwork, AAC Blocks & Plastering · Drawing readiness (2026-05-12) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
         "category": "procurement",
         "description": "Release PO: GSS / General Site Services",
         "endDate": "2026-05-16",
@@ -9111,6 +9116,19 @@
         "notes": "No design gate recorded.",
         "priority": "MEDIUM",
         "responsibility": "Procurement",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Furniture Layout",
+        "endDate": "2026-05-17",
+        "id": "t60",
+        "notes": "Releases: Manager/Meeting Room Tables · Drawing readiness (2026-05-17) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9134,9 +9152,35 @@
         "description": "Release PO: Electrical Works",
         "endDate": "2026-05-24",
         "id": "t54",
-        "notes": "No design gate recorded.",
+        "notes": "Gated by Electrical DBR (client approval 2026-06-05)",
         "priority": "HIGH",
         "responsibility": "Procurement",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Furniture Dimensions Layout",
+        "endDate": "2026-05-24",
+        "id": "t61",
+        "notes": "Releases: Manager/Meeting Room Tables · Drawing readiness (2026-05-24) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Partition Layout",
+        "endDate": "2026-05-24",
+        "id": "t62",
+        "notes": "Releases: 100mm Partition Framing · Drawing readiness (2026-05-24) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9160,7 +9204,7 @@
         "description": "Release PO: HVAC (Low Side + VAV + VRF)",
         "endDate": "2026-05-28",
         "id": "t56",
-        "notes": "Gated by HVAC DBR (client approval 2026-07-03)",
+        "notes": "Gated by HVAC DBR (client approval 2026-06-19)",
         "priority": "HIGH",
         "responsibility": "Procurement",
         "revisedDate": null,
@@ -9170,77 +9214,12 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Lighting Layout (with dimensions)",
-        "endDate": "2026-06-02",
-        "id": "t70",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Electrical SLD Layout",
-        "endDate": "2026-06-02",
-        "id": "t75",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Electrical Load Calculation",
-        "endDate": "2026-06-02",
-        "id": "t76",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
         "description": "Issue for approval: Power, Data & Switch Board Layout",
-        "endDate": "2026-06-02",
+        "endDate": "2026-05-29",
         "id": "t77",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+        "notes": "Releases: Raceway Trunking & Installation · Drawing readiness (2026-05-29) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: UPS Calculation & Specification",
-        "endDate": "2026-06-02",
-        "id": "t82",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Decorative Lights",
-        "endDate": "2026-06-02",
-        "id": "t136",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-02) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9249,9 +9228,9 @@
       {
         "category": "design",
         "description": "Issue for approval: Electrical DBR",
-        "endDate": "2026-06-04",
+        "endDate": "2026-05-31",
         "id": "t74",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+        "notes": "Releases: Raceway Trunking & Installation · Drawing readiness (2026-05-31) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -9261,63 +9240,11 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Raceway Layout",
-        "endDate": "2026-06-04",
-        "id": "t78",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+        "description": "Issue for approval: RCP Layout",
+        "endDate": "2026-06-03",
+        "id": "t69",
+        "notes": "Releases: Gypsum False Ceiling · Drawing readiness (2026-06-03) is before the project starts (2026-06-08) — this drawing is already late on day one.",
         "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Cable Tray Layout",
-        "endDate": "2026-06-04",
-        "id": "t79",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Lighting Looping Layout",
-        "endDate": "2026-06-04",
-        "id": "t80",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Panel & DB Position Layout",
-        "endDate": "2026-06-04",
-        "id": "t81",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Switch Sockets",
-        "endDate": "2026-06-04",
-        "id": "t135",
-        "notes": "Releases: Temporary Power · Drawing readiness (2026-06-04) is before the project starts (2026-06-08) — this drawing is already late on day one.",
-        "priority": "MEDIUM",
         "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",
@@ -9334,6 +9261,19 @@
         "responsibility": "Project head",
         "revisedDate": null,
         "source": "standard",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical Load Calculation",
+        "endDate": "2026-06-05",
+        "id": "t76",
+        "notes": "Releases: Raceway Trunking & Installation · Drawing readiness (2026-06-05) is before the project starts (2026-06-08) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
         "startDate": null,
         "status": "Delayed"
       },
@@ -9407,7 +9347,7 @@
         "description": "Release PO: Modular Furniture",
         "endDate": "2026-06-08",
         "id": "t52",
-        "notes": "Gated by Furniture Layout (client approval 2026-07-24)",
+        "notes": "Gated by Furniture Layout (client approval 2026-05-24)",
         "priority": "HIGH",
         "responsibility": "Procurement",
         "revisedDate": null,
@@ -9459,7 +9399,7 @@
         "description": "Release PO: Interior Works",
         "endDate": "2026-06-09",
         "id": "t45",
-        "notes": "Gated by Partition Layout (client approval 2026-06-22)",
+        "notes": "Gated by Partition Layout (client approval 2026-05-29)",
         "priority": "MEDIUM",
         "responsibility": "Procurement",
         "revisedDate": null,
@@ -9494,6 +9434,19 @@
         "status": "Delayed"
       },
       {
+        "category": "design",
+        "description": "Issue for approval: Lighting Layout (with dimensions)",
+        "endDate": "2026-06-10",
+        "id": "t70",
+        "notes": "Releases: Raceway Trunking & Installation",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
         "category": "general",
         "description": "Kick-off meeting with the client and consultants",
         "endDate": "2026-06-11",
@@ -9524,7 +9477,7 @@
         "description": "Release PO: Civil Works",
         "endDate": "2026-06-12",
         "id": "t44",
-        "notes": "Gated by Base Build Layout (client approval 2026-06-20)",
+        "notes": "Gated by Base Build Layout (client approval 2026-05-17)",
         "priority": "MEDIUM",
         "responsibility": "Procurement",
         "revisedDate": null,
@@ -9540,6 +9493,19 @@
         "notes": "Releases: 100mm Partition Framing",
         "priority": "HIGH",
         "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical SLD Layout",
+        "endDate": "2026-06-12",
+        "id": "t75",
+        "notes": "Releases: Raceway Trunking & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9563,7 +9529,7 @@
         "description": "Release PO: Plumbing (PHE)",
         "endDate": "2026-06-14",
         "id": "t55",
-        "notes": "Gated by PHE DBR & Plumbing Layout (client approval 2026-06-29)",
+        "notes": "Gated by PHE DBR & Plumbing Layout (client approval 2026-06-24)",
         "priority": "MEDIUM",
         "responsibility": "Procurement",
         "revisedDate": null,
@@ -9573,12 +9539,12 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Base Build Layout",
-        "endDate": "2026-06-15",
-        "id": "t59",
-        "notes": "Releases: Blockwork, AAC Blocks & Plastering",
+        "description": "Issue for approval: HVAC DBR",
+        "endDate": "2026-06-14",
+        "id": "t83",
+        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
         "priority": "HIGH",
-        "responsibility": "Design lead",
+        "responsibility": "MEP design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9612,10 +9578,23 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Partition Layout",
+        "description": "Issue for approval: UPS Calculation & Specification",
         "endDate": "2026-06-17",
-        "id": "t62",
-        "notes": "Releases: 100mm Partition Framing",
+        "id": "t82",
+        "notes": "Releases: Raceway Trunking & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Decorative Lights",
+        "endDate": "2026-06-17",
+        "id": "t136",
+        "notes": "Releases: Raceway Trunking & Installation",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -9729,12 +9708,90 @@
       },
       {
         "category": "design",
+        "description": "Issue for approval: Raceway Layout",
+        "endDate": "2026-06-19",
+        "id": "t78",
+        "notes": "Releases: Raceway Trunking & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Cable Tray Layout",
+        "endDate": "2026-06-19",
+        "id": "t79",
+        "notes": "Releases: Raceway Trunking & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Lighting Looping Layout",
+        "endDate": "2026-06-19",
+        "id": "t80",
+        "notes": "Releases: Raceway Trunking & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Panel & DB Position Layout",
+        "endDate": "2026-06-19",
+        "id": "t81",
+        "notes": "Releases: Raceway Trunking & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: HVAC Heat Load",
+        "endDate": "2026-06-19",
+        "id": "t84",
+        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
         "description": "Issue for approval: PHE DBR & Plumbing Layout",
-        "endDate": "2026-06-24",
+        "endDate": "2026-06-19",
         "id": "t86",
         "notes": "Releases: Plumbing Internal Piping",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Switch Sockets",
+        "endDate": "2026-06-19",
+        "id": "t135",
+        "notes": "Releases: Raceway Trunking & Installation",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9748,19 +9805,6 @@
         "notes": "Releases: Plumbing Internal Piping",
         "priority": "MEDIUM",
         "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: HVAC Heat Load",
-        "endDate": "2026-06-26",
-        "id": "t84",
-        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9785,6 +9829,19 @@
         "endDate": "2026-06-27",
         "id": "t66",
         "notes": "Releases: Column Cladding (Ply/Gypsum)",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Wall Finishes Layout",
+        "endDate": "2026-06-27",
+        "id": "t67",
+        "notes": "Releases: Internal Walls (Putty + Paint)",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -9891,32 +9948,6 @@
         "notes": "Releases: Column Cladding (Ply/Gypsum)",
         "priority": "HIGH",
         "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: RCP Layout",
-        "endDate": "2026-06-28",
-        "id": "t69",
-        "notes": "Releases: Gypsum False Ceiling",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: HVAC DBR",
-        "endDate": "2026-06-28",
-        "id": "t83",
-        "notes": "Releases: GI Sheet Ducting Fabrication & Installation",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -10196,6 +10227,19 @@
         "status": "Delayed"
       },
       {
+        "category": "design",
+        "description": "Issue for approval: Flooring Layout",
+        "endDate": "2026-07-07",
+        "id": "t63",
+        "notes": "Releases: Vitrified Tile Works",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
         "category": "procurement",
         "description": "Release PO: Signages",
         "endDate": "2026-07-11",
@@ -10203,6 +10247,19 @@
         "notes": "No design gate recorded.",
         "priority": "MEDIUM",
         "responsibility": "Procurement",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Modular Layout",
+        "endDate": "2026-07-12",
+        "id": "t68",
+        "notes": "Releases: Manager/Meeting Room Tables",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -10291,19 +10348,6 @@
         "description": "Issue for approval: Carpet / SPC Flooring — Support & Server",
         "endDate": "2026-07-12",
         "id": "t118",
-        "notes": "Releases: Vitrified Tile Works",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Flooring Layout",
-        "endDate": "2026-07-14",
-        "id": "t63",
         "notes": "Releases: Vitrified Tile Works",
         "priority": "HIGH",
         "responsibility": "Design lead",
@@ -10470,45 +10514,6 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Furniture Layout",
-        "endDate": "2026-07-17",
-        "id": "t60",
-        "notes": "Releases: Manager/Meeting Room Tables",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Wall Finishes Layout",
-        "endDate": "2026-07-17",
-        "id": "t67",
-        "notes": "Releases: Internal Walls (Putty + Paint)",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Modular Layout",
-        "endDate": "2026-07-17",
-        "id": "t68",
-        "notes": "Releases: Manager/Meeting Room Tables",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
         "description": "Issue for approval: Paint Shades — Reception & Lounge",
         "endDate": "2026-07-17",
         "id": "t105",
@@ -10618,19 +10623,6 @@
         "id": "t140",
         "notes": "Releases: Aluminium Skirting",
         "priority": "MEDIUM",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Furniture Dimensions Layout",
-        "endDate": "2026-07-19",
-        "id": "t61",
-        "notes": "Releases: Manager/Meeting Room Tables",
-        "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",

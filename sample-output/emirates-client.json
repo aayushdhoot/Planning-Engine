@@ -198,11 +198,11 @@
       {
         "actualDate": null,
         "area": "Operation",
-        "blocks": "Marking & supports fixing for fire pipes",
+        "blocks": "Modification of existing fire pipes",
         "description": "Fire NOC / CFO approval",
         "id": "x11",
-        "planDate": "2025-09-29",
-        "remarks": "Blocks \"Marking & supports fixing for fire pipes\" starting 2025-10-13.",
+        "planDate": "2025-10-03",
+        "remarks": "Blocks \"Modification of existing fire pipes\" starting 2025-10-17.",
         "responsibility": "FS/Builder",
         "sr": 11,
         "status": "Delayed"
@@ -258,11 +258,11 @@
       {
         "actualDate": null,
         "area": "Operation",
-        "blocks": "Marking & Support fixing of Ducts",
+        "blocks": "Installation of Ducts",
         "description": "Heat load approval / CFM availability",
         "id": "x16",
-        "planDate": "2025-10-17",
-        "remarks": "Blocks \"Marking & Support fixing of Ducts\" starting 2025-10-31.",
+        "planDate": "2025-10-21",
+        "remarks": "Blocks \"Installation of Ducts\" starting 2025-11-04.",
         "responsibility": "Builder",
         "sr": 16,
         "status": "Delayed"
@@ -319,14 +319,16 @@
     "design": {
       "rows": [
         {
-          "approvalBy": "2025-09-25",
-          "basis": "back-scheduled from \"Waterproofing\" starting 2025-09-26, less 5d client approval",
+          "approvalBy": "2025-06-06",
+          "basis": "back-scheduled from \"Waterproofing\" starting 2025-09-26, less 5d client approval; pulled forward from 2025-09-25 because 5 drawings are drawn from it and issued by 2025-06-06",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Base Build Layout",
           "id": "d1",
-          "issues": [],
-          "readyBy": "2025-09-20",
+          "issues": [
+            "Drawing readiness (2025-06-01) is before the project starts (2025-06-23) — this drawing is already late on day one."
+          ],
+          "readyBy": "2025-06-01",
           "releases": [
             "Waterproofing"
           ],
@@ -337,14 +339,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-12-23",
-          "basis": "back-scheduled from \"Site Measurement for Modular Cubicle\" starting 2025-12-24, less 7d client approval",
+          "approvalBy": "2025-06-13",
+          "basis": "back-scheduled from \"Site Measurement for Modular Cubicle\" starting 2025-12-24, less 7d client approval; pulled forward from 2025-12-23 because 3 drawings are drawn from it and issued by 2025-06-13",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Furniture Layout",
           "id": "d2",
-          "issues": [],
-          "readyBy": "2025-12-16",
+          "issues": [
+            "Drawing readiness (2025-06-06) is before the project starts (2025-06-23) — this drawing is already late on day one."
+          ],
+          "readyBy": "2025-06-06",
           "releases": [
             "Site Measurement for Modular Cubicle"
           ],
@@ -355,14 +359,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-12-23",
-          "basis": "back-scheduled from \"Site Measurement for Modular Cubicle\" starting 2025-12-24, less 5d client approval",
+          "approvalBy": "2025-09-27",
+          "basis": "back-scheduled from \"Site Measurement for Modular Cubicle\" starting 2025-12-24, less 5d client approval; pulled forward from 2025-12-23 because 2 drawings are drawn from it and issued by 2025-09-27",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Furniture Dimensions Layout",
           "id": "d3",
           "issues": [],
-          "readyBy": "2025-12-18",
+          "readyBy": "2025-09-22",
           "releases": [
             "Site Measurement for Modular Cubicle"
           ],
@@ -373,14 +377,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-09",
-          "basis": "back-scheduled from \"Single side single skinning\" starting 2025-10-10, less 5d client approval",
+          "approvalBy": "2025-06-18",
+          "basis": "back-scheduled from \"Single side single skinning\" starting 2025-10-10, less 5d client approval; pulled forward from 2025-10-09 because 20 drawings are drawn from it and issued by 2025-06-18",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Partition Layout",
           "id": "d4",
-          "issues": [],
-          "readyBy": "2025-10-04",
+          "issues": [
+            "Drawing readiness (2025-06-13) is before the project starts (2025-06-23) — this drawing is already late on day one."
+          ],
+          "readyBy": "2025-06-13",
           "releases": [
             "Single side single skinning"
           ],
@@ -391,14 +397,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-23",
-          "basis": "back-scheduled from \"Modifoam Flooring\" starting 2025-10-24, less 5d client approval",
+          "approvalBy": "2025-07-01",
+          "basis": "back-scheduled from \"Modifoam Flooring\" starting 2025-10-24, less 5d client approval; pulled forward from 2025-10-23 because 16 drawings are drawn from it and issued by 2025-07-01",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Flooring Layout",
           "id": "d5",
           "issues": [],
-          "readyBy": "2025-10-18",
+          "readyBy": "2025-06-26",
           "releases": [
             "Modifoam Flooring"
           ],
@@ -463,14 +469,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-11-06",
-          "basis": "back-scheduled from \"Putty application (walls)\" starting 2025-11-07, less 5d client approval",
+          "approvalBy": "2025-07-03",
+          "basis": "back-scheduled from \"Putty application (walls)\" starting 2025-11-07, less 5d client approval; pulled forward from 2025-11-06 because 9 drawings are drawn from it and issued by 2025-07-03",
           "category": "GFC",
           "criticality": "High",
           "drawingName": "Wall Finishes Layout",
           "id": "d9",
           "issues": [],
-          "readyBy": "2025-11-01",
+          "readyBy": "2025-06-28",
           "releases": [
             "Putty application (walls)"
           ],
@@ -481,14 +487,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-12-23",
-          "basis": "back-scheduled from \"Site Measurement for Modular Cubicle\" starting 2025-12-24, less 7d client approval",
+          "approvalBy": "2025-12-18",
+          "basis": "back-scheduled from \"Site Measurement for Modular Cubicle\" starting 2025-12-24, less 7d client approval; pulled forward from 2025-12-23 because \"TD — Soft Cost (furniture & furnishing)\" is drawn from it and issued by 2025-12-18",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Modular Layout",
           "id": "d10",
           "issues": [],
-          "readyBy": "2025-12-16",
+          "readyBy": "2025-12-11",
           "releases": [
             "Site Measurement for Modular Cubicle"
           ],
@@ -499,14 +505,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-16",
-          "basis": "back-scheduled from \"FA Cabling on ceiling\" starting 2025-10-17, less 7d client approval",
+          "approvalBy": "2025-10-06",
+          "basis": "back-scheduled from \"FA Cabling on ceiling\" starting 2025-10-17, less 7d client approval; pulled forward from 2025-10-16 because 20 drawings are drawn from it and issued by 2025-10-06",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "RCP Layout",
           "id": "d11",
           "issues": [],
-          "readyBy": "2025-10-09",
+          "readyBy": "2025-09-29",
           "releases": [
             "FA Cabling on ceiling"
           ],
@@ -517,14 +523,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-23",
-          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 7d client approval",
+          "approvalBy": "2025-10-16",
+          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 7d client approval; pulled forward from 2025-10-23 because 2 drawings are drawn from it and issued by 2025-10-16",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "Lighting Layout (with dimensions)",
           "id": "d12",
           "issues": [],
-          "readyBy": "2025-10-16",
+          "readyBy": "2025-10-09",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
           ],
@@ -567,14 +573,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-09",
-          "basis": "back-scheduled from \"Single side single skinning\" starting 2025-10-10, less 10d client approval",
+          "approvalBy": "2025-06-28",
+          "basis": "back-scheduled from \"Single side single skinning\" starting 2025-10-10, less 10d client approval; pulled forward from 2025-10-09 because 8 drawings are drawn from it and issued by 2025-06-28",
           "category": "GFC",
           "criticality": "Very Critical",
           "drawingName": "3D Views — Detailed & Client Approval",
           "id": "d15",
-          "issues": [],
-          "readyBy": "2025-09-29",
+          "issues": [
+            "Drawing readiness (2025-06-18) is before the project starts (2025-06-23) — this drawing is already late on day one."
+          ],
+          "readyBy": "2025-06-18",
           "releases": [
             "Single side single skinning"
           ],
@@ -585,14 +593,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-23",
-          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 5d client approval",
+          "approvalBy": "2025-10-04",
+          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 5d client approval; pulled forward from 2025-10-23 because \"Electrical Load Calculation\" is drawn from it and issued by 2025-10-04",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical DBR",
           "id": "d16",
           "issues": [],
-          "readyBy": "2025-10-18",
+          "readyBy": "2025-09-29",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
           ],
@@ -603,14 +611,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-23",
-          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 7d client approval",
+          "approvalBy": "2025-10-18",
+          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 7d client approval; pulled forward from 2025-10-23 because 2 drawings are drawn from it and issued by 2025-10-18",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical SLD Layout",
           "id": "d17",
           "issues": [],
-          "readyBy": "2025-10-16",
+          "readyBy": "2025-10-11",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
           ],
@@ -621,14 +629,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-23",
-          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 7d client approval",
+          "approvalBy": "2025-10-11",
+          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 7d client approval; pulled forward from 2025-10-23 because 2 drawings are drawn from it and issued by 2025-10-11",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Electrical Load Calculation",
           "id": "d18",
           "issues": [],
-          "readyBy": "2025-10-16",
+          "readyBy": "2025-10-04",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
           ],
@@ -639,14 +647,14 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-23",
-          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 7d client approval",
+          "approvalBy": "2025-10-04",
+          "basis": "back-scheduled from \"Conduiting for Raw Power, UPS, lighting, IT\" starting 2025-10-24, less 7d client approval; pulled forward from 2025-10-23 because 3 drawings are drawn from it and issued by 2025-10-04",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Power, Data & Switch Board Layout",
           "id": "d19",
           "issues": [],
-          "readyBy": "2025-10-16",
+          "readyBy": "2025-09-27",
           "releases": [
             "Conduiting for Raw Power, UPS, lighting, IT"
           ],
@@ -747,16 +755,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-30",
-          "basis": "back-scheduled from \"Marking & Support fixing of Ducts\" starting 2025-10-31, less 5d client approval",
+          "approvalBy": "2025-10-20",
+          "basis": "back-scheduled from \"Installation of Ducts\" starting 2025-11-04, less 5d client approval; pulled forward from 2025-11-03 because \"HVAC Heat Load\" is drawn from it and issued by 2025-10-20",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "HVAC DBR",
           "id": "d25",
           "issues": [],
-          "readyBy": "2025-10-25",
+          "readyBy": "2025-10-15",
           "releases": [
-            "Marking & Support fixing of Ducts"
+            "Installation of Ducts"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -765,16 +773,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-30",
-          "basis": "back-scheduled from \"Marking & Support fixing of Ducts\" starting 2025-10-31, less 7d client approval",
+          "approvalBy": "2025-10-27",
+          "basis": "back-scheduled from \"Installation of Ducts\" starting 2025-11-04, less 7d client approval; pulled forward from 2025-11-03 because \"HVAC Layout\" is drawn from it and issued by 2025-10-27",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "HVAC Heat Load",
           "id": "d26",
           "issues": [],
-          "readyBy": "2025-10-23",
+          "readyBy": "2025-10-20",
           "releases": [
-            "Marking & Support fixing of Ducts"
+            "Installation of Ducts"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -783,16 +791,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-30",
-          "basis": "back-scheduled from \"Marking & Support fixing of Ducts\" starting 2025-10-31, less 7d client approval",
+          "approvalBy": "2025-11-03",
+          "basis": "back-scheduled from \"Installation of Ducts\" starting 2025-11-04, less 7d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "HVAC Layout",
           "id": "d27",
           "issues": [],
-          "readyBy": "2025-10-23",
+          "readyBy": "2025-10-27",
           "releases": [
-            "Marking & Support fixing of Ducts"
+            "Installation of Ducts"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -801,16 +809,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-13",
-          "basis": "back-scheduled from \"Marking of plumbing lines\" starting 2025-10-14, less 5d client approval",
+          "approvalBy": "2025-10-09",
+          "basis": "back-scheduled from \"Pipes Installation (drainage)\" starting 2025-10-15, less 5d client approval; pulled forward from 2025-10-14 because \"Sanitary Fixtures\" is drawn from it and issued by 2025-10-09",
           "category": "MEP",
           "criticality": "High",
           "drawingName": "PHE DBR & Plumbing Layout",
           "id": "d28",
           "issues": [],
-          "readyBy": "2025-10-08",
+          "readyBy": "2025-10-04",
           "releases": [
-            "Marking of plumbing lines"
+            "Pipes Installation (drainage)"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -819,16 +827,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-12",
-          "basis": "back-scheduled from \"Marking & supports fixing for fire pipes\" starting 2025-10-13, less 10d client approval",
+          "approvalBy": "2025-10-16",
+          "basis": "back-scheduled from \"Modification of existing fire pipes\" starting 2025-10-17, less 10d client approval",
           "category": "MEP",
           "criticality": "Very Critical",
           "drawingName": "Fire Sprinkler Layout",
           "id": "d29",
           "issues": [],
-          "readyBy": "2025-10-02",
+          "readyBy": "2025-10-06",
           "releases": [
-            "Marking & supports fixing for fire pipes"
+            "Modification of existing fire pipes"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -1719,16 +1727,16 @@
           "zone": null
         },
         {
-          "approvalBy": "2025-10-13",
-          "basis": "back-scheduled from \"Marking of plumbing lines\" starting 2025-10-14, less 5d client approval",
+          "approvalBy": "2025-10-14",
+          "basis": "back-scheduled from \"Pipes Installation (drainage)\" starting 2025-10-15, less 5d client approval",
           "category": "SAMPLING",
           "criticality": "Medium",
           "drawingName": "Sanitary Fixtures",
           "id": "d79",
           "issues": [],
-          "readyBy": "2025-10-08",
+          "readyBy": "2025-10-09",
           "releases": [
-            "Marking of plumbing lines"
+            "Pipes Installation (drainage)"
           ],
           "revision": "R0",
           "statusClient": "Delayed",
@@ -2087,7 +2095,7 @@
           "consumedBy": "Site Measurement for Modular Cubicle (2025-12-24)",
           "deliveredQty": null,
           "expectedDelivery": null,
-          "gatedBy": "Furniture Layout (client approval 2025-12-23)",
+          "gatedBy": "Furniture Layout (client approval 2025-06-13)",
           "id": "m79",
           "inspection": "Pending",
           "issues": [],
@@ -2155,7 +2163,7 @@
         "deliveryRequired": "2025-09-24",
         "deliveryStatus": "Not Started",
         "feeds": "Waterproofing (2025-09-26)",
-        "gatedBy": "Base Build Layout (client approval 2025-09-25)",
+        "gatedBy": "Base Build Layout (client approval 2025-06-06)",
         "id": "p1",
         "leadDays": 21,
         "longLead": false,
@@ -2175,7 +2183,7 @@
         "deliveryRequired": "2025-12-22",
         "deliveryStatus": "Not Started",
         "feeds": "Site Measurement for Modular Cubicle (2025-12-24)",
-        "gatedBy": "Furniture Layout (client approval 2025-12-23)",
+        "gatedBy": "Furniture Layout (client approval 2025-06-13)",
         "id": "p2",
         "leadDays": 21,
         "longLead": false,
@@ -2195,7 +2203,7 @@
         "deliveryRequired": "2025-10-22",
         "deliveryStatus": "Not Started",
         "feeds": "Conduiting for Raw Power, UPS, lighting, IT (2025-10-24)",
-        "gatedBy": "Lighting Layout (with dimensions) (client approval 2025-10-23)",
+        "gatedBy": "Electrical DBR (client approval 2025-10-04)",
         "id": "p3",
         "leadDays": 21,
         "longLead": false,
@@ -2215,7 +2223,7 @@
         "deliveryRequired": "2025-10-29",
         "deliveryStatus": "Not Started",
         "feeds": "Marking & Support fixing of Ducts (2025-10-31)",
-        "gatedBy": "HVAC DBR (client approval 2025-10-30)",
+        "gatedBy": null,
         "id": "p4",
         "leadDays": 21,
         "longLead": false,
@@ -2235,7 +2243,7 @@
         "deliveryRequired": "2025-10-12",
         "deliveryStatus": "Not Started",
         "feeds": "Marking of plumbing lines (2025-10-14)",
-        "gatedBy": "PHE DBR & Plumbing Layout (client approval 2025-10-13)",
+        "gatedBy": null,
         "id": "p5",
         "leadDays": 21,
         "longLead": false,
@@ -2275,7 +2283,7 @@
         "deliveryRequired": "2025-10-11",
         "deliveryStatus": "Not Started",
         "feeds": "Marking & supports fixing for fire pipes (2025-10-13)",
-        "gatedBy": "Fire Sprinkler Layout (client approval 2025-10-12)",
+        "gatedBy": null,
         "id": "p7",
         "leadDays": 21,
         "longLead": false,
@@ -8637,6 +8645,84 @@
     "todos": [
       {
         "category": "design",
+        "description": "Issue for approval: Base Build Layout",
+        "endDate": "2025-06-01",
+        "id": "t21",
+        "notes": "Releases: Waterproofing · Drawing readiness (2025-06-01) is before the project starts (2025-06-23) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Furniture Layout",
+        "endDate": "2025-06-06",
+        "id": "t22",
+        "notes": "Releases: Site Measurement for Modular Cubicle · Drawing readiness (2025-06-06) is before the project starts (2025-06-23) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Partition Layout",
+        "endDate": "2025-06-13",
+        "id": "t24",
+        "notes": "Releases: Single side single skinning · Drawing readiness (2025-06-13) is before the project starts (2025-06-23) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: 3D Views — Detailed & Client Approval",
+        "endDate": "2025-06-18",
+        "id": "t35",
+        "notes": "Releases: Single side single skinning · Drawing readiness (2025-06-18) is before the project starts (2025-06-23) — this drawing is already late on day one.",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Flooring Layout",
+        "endDate": "2025-06-26",
+        "id": "t25",
+        "notes": "Releases: Modifoam Flooring",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Wall Finishes Layout",
+        "endDate": "2025-06-28",
+        "id": "t29",
+        "notes": "Releases: Putty application (walls)",
+        "priority": "HIGH",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
         "description": "Issue for approval: Fire Evacuation Plan",
         "endDate": "2025-07-01",
         "id": "t34",
@@ -8689,10 +8775,10 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Base Build Layout",
-        "endDate": "2025-09-20",
-        "id": "t21",
-        "notes": "Releases: Waterproofing",
+        "description": "Issue for approval: Furniture Dimensions Layout",
+        "endDate": "2025-09-22",
+        "id": "t23",
+        "notes": "Releases: Site Measurement for Modular Cubicle",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -8702,23 +8788,10 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: 3D Views — Detailed & Client Approval",
-        "endDate": "2025-09-29",
-        "id": "t35",
-        "notes": "Releases: Single side single skinning",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Fire Sprinkler Layout",
-        "endDate": "2025-10-02",
-        "id": "t49",
-        "notes": "Releases: Marking & supports fixing for fire pipes",
+        "description": "Issue for approval: Power, Data & Switch Board Layout",
+        "endDate": "2025-09-27",
+        "id": "t39",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -8728,12 +8801,51 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Partition Layout",
-        "endDate": "2025-10-04",
-        "id": "t24",
-        "notes": "Releases: Single side single skinning",
+        "description": "Issue for approval: RCP Layout",
+        "endDate": "2025-09-29",
+        "id": "t31",
+        "notes": "Releases: FA Cabling on ceiling",
         "priority": "HIGH",
         "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical DBR",
+        "endDate": "2025-09-29",
+        "id": "t36",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical Load Calculation",
+        "endDate": "2025-10-04",
+        "id": "t38",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: PHE DBR & Plumbing Layout",
+        "endDate": "2025-10-04",
+        "id": "t48",
+        "notes": "Releases: Pipes Installation (drainage)",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -8845,25 +8957,12 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: PHE DBR & Plumbing Layout",
-        "endDate": "2025-10-08",
-        "id": "t48",
-        "notes": "Releases: Marking of plumbing lines",
+        "description": "Issue for approval: Fire Sprinkler Layout",
+        "endDate": "2025-10-06",
+        "id": "t49",
+        "notes": "Releases: Modification of existing fire pipes",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Sanitary Fixtures",
-        "endDate": "2025-10-08",
-        "id": "t99",
-        "notes": "Releases: Marking of plumbing lines",
-        "priority": "MEDIUM",
-        "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -8884,10 +8983,10 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: RCP Layout",
+        "description": "Issue for approval: Lighting Layout (with dimensions)",
         "endDate": "2025-10-09",
-        "id": "t31",
-        "notes": "Releases: FA Cabling on ceiling",
+        "id": "t32",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
         "priority": "HIGH",
         "responsibility": "Design lead",
         "revisedDate": null,
@@ -9079,6 +9178,32 @@
       },
       {
         "category": "design",
+        "description": "Issue for approval: Sanitary Fixtures",
+        "endDate": "2025-10-09",
+        "id": "t99",
+        "notes": "Releases: Pipes Installation (drainage)",
+        "priority": "MEDIUM",
+        "responsibility": "Design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
+        "description": "Issue for approval: Electrical SLD Layout",
+        "endDate": "2025-10-11",
+        "id": "t37",
+        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
+        "priority": "HIGH",
+        "responsibility": "MEP design lead",
+        "revisedDate": null,
+        "source": "derived",
+        "startDate": null,
+        "status": "Delayed"
+      },
+      {
+        "category": "design",
         "description": "Issue for approval: Acoustics / Fluted Panel — Reception & Lounge",
         "endDate": "2025-10-11",
         "id": "t90",
@@ -9170,49 +9295,10 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Lighting Layout (with dimensions)",
-        "endDate": "2025-10-16",
-        "id": "t32",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Electrical SLD Layout",
-        "endDate": "2025-10-16",
-        "id": "t37",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Electrical Load Calculation",
-        "endDate": "2025-10-16",
-        "id": "t38",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Power, Data & Switch Board Layout",
-        "endDate": "2025-10-16",
-        "id": "t39",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
+        "description": "Issue for approval: HVAC DBR",
+        "endDate": "2025-10-15",
+        "id": "t45",
+        "notes": "Releases: Installation of Ducts",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -9339,38 +9425,12 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Flooring Layout",
-        "endDate": "2025-10-18",
-        "id": "t25",
-        "notes": "Releases: Modifoam Flooring",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
         "description": "Issue for approval: Raised Flooring Layout",
         "endDate": "2025-10-18",
         "id": "t27",
         "notes": "Releases: Modifoam Flooring",
         "priority": "HIGH",
         "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Electrical DBR",
-        "endDate": "2025-10-18",
-        "id": "t36",
-        "notes": "Releases: Conduiting for Raw Power, UPS, lighting, IT",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9548,9 +9608,9 @@
       {
         "category": "design",
         "description": "Issue for approval: HVAC Heat Load",
-        "endDate": "2025-10-23",
+        "endDate": "2025-10-20",
         "id": "t46",
-        "notes": "Releases: Marking & Support fixing of Ducts",
+        "notes": "Releases: Installation of Ducts",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
         "revisedDate": null,
@@ -9561,37 +9621,11 @@
       {
         "category": "design",
         "description": "Issue for approval: HVAC Layout",
-        "endDate": "2025-10-23",
+        "endDate": "2025-10-27",
         "id": "t47",
-        "notes": "Releases: Marking & Support fixing of Ducts",
+        "notes": "Releases: Installation of Ducts",
         "priority": "HIGH",
         "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: HVAC DBR",
-        "endDate": "2025-10-25",
-        "id": "t45",
-        "notes": "Releases: Marking & Support fixing of Ducts",
-        "priority": "HIGH",
-        "responsibility": "MEP design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Wall Finishes Layout",
-        "endDate": "2025-11-01",
-        "id": "t29",
-        "notes": "Releases: Putty application (walls)",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
         "revisedDate": null,
         "source": "derived",
         "startDate": null,
@@ -9729,21 +9763,8 @@
       },
       {
         "category": "design",
-        "description": "Issue for approval: Furniture Layout",
-        "endDate": "2025-12-16",
-        "id": "t22",
-        "notes": "Releases: Site Measurement for Modular Cubicle",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
         "description": "Issue for approval: Modular Layout",
-        "endDate": "2025-12-16",
+        "endDate": "2025-12-11",
         "id": "t30",
         "notes": "Releases: Site Measurement for Modular Cubicle",
         "priority": "HIGH",
@@ -9758,19 +9779,6 @@
         "description": "Issue for approval: Chairs & Loose Furniture",
         "endDate": "2025-12-16",
         "id": "t100",
-        "notes": "Releases: Site Measurement for Modular Cubicle",
-        "priority": "HIGH",
-        "responsibility": "Design lead",
-        "revisedDate": null,
-        "source": "derived",
-        "startDate": null,
-        "status": "Delayed"
-      },
-      {
-        "category": "design",
-        "description": "Issue for approval: Furniture Dimensions Layout",
-        "endDate": "2025-12-18",
-        "id": "t23",
         "notes": "Releases: Site Measurement for Modular Cubicle",
         "priority": "HIGH",
         "responsibility": "Design lead",

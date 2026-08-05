@@ -43,7 +43,7 @@ src/services/persistence.ts PersistenceService: memory + file-based workspace
 src/reports/render.ts      branded HTML reports (client ≠ internal)
 src/reports/deck.ts        branded PPTX decks (client ≠ internal)
 src/App.tsx, src/ui/       React app: 13 tabs, I/E toggle, SVG Gantt
-tests/                     272 tests — the Tier-1 gates live here
+tests/                     278 tests — the Tier-1 gates live here
 scripts/sample-run.ts      end-to-end run over all 3 projects + gate assertions
 ```
 
@@ -143,6 +143,20 @@ rows as "Summary" and looked broken. Hand expand/collapse still works — the le
   `revisedEndDateClient` columns are gone; nobody managed them. Slippage is tracked by status.
 - **No row may be dateless.** When no gated site activity exists, `windowFor()` anchors to the
   project window and says so in `basis`, so a weak date is visibly weaker rather than absent.
+- **Design precedence is a second pass** (`applyDesignPrecedence`). Back-scheduling alone gets
+  every drawing in front of the work that needs it and says nothing about the order the
+  *drawings* come in — it produced a partition layout ready a month before the furniture layout
+  it is set out from, and a lighting layout issued before its RCP. `DesignSpec.dependsOn` is the
+  design DAG; the pass walks it dependents-first and pulls each **upstream** drawing earlier so
+  it is approved by the time anything drawn from it is issued. The site date is the hard
+  constraint, so the repair never pushes a dependent later — and `basis` records what pulled it.
+  Where the chain lands before mobilisation, `validateDesignRow` flags it; that is a genuine
+  finding about the front-end, not something to hide by relaxing the sequence.
+- **Enabling works never drive a drawing.** `isEnabling()` keeps surveys, temporary services,
+  marking, demolition and debris out of `firstOfTrade()`. "Temporary Power" was the first
+  electrical activity on SKF, so it drove the lighting layout — dating it before the project
+  started and dragging the whole architectural chain back with it. Fixing this *reduced* the
+  flagged rows from 12 to 8.
 - **`issues[]` validates each row**: readiness before approval, approval before the activity it
   gates, nothing before the project starts, nothing already past. The UI banners them.
 - **TDs come from the BOQ, not a list.** Every carpentry / modular / partition cost head raises
