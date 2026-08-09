@@ -13,9 +13,12 @@
     "pdf": "node scripts/to-pdf.mjs",
     "gates": "npm run typecheck && npm run lint && npm run test && npm run build && npm run sample",
     "start": "npm run build && node scripts/serve.mjs",
-    "serve": "node scripts/serve.mjs"
+    "serve": "node scripts/serve.mjs",
+    "migrate": "vite-node scripts/migrate-to-supabase.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.2",
+    "dotenv": "^17.4.2",
     "pptxgenjs": "^3.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -23,14 +26,15 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
-    "eslint": "^9.17.0",
-    "typescript-eslint": "^8.18.0",
-    "vite-node": "^2.1.8",
+    "@types/node": "^26.2.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
     "typescript": "^5.6.3",
+    "typescript-eslint": "^8.18.0",
     "vite": "^5.4.11",
+    "vite-node": "^2.1.8",
     "vite-plugin-singlefile": "^2.0.3",
     "vitest": "^2.1.8"
   }
