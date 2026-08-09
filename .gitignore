@@ -9,3 +9,5 @@ node_modules/
 # reads it locally. If it must be versioned, make the repo private first, or strip the
 # Mobile NO column and commit only name / designation / department / location / work email.
 source-documents/org/
+
+.env
