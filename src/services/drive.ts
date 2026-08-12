@@ -198,6 +198,7 @@ export class GoogleDriveService implements DriveService {
  * they are fetched in their .xlsx form.
  */
 const PROXY = '/gdrive';
+const DOCS_PROXY = '/gdocs';
 const ENTRY_RE = /<div class="flip-entry" id="entry-([^"]+)".*?<a href="([^"]+)".*?<div class="flip-entry-title">(.*?)<\/div>/gs;
 
 /**
@@ -337,10 +338,20 @@ export class PublicLinkDriveService implements DriveService {
     const res = await fetch(`${PROXY}/uc?export=download&id=${encodeURIComponent(file.id)}`);
     if (!res.ok) throw new Error(`Could not download "${file.name}" (${res.status}).`);
     const buf = await res.arrayBuffer();
-    // Drive answers very large files with an HTML interstitial instead of the bytes
+    // Drive answers very large files with an HTML interstitial instead of the bytes. A native
+    // Google Sheet/Doc/Slide hits this same path, since it has no raw bytes to download at all
+    // — public-link scanning has no mimeType (see scanFolder above) to tell the two cases
+    // apart ahead of time, so this is discovered here rather than predicted.
     const head = new TextDecoder().decode(buf.slice(0, 200)).toLowerCase();
-    if (head.startsWith('<!doctype html') || head.startsWith('<html'))
+    if (head.startsWith('<!doctype html') || head.startsWith('<html')) {
+      const sheetRes = await fetch(`${DOCS_PROXY}/spreadsheets/d/${encodeURIComponent(file.id)}/export?format=xlsx`).catch(() => null);
+      if (sheetRes?.ok) {
+        const sheetBuf = await sheetRes.arrayBuffer();
+        const sheetHead = new TextDecoder().decode(sheetBuf.slice(0, 200)).toLowerCase();
+        if (!sheetHead.startsWith('<!doctype html') && !sheetHead.startsWith('<html')) return sheetBuf;
+      }
       throw new Error(`Drive served a confirmation page rather than "${file.name}" — it is probably too large for direct download. Use "Prepare by hand" to upload it.`);
+    }
     return buf;
   }
 }

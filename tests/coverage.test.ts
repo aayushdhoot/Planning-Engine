@@ -14,6 +14,8 @@ const f = (name: string, path = `KOHLER OS/${name}`): DriveFile => ({
   webViewLink: null,
 });
 
+const withMime = (file: DriveFile, mimeType: string): DriveFile => ({ ...file, mimeType });
+
 const scan = (files: DriveFile[]): DriveScan => ({
   folderId: 'x',
   folderName: 'KOHLER OS',
@@ -26,6 +28,22 @@ describe('extractorFor', () => {
   it('recognises the two things the engine can structurally read', () => {
     expect(extractorFor(f('priced BOQ_BCS.csv'))).toBe('boq');
     expect(extractorFor(f('Kohler_Pune_Project_Schedule_V2.xlsx'))).toBe('schedule');
+  });
+
+  it('reads a native Google Sheet named like a BOQ, even with no mimeType (public-link scan)', () => {
+    const nativeBoq = f('Priced BOQ', 'KOHLER OS/BOQ & Project Plan/Priced BOQ');
+    expect(extractorFor(nativeBoq)).toBe('boq');
+  });
+
+  it('reads a native Google Sheet via its real mimeType (OAuth-authenticated scan)', () => {
+    const nativeBoq = withMime(f('Priced BOQ', 'KOHLER OS/BOQ & Project Plan/Priced BOQ'), 'application/vnd.google-apps.spreadsheet');
+    expect(extractorFor(nativeBoq)).toBe('boq');
+  });
+
+  it('does not guess spreadsheet for a no-extension file that is not named like a BOQ or schedule', () => {
+    const notes = f('Random Notes', 'KOHLER OS/Random Notes');
+    expect(kindOf(notes)).toBe('other');
+    expect(extractorFor(notes)).toBeNull();
   });
 
   it("identifies KOHLER's real BOQ, whose filename never says BOQ", () => {
@@ -90,7 +108,7 @@ describe('buildCoverage', () => {
     const states: DocStates = { 'priced BOQ_BCS.xlsx': { state: 'extracted', detail: '19 packages' } };
     const cov = buildCoverage(scan(files), states);
     expect(cov.extracted).toBe(1);
-    expect(cov.extractableNotRead).toBe(1);
+    expect(cov.extractableNotRead).toBe(2); // programme + the site photo remain (BOQ now extracted)
     expect(cov.evidenceOnlyMandatory).not.toContain('Project BOQ (priced)');
   });
 
@@ -98,7 +116,7 @@ describe('buildCoverage', () => {
     const states: DocStates = { 'Kohler_Pune_Project_Schedule_V2.xlsx': { state: 'dropped' } };
     const cov = buildCoverage(scan(files), states);
     expect(cov.dropped).toBe(1);
-    expect(cov.extractableNotRead).toBe(1); // only the BOQ remains
+    expect(cov.extractableNotRead).toBe(2); // BOQ + the site photo remain (schedule was dropped)
   });
 
   it('reports a required input as uncovered once its only document is dropped', () => {

@@ -3,7 +3,7 @@
 import type { CpmResult, EngineConfig, ProjectInputs, ScheduledActivity, Traced } from '../domain/types';
 import { computeCpm } from './cpm';
 import { addCalendarDays, parseIso } from './calendar';
-import { deriveWbs } from './wbs';
+import { deriveWbs, applyDesignTradeHints } from './wbs';
 import { levelManpower, type ManpowerPlan } from './manpower';
 import { buildDependencyTracker, buildDesignTracker, buildProcurementTracker, buildRaTracker, buildTodoTracker } from './trackers';
 import { buildMaterialTracker } from './materials';
@@ -69,7 +69,16 @@ export interface Plan {
   missingInputs: string[];
 }
 
-export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): Plan {
+export interface ExternalDelay {
+  /** exact activity id — resolved by the caller (see services/replan/apply.ts), which has the
+   * baseline schedule needed to turn a relative "delayed by N days" into this absolute floor */
+  activityId: string;
+  /** working days from project start; the activity may not start earlier than this */
+  minStartWorkingDay: number;
+  reason: string;
+}
+
+export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, externalDelays: ExternalDelay[] = []): Plan {
   const missing: string[] = [];
   const prov = p.provided;
   if (!prov.boq) missing.push('Project BOQ (priced)');
@@ -83,11 +92,23 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
   if (!prov.paymentTerms) missing.push('Payment terms');
 
   const assumptions: Assumption[] = [];
+  // Item 3: sharpen 'general'-fallback trade classification using drawing/3D references, before
+  // anything downstream (WBS, procurement, materials) groups by trade. Reassigning p here means
+  // every later p.boqPackages read in this function sees the corrected trade — deliberately a
+  // single correction point rather than patching each consumer separately.
+  const { packages: correctedBoq, notes: designHintNotes } = applyDesignTradeHints(p.boqPackages, p.designRefs);
+  p = { ...p, boqPackages: correctedBoq };
+  for (const n of designHintNotes) assumptions.push({ area: 'design-refs', text: n, internalOnly: false });
+
+  // Item 5: sales KT / email thread context is qualitative only — it never drives a date or
+  // quantity, by design (a client preference is not a quantity). Surfaced purely as read context
+  // for whoever reviews the plan, same as any other internal-only note.
+  for (const s of p.scopeNotes) assumptions.push({ area: 'scope', text: `${s.area}: ${s.note} (${s.source})`, internalOnly: true });
 
   // A BOQ without a supplied schedule is still plannable: derive the WBS from scope.
   let sourceActivities = p.scheduleActivities;
   if (!sourceActivities.length && prov.boq && p.boqPackages.length && p.contractStart) {
-    const wbs = deriveWbs(p.boqPackages, p.contractDurationCalDays?.value ?? null);
+    const wbs = deriveWbs(p.boqPackages, p.contractDurationCalDays?.value ?? null, p.siteConditions);
     sourceActivities = wbs.activities;
     for (const n of wbs.notes) assumptions.push({ area: 'wbs', text: n, internalOnly: false });
   }
@@ -157,13 +178,47 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string): P
   // lags between them stretch — otherwise the network shape would freeze and a slower
   // work mode would understate the finish date.
   const f = cfg.calendar.workModeFactor;
-  const scaled = sourceActivities.map((a) => ({
+  let scaled = sourceActivities.map((a) => ({
     ...a,
     duration: f === 1 ? a.duration : comp(Math.ceil(a.duration.value * f), `${a.duration.source} × workModeFactor ${f}`),
     deps: f === 1 ? a.deps : a.deps.map((d) => ({ ...d, lag: Math.round(d.lag * f) })),
   }));
   if (f !== 1)
     assumptions.push({ area: 'schedule', text: `Site work mode factor ${f} applied to every activity duration and dependency lag (${f < 1 ? 'day & night working' : 'restricted daytime working'}).`, internalOnly: false });
+
+  // Replanning constraint: an absolute "may not start before working day N" floor, resolved by
+  // the caller from a relative delay against the baseline schedule (see replan/apply.ts) — this
+  // function only applies the floor, it never interprets "delayed by N days" itself, so there's
+  // no ambiguity about what N days is relative to. Implemented as an FS dependency on a
+  // zero-duration anchor, same mechanism every other dependency in this engine already uses.
+  // CPM's forward pass just takes the max across all of an activity's deps, so this only pushes
+  // a start out when the floor is actually binding; it never shortens anything.
+  if (externalDelays.length) {
+    const ANCHOR_ID = '__replan_anchor__';
+    let anchorNeeded = false;
+    scaled = scaled.map((a) => {
+      const hit = externalDelays.find((d) => d.activityId === a.id);
+      if (!hit) return a;
+      anchorNeeded = true;
+      assumptions.push({
+        area: 'replan',
+        text: `"${a.name}" (${a.trade}) held to start no earlier than working day ${hit.minStartWorkingDay} from project start — ${hit.reason}`,
+        internalOnly: false,
+      });
+      return { ...a, deps: [...a.deps, { pred: ANCHOR_ID, type: 'FS' as const, lag: hit.minStartWorkingDay }] };
+    });
+    if (anchorNeeded) {
+      scaled = [
+        {
+          id: ANCHOR_ID, name: 'Replan constraint anchor', phase: 'Replan', trade: 'general',
+          duration: { value: 0, provenance: 'computed', source: 'replan anchor, zero duration' },
+          deps: [], crew: { value: 0, provenance: 'computed', source: 'replan anchor' }, isMilestone: true,
+        },
+        ...scaled,
+      ];
+    }
+  }
+
   const cpm: CpmResult = computeCpm(scaled, start, cfg.calendar);
   const internalEnd = cpm.activities.reduce((m, a) => (a.endDate > m ? a.endDate : m), start);
 

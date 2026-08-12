@@ -202,4 +202,8 @@ export const skf: ProjectInputs = {
   ldPercentPerWeek: 1,
   ldCapPercent: 5,
   dlpMonths: 12,
+  siteConditions: [],
+  materialItems: [],
+  scopeNotes: [],
+  designRefs: [],
 };

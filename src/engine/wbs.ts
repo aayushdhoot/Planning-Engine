@@ -1,7 +1,7 @@
 // Scope -> WBS derivation. Used when a project has a priced BOQ but no supplied schedule.
 // The AI-mapped part is the *structure* (which trades exist, in what sequence);
 // every duration is computed from norms x quantity — never guessed.
-import type { Activity, BoqPackage, Dependency, Traced } from '../domain/types';
+import type { Activity, BoqPackage, Dependency,DesignReference,SiteConditionNote, Traced } from '../domain/types';
 import norms from '../norms/norms-v1.json';
 
 interface TradeStep {
@@ -57,16 +57,53 @@ export function convertUnit(qty: number, from: string, to: string): number | nul
   if (from === 'sqm' && to === 'sft') return qty * norms.sftPerSqm;
   return null;
 }
-
+/**
+ * Sharpens BOQ package -> trade classification using drawing/3D references, for packages
+ * ingestion.ts's tradeFor() keyword match couldn't place (falls back to 'general'). Deliberately
+ * conservative: only overrides when the drawing explicitly names the package code — a fuzzy
+ * text match against a drawing description is exactly the kind of guess this engine avoids
+ * elsewhere, so an unmatched 'general' package stays 'general' rather than being reassigned on
+ * a hunch. This never touches value, quantity, or duration — trade is structure, not a number.
+ */
+export function applyDesignTradeHints(packages: BoqPackage[], designRefs: DesignReference[]): { packages: BoqPackage[]; notes: string[] } {
+  const notes: string[] = [];
+  const hintByCode = new Map<string, DesignReference>();
+  for (const ref of designRefs) {
+    if (!ref.packageCodeHint) continue;
+    if (!hintByCode.has(ref.packageCodeHint)) hintByCode.set(ref.packageCodeHint, ref);
+  }
+  const adjusted = packages.map((pkg) => {
+    if (pkg.trade !== 'general') return pkg; // don't override a classification ingestion.ts was confident about
+    const hint = hintByCode.get(pkg.code);
+    if (!hint || hint.trade === 'general') return pkg;
+    notes.push(`Package ${pkg.code} ("${pkg.name}") reclassified from "general" to "${hint.trade}" per drawing reference: ${hint.description} (${hint.source}).`);
+    return { ...pkg, trade: hint.trade };
+  });
+  return { packages: adjusted, notes };
+}
 /**
  * Derive a WBS from BOQ packages.
  * duration = ceil(packageValue / (crewSize x productivityPerManDay)), floored at 1 day.
  * Productivity is a versioned norm expressed as INR of work executed per man-day.
  */
-export function deriveWbs(packages: BoqPackage[], targetDurationDays: number | null): WbsResult {
+export function deriveWbs(packages: BoqPackage[], targetDurationDays: number | null, siteConditions: SiteConditionNote[] = []): WbsResult {
   const notes: string[] = [];
   const valueByTrade = new Map<string, number>();
   for (const p of packages) valueByTrade.set(p.trade, (valueByTrade.get(p.trade) ?? 0) + p.clientAmount.value);
+
+  // Site images can show a trade already done or partway done ahead of the WBS ever being
+  // planned. 'complete' skips the SEQUENCE step outright — with the same effect as it never
+  // having been chained in, since lastOfTrade is simply never set for it and every downstream
+  // `after: [thisTrade]` already tolerates a missing predecessor id. 'in_progress' keeps the
+  // step but shrinks its computed duration by the observed fraction — the remaining work is
+  // still norm-driven, never guessed from the photo itself. Duplicate readings for one trade
+  // (e.g. two site photos) prefer 'complete' over 'in_progress' over 'not_started'.
+  const statusRank: Record<SiteConditionNote['status'], number> = { complete: 2, in_progress: 1, not_started: 0 };
+  const conditionByTrade = new Map<string, SiteConditionNote>();
+  for (const c of siteConditions) {
+    const existing = conditionByTrade.get(c.trade);
+    if (!existing || statusRank[c.status] > statusRank[existing.status]) conditionByTrade.set(c.trade, c);
+  }
 
   const prodTable = norms.productivityInrPerManDay as unknown as Record<string, number>;
   const crewTable = norms.crewByTrade as Record<string, number>;
@@ -102,6 +139,12 @@ export function deriveWbs(packages: BoqPackage[], targetDurationDays: number | n
   const durById = new Map<string, number>();
 
   steps.forEach((s, i) => {
+    const cond = conditionByTrade.get(s.trade);
+    if (cond?.status === 'complete') {
+      notes.push(`${s.trade}: site images show this already complete — "${cond.note}" (${cond.source}). Skipped from the derived WBS; nothing downstream waits on it.`);
+      return;
+    }
+
     const id = `w${i + 1}`;
     const mapped = valueByTrade.get(s.trade) ?? 0;
     const value = Math.max(mapped, floorValue, 1);
@@ -119,6 +162,12 @@ export function deriveWbs(packages: BoqPackage[], targetDurationDays: number | n
       const prod = prodTable[s.trade] ?? prodTable.general;
       duration = Math.max(1, Math.ceil(value / (crew * prod)));
       durSource = `ceil(${Math.round(value).toLocaleString('en-IN')} INR / (crew ${crew} × ${prod} INR per man-day)) per ${norms.version}:productivityInrPerManDay.${s.trade} — no BOQ quantity available`;
+    }
+    if (cond?.status === 'in_progress' && typeof cond.percentComplete === 'number') {
+      const remainingFraction = Math.max(0, Math.min(1, 1 - cond.percentComplete));
+      const shrunk = Math.max(1, Math.ceil(duration * remainingFraction));
+      durSource = `${durSource}, then reduced to ${Math.round(remainingFraction * 100)}% remaining per site image — "${cond.note}" (${cond.source})`;
+      duration = shrunk;
     }
     durById.set(id, duration);
 
@@ -156,5 +205,9 @@ export function deriveWbs(packages: BoqPackage[], targetDurationDays: number | n
   if (floored.length)
     notes.push(`These trades carry little or no value of their own in a summary-level BOQ and were floored at ${Math.round(norms.wbsMinTradeValueShare * 100)}% of project value: ${[...new Set(floored)].join(', ')}. Supply a line-item BOQ for a sharper split.`);
   if (targetDurationDays) notes.push(`Contract allows ${targetDurationDays} calendar days; compare against the derived CPM finish before committing.`);
+  const inProgressCount = [...conditionByTrade.values()].filter((c) => c.status === 'in_progress').length;
+  const completeCount = [...conditionByTrade.values()].filter((c) => c.status === 'complete').length;
+  if (completeCount || inProgressCount)
+    notes.push(`Site images informed ${completeCount} completed trade(s) skipped and ${inProgressCount} in-progress trade(s) shrunk — see the per-trade notes above for the evidence behind each.`);
   return { activities: acts, notes };
 }

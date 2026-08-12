@@ -5,8 +5,9 @@
 // the engine can open a contract PDF and extract nothing from it. Reporting that as "read"
 // gives false assurance about the one thing the user is checking.
 //
-// So there are two different successes:
-//   extracted — parsed structurally; numbers from this file are in the plan
+// So there are three different successes now:
+//   extracted — parsed structurally (BOQ/schedule spreadsheet); numbers from this file are in the plan
+//   vision    — read by the vision extraction adapter (site photos); structure, not numbers, feeds the plan
 //   logged    — bytes were read, but there is no structural extractor for this type, so
 //               nothing reached the plan. The file counts as evidence, not as input.
 import type { DriveFile, DriveScan } from '../services/drive';
@@ -15,24 +16,57 @@ import { INPUT_SLOTS, type InputSlot } from './intake';
 export type ReadState = 'pending' | 'extracted' | 'logged' | 'dropped';
 
 /** Which structural parser, if any, can turn this file into engine inputs. */
-export type Extractor = 'boq' | 'schedule' | null;
+export type Extractor = 'boq' | 'schedule' | 'vision' | null;
 
 export type FileKind = 'spreadsheet' | 'document' | 'drawing' | 'image' | 'archive' | 'other';
 
 const EXT = (name: string) => name.split('.').pop()?.toLowerCase() ?? '';
 
+const SPREADSHEET_EXT = new Set(['xlsx', 'xls', 'csv', 'tsv']);
+const DOCUMENT_EXT = new Set(['pdf', 'doc', 'docx', 'txt', 'ppt', 'pptx']);
+const DRAWING_EXT = new Set(['dwg', 'dxf', 'rvt', 'skp']);
+const IMAGE_EXT = new Set(['png', 'jpg', 'jpeg', 'gif', 'heic', 'webp', 'mp4', 'mov']);
+const ARCHIVE_EXT = new Set(['zip', 'rar', '7z']);
+const ALL_KNOWN_EXT = new Set([...SPREADSHEET_EXT, ...DOCUMENT_EXT, ...DRAWING_EXT, ...IMAGE_EXT, ...ARCHIVE_EXT]);
+
 export function kindOf(file: DriveFile): FileKind {
+  // A native Google Sheet/Doc/Slide has no file extension in Drive's display name. When we
+  // have a real mimeType (OAuth-authenticated scans set this correctly), trust it directly.
+  if (file.mimeType === 'application/vnd.google-apps.spreadsheet') return 'spreadsheet';
+  if (file.mimeType.startsWith('application/vnd.google-apps.')) return 'document';
+
   const e = EXT(file.name);
-  if (['xlsx', 'xls', 'csv', 'tsv'].includes(e)) return 'spreadsheet';
-  if (['pdf', 'doc', 'docx', 'txt', 'ppt', 'pptx'].includes(e)) return 'document';
-  if (['dwg', 'dxf', 'rvt', 'skp'].includes(e)) return 'drawing';
-  if (['png', 'jpg', 'jpeg', 'gif', 'heic', 'webp', 'mp4', 'mov'].includes(e)) return 'image';
-  if (['zip', 'rar', '7z'].includes(e)) return 'archive';
+  if (SPREADSHEET_EXT.has(e)) return 'spreadsheet';
+  if (DOCUMENT_EXT.has(e)) return 'document';
+  if (DRAWING_EXT.has(e)) return 'drawing';
+  if (IMAGE_EXT.has(e)) return 'image';
+  if (ARCHIVE_EXT.has(e)) return 'archive';
+
+  // Public-link scans never carry a mimeType at all (see PublicLinkDriveService.scanFolder in
+  // drive.ts) — a native Google Sheet reached that way has no extension AND no mimeType to go
+  // on. "No extension" is checked against the set of KNOWN extensions above, not just "does the
+  // name contain a dot" — a name like "Final BOQ - 30 Dec 2025_8.75Cr" has a dot in the value,
+  // not an extension, and naively splitting on the last dot would read that as extension
+  // "75cr" and never reach this branch at all. A no-recognised-extension file whose name or
+  // folder already matches a BOQ/schedule keyword is treated as a likely native Sheet: the
+  // realistic case in a project folder, and readFile()'s own fallback (docs.google.com export)
+  // will actually confirm or fail this guess when the bytes are read, so nothing here is taken
+  // on faith alone.
+  if (!ALL_KNOWN_EXT.has(e) && (SCHEDULE_NAME.test(file.name) || BOQ_NAME.test(file.name) || SCHEDULE_NAME.test(file.path) || BOQ_NAME.test(file.path)))
+    return 'spreadsheet';
+
   return 'other';
 }
 
 const SCHEDULE_NAME = /schedule|programme|program\b|pert|gantt|timeline|baseline/i;
 const BOQ_NAME = /boq|bcs|bill of quant|\bbom\b|submission|costing|estimate/i;
+
+// Only formats browser-client.ts can actually send through to the vision model — HEIC (the
+// default iPhone photo format) and WEBP are NOT included: extractWithVision only accepts
+// image/png and image/jpeg, and browser-client.ts's EXT_MIME map reflects that. Marking a HEIC
+// file as vision-extractable here would show it as "ready to read" in the UI and then throw the
+// moment someone actually tried — worse than just being honest that it isn't supported yet.
+const STILL_IMAGE_EXT = new Set(['png', 'jpg', 'jpeg']);
 
 /**
  * What the engine can structurally read today. Deliberately conservative: claiming an
@@ -45,13 +79,22 @@ const BOQ_NAME = /boq|bcs|bill of quant|\bbom\b|submission|costing|estimate/i;
  * folder is still recognised as a programme.
  */
 export function extractorFor(file: DriveFile): Extractor {
-  if (kindOf(file) !== 'spreadsheet') return null;
-  if (SCHEDULE_NAME.test(file.name)) return 'schedule';
-  if (BOQ_NAME.test(file.name)) return 'boq';
-  if (SCHEDULE_NAME.test(file.path)) return 'schedule';
-  if (BOQ_NAME.test(file.path)) return 'boq';
+  if (kindOf(file) === 'spreadsheet') {
+    if (SCHEDULE_NAME.test(file.name)) return 'schedule';
+    if (BOQ_NAME.test(file.name)) return 'boq';
+    if (SCHEDULE_NAME.test(file.path)) return 'schedule';
+    if (BOQ_NAME.test(file.path)) return 'boq';
+    return null;
+  }
+  // Still images are read by the vision extraction adapter (src/services/extraction) — site
+  // photos, hand-marked layouts, make-list photos. Video is excluded: there is no per-frame
+  // analysis here, and sending video frames to a vision model is a different, unbuilt feature.
+  if (kindOf(file) === 'image' && STILL_IMAGE_EXT.has(EXT(file.name))) return 'vision';
   return null;
 }
+
+const VIDEO_EXT = new Set(['mp4', 'mov']);
+const UNSUPPORTED_IMAGE_EXT = new Set(['heic', 'webp']); // valid still images, just not accepted by the vision client yet
 
 /** Plain-English reason a file cannot be structurally extracted. */
 export function noExtractorReason(file: DriveFile): string {
@@ -63,7 +106,13 @@ export function noExtractorReason(file: DriveFile): string {
     case 'drawing':
       return 'CAD files are held as evidence; drawing registers are tracked in the Design module, not parsed.';
     case 'image':
-      return 'Images and video are evidence of site condition; nothing is extracted from them.';
+      if (STILL_IMAGE_EXT.has(EXT(file.name)))
+        return 'Should have been read by the vision extraction adapter — if this still shows no extractor, the file may have failed to read; check the read log.';
+      if (UNSUPPORTED_IMAGE_EXT.has(EXT(file.name)))
+        return `.${EXT(file.name)} isn't accepted by the vision extraction adapter yet (it takes JPEG/PNG) — convert it and re-upload via "Prepare by hand", or rescan once support is added.`;
+      if (VIDEO_EXT.has(EXT(file.name)))
+        return 'Video is evidence of site condition; nothing is extracted from it (no per-frame analysis).';
+      return 'Image, but of an unrecognised format — held as evidence only.';
     case 'archive':
       return 'Archives are not opened. Extract it in Drive and rescan if it holds a BOQ or programme.';
     default:
@@ -130,7 +179,7 @@ export function buildCoverage(scan: DriveScan, states: DocStates = {}): Coverage
       saved?.detail ??
       (state === 'pending'
         ? extractor
-          ? `Ready to read as a ${extractor === 'boq' ? 'priced BOQ' : 'programme'}.`
+          ? `Ready to read as a ${extractor === 'boq' ? 'priced BOQ' : extractor === 'schedule' ? 'programme' : 'site image (vision extraction)'}.`
           : noExtractorReason(file)
         : '');
     return { file, slot, extractor, kind: kindOf(file), state, detail };

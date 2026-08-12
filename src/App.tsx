@@ -4,7 +4,7 @@ import type { DesignRow, MaterialInspection, MaterialRow, MaterialStatus, Materi
 import {
   MATERIAL_INSPECTIONS, MATERIAL_STATUSES, MATERIAL_SUPPLIES, SUPPLY_LABEL, TRACK_STATUSES, delayDays, summariseMaterials,
 } from './domain/trackers';
-import { buildPlan, clientView, type Plan } from './engine/planner';
+import { buildPlan, clientView, type ExternalDelay, type Plan } from './engine/planner';
 import { auditTrace, canonicalJson, validatePlan } from './engine/schema';
 import { buildPertFromPlan } from './engine/pert-build';
 import { skf } from './data/skf';
@@ -20,6 +20,7 @@ import { buildSCurve } from './engine/scurve';
 import { Pert } from './ui/Pert';
 import type { PertTree } from './domain/pert';
 import { ProjectSettings } from './ui/ProjectSettings';
+import { Assistant } from './ui/Assistant';
 import { BoqIngestionService, type IngestedBoq } from './services/ingestion';
 import { FilePersistence } from './services/persistence';
 import { readDriveClientId, writeDriveClientId, readOrg, writeOrg } from './services/settings-store';
@@ -31,7 +32,7 @@ import { buildDeck } from './reports/deck';
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
-const TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material at site', 'To-do', 'Dependencies', 'RA Milestones', 'Project settings', 'Admin', 'Settings'] as const;
+const TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material at site', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant', 'Project settings', 'Admin', 'Settings'] as const;
 type Tab = (typeof TABS)[number];
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -68,7 +69,11 @@ export default function App() {
   const [deletedTodos, setDeletedTodos] = useState<Record<string, string[]>>({});
   // live tracker edits, keyed by project then row id
   const [edits, setEdits] = useState<Record<string, Record<string, Record<string, string>>>>({});
-
+  // approved AI-replan constraints, keyed by project — session-only for now: the API routes for
+  // durable Supabase persistence exist (api/projects/create.ts, api/replan/approve.ts) but
+  // aren't wired into this component yet.
+  const [appliedDelays, setAppliedDelays] = useState<Record<string, ExternalDelay[]>>({});
+  const [lastAppliedSummary, setLastAppliedSummary] = useState<Record<string, string>>({});
   const today = new Date().toISOString().slice(0, 10);
   const ALL_PROJECTS = [...BASE_PROJECTS.map((p) => overrides[p.id] ?? p), ...extraProjects];
   const PROJECTS = ALL_PROJECTS.filter((p) => !org.archived.includes(p.id));
@@ -100,7 +105,10 @@ export default function App() {
       ? { ...project, areaSft: { value: area, provenance: 'input' as const, source: 'project settings · site details (carpet area)' } }
       : project;
   }, [project, org.sites]);
-  const full = useMemo(() => buildPlan(sited, cfg, today), [sited, cfg, today]);
+  const full = useMemo(
+    () => buildPlan(sited, cfg, today, appliedDelays[project.id] ?? []),
+    [sited, cfg, today, appliedDelays, project.id],
+  );
   const plan: Plan = view === 'external' ? clientView(full) : full;
   const validation = validatePlan(plan);
   const trace = auditTrace(plan);
@@ -132,6 +140,11 @@ export default function App() {
           <button className={view === 'external' ? 'on' : ''} onClick={() => setView('external')}>Client</button>
         </div>
         <div className="spacer" />
+        {appliedDelays[project.id]?.length ? (
+          <span className="tag info" title={lastAppliedSummary[project.id]}>
+            AI replan active: {lastAppliedSummary[project.id]}
+          </span>
+        ) : null}
         <span className={'tag ' + (validation.ok ? 'ok' : 'crit')}>{validation.ok ? 'schema valid' : `${validation.errors.length} schema errors`}</span>
         <span className={'tag ' + (trace.ok ? 'ok' : 'crit')}>{trace.tracedCount} traced</span>
         <button onClick={() => download(`${plan.project.id}-${view}.json`, canonicalJson(plan))}>JSON</button>
@@ -211,6 +224,17 @@ export default function App() {
         )}
         {tab === 'Dependencies' && <Dependencies plan={plan} today={today} edit={edit} val={val} />}
         {tab === 'RA Milestones' && <RaMilestones plan={plan} view={view} today={today} edit={edit} val={val} />}
+        {tab === 'AI Assistant' && (
+          <Assistant
+            p={sited}
+            cfg={cfg}
+            today={today}
+            onApprove={(delays, summary) => {
+              setAppliedDelays((prev) => ({ ...prev, [project.id]: [...(prev[project.id] ?? []), ...delays] }));
+              setLastAppliedSummary((prev) => ({ ...prev, [project.id]: summary }));
+            }}
+          />
+        )}
         {tab === 'Project settings' && (
           <ProjectSettings
             project={project}

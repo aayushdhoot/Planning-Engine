@@ -407,5 +407,9 @@ export const kohler: ProjectInputs = {
   provided: { boq: true, contract: true, layout: true, drawings: true, day0Images: true, design3d: true, salesKt: true, makeList: true, paymentTerms: true },
   ldPercentPerWeek: null, // not extracted — the signed contract PDF is not parsed structurally
   ldCapPercent: null,
-  dlpMonths: 6, // KOHLER_PUNE_FS_26TH JUNE_V5.xlsx · Payment Terms · RA5 ("6 months Defects Liability Period")
+  dlpMonths: 6,
+  siteConditions: [],
+  materialItems: [],
+  scopeNotes: [],
+  designRefs: [], // KOHLER_PUNE_FS_26TH JUNE_V5.xlsx · Payment Terms · RA5 ("6 months Defects Liability Period")
 };

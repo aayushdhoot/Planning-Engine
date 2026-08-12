@@ -151,4 +151,8 @@ export const emirates: ProjectInputs = {
   ldPercentPerWeek: null,
   ldCapPercent: null,
   dlpMonths: 12,
+  siteConditions: [],
+  materialItems: [],
+  scopeNotes: [],
+  designRefs: [],
 };

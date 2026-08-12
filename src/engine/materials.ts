@@ -13,7 +13,7 @@
 //
 // Quantities and delivery dates are entered by site. The engine computes dates and links only;
 // a value-only BOQ says nothing about how many boards are coming.
-import type { BoqPackage, ProjectInputs, ScheduledActivity } from '../domain/types';
+import type { BoqPackage, MaterialListItem, ProjectInputs, ScheduledActivity } from '../domain/types';
 import type { DesignRow, MaterialRow, MaterialSupply, ProcurementRow } from '../domain/trackers';
 import { addCalendarDays } from './calendar';
 import norms from '../norms/norms-v1.json';
@@ -30,6 +30,9 @@ interface MaterialSpec {
   make?: string;
   /** how it normally reaches site; 'procured' unless stated */
   supply?: MaterialSupply;
+  /** set when this spec came from a project make list rather than the inferred catalogue —
+   * carries the source string through to the row's basis text */
+  fromMakeList?: string;
 }
 
 /**
@@ -344,12 +347,32 @@ export function buildMaterialTracker(
     ({ head, owner }) => owner !== null || head.materials.some((m) => acts.some((a) => a.trade === m.trade)),
   );
 
+  // Named items from a project make list REPLACE the inferred catalogue for their trade — a
+  // trade the client has already specified down to make/finish is better represented by those
+  // named rows than by the generic catalogue guess, and carrying both would just duplicate the
+  // same physical delivery under two different line items. Any trade the make list doesn't
+  // mention still falls back to the catalogue, so an empty or partial make list never leaves a
+  // gap in the register.
+  const namedTrades = new Set(p.materialItems.map((m) => m.trade));
+  const ownerOfTrade = (trade: string): BoqPackage | null => {
+    const sameTrade = p.boqPackages.filter((pkg) => pkg.trade === trade);
+    return sameTrade.length === 1 ? sameTrade[0] : null;
+  };
+  const namedSpecs = p.materialItems.map((m: MaterialListItem) => {
+    const owner = ownerOfTrade(m.trade);
+    const syntheticHead: MaterialHead = { code: owner?.code ?? '', label: owner?.name ?? `Make list — ${m.trade}`, match: /(?!)/, trade: m.trade, materials: [] };
+    const spec: MaterialSpec = { item: m.item, unit: m.unit ?? 'nos', trade: m.trade, make: m.spec, fromMakeList: m.source };
+    return { spec, head: syntheticHead, owner };
+  });
+
   // free issue is raised on every project — it is not in the BOQ by definition
   const specs = [
-    ...heads.flatMap(({ head, owner }) => head.materials.map((spec) => ({ spec, head, owner }))),
+    ...heads.flatMap(({ head, owner }) =>
+      head.materials.filter((spec) => !namedTrades.has(spec.trade)).map((spec) => ({ spec, head, owner })),
+    ),
+    ...namedSpecs,
     ...CLIENT_FREE_ISSUE.materials.map((spec) => ({ spec, head: CLIENT_FREE_ISSUE, owner: null as BoqPackage | null })),
   ];
-
   return specs.map(({ spec, head, owner }, i) => {
     const proc = owner ? procByCode.get(owner.code) ?? null : null;
     const supply = spec.supply ?? 'procured';
@@ -404,7 +427,7 @@ export function buildMaterialTracker(
       responsibility: RESPONSIBILITY[supply],
       remarks,
       basis: consumer
-        ? `on site ${ON_SITE_AHEAD_DAYS}d before "${consumer.name}" starts ${consumer.startDate}; order-by = that date − ${lead.days}d lead from ${lead.source}`
+        ? `${spec.fromMakeList ? `from project make list (${spec.fromMakeList}); ` : ''}on site ${ON_SITE_AHEAD_DAYS}d before "${consumer.name}" starts ${consumer.startDate}; order-by = that date − ${lead.days}d lead from ${lead.source}`
         : `no site activity of trade "${spec.trade}" in the programme`,
       issues,
     };

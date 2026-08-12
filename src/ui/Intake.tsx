@@ -1,11 +1,13 @@
 import { useMemo, useRef, useState } from 'react';
-import type { Activity, ProjectInputs } from '../domain/types';
+import type { Activity, ContractMilestone, DesignReference, MaterialListItem, ProjectInputs, ScopeNote, SiteConditionNote, Traced } from '../domain/types';
 import type { DriveFile, DriveScan, DriveService, PickedFile } from '../services/drive';
 import { DriveFolderNotPublic, GoogleDriveService, LocalFolderDriveService, ManifestDriveService, PublicLinkDriveService } from '../services/drive';
 import { BoqIngestionService } from '../services/ingestion';
 import { ScheduleIngestionService } from '../services/schedule-ingestion';
 import { buildInventory, buildQueries, unansweredBlocking, type IntakeQuery } from '../engine/intake';
 import { extractorFor, noExtractorReason, type DocStates } from '../engine/coverage';
+import { applyExtractionPatch } from '../services/extraction/extraction-service';
+import { extractImageViaApi, ExtractionClientError } from '../services/extraction/browser-client';
 import { DriveCoverage } from './DriveCoverage';
 
 type Step = 'link' | 'drive' | 'queries' | 'done';
@@ -124,6 +126,25 @@ export function Intake({
 
   const [draftInputs, setDraftInputs] = useState<Partial<ProjectInputs>>({});
 
+  // What the vision extraction adapter has found across every image read so far this session —
+  // merged additively via applyExtractionPatch, same as a second document would add to the
+  // first. Never overwrites a higher-trust source (Excel/hand-typed answer); see create() below.
+  interface ExtractionAccumulator {
+    contractStart: string | null;
+    contractDurationCalDays: Traced<number> | null;
+    contractValue: Traced<number> | null;
+    bcsValue: Traced<number> | null;
+    milestones: ContractMilestone[];
+    siteConditions: SiteConditionNote[];
+    materialItems: MaterialListItem[];
+    scopeNotes: ScopeNote[];
+    designRefs: DesignReference[];
+  }
+  const [extraction, setExtraction] = useState<ExtractionAccumulator>({
+    contractStart: null, contractDurationCalDays: null, contractValue: null, bcsValue: null,
+    milestones: [], siteConditions: [], materialItems: [], scopeNotes: [], designRefs: [],
+  });
+
   const mark = (id: string, state: DocStates[string]['state'], detail?: string) =>
     setDocStates((prev) => ({ ...prev, [id]: { state, detail } }));
 
@@ -131,7 +152,14 @@ export function Intake({
    * Apply the right structural parser to one document's bytes. Anything without an extractor
    * is marked `logged`, never `extracted` — the distinction is the point of the whole screen.
    */
-  const applyBytes = (name: string, data: ArrayBuffer | string, id: string, extractor: ReturnType<typeof extractorFor>, viaHand: boolean) => {
+  const applyBytes = async (
+    name: string,
+    data: ArrayBuffer | string,
+    id: string,
+    extractor: ReturnType<typeof extractorFor>,
+    viaHand: boolean,
+    filePath: string,
+  ): Promise<string> => {
     const suffix = viaHand ? ' (supplied by hand)' : '';
     if (extractor === 'boq') {
       const parsed = ingestion.parseBoq({ name, data });
@@ -171,6 +199,38 @@ export function Intake({
       mark(id, 'extracted', bits.join(' · ') + suffix);
       return `✓ ${name} — ${bits.join(' · ')}`;
     }
+    if (extractor === 'vision') {
+      if (typeof data === 'string') {
+        mark(id, 'logged', `Could not read as an image${suffix}.`);
+        return `✗ ${name} — not readable as an image`;
+      }
+      try {
+        const patch = await extractImageViaApi(name, filePath, data);
+        const wroteSomething =
+          patch.siteConditions.length > 0 || patch.materialItems.length > 0 || patch.scopeNotes.length > 0 ||
+          patch.designRefs.length > 0 || !!patch.contractStart || !!patch.contractDurationCalDays ||
+          !!patch.contractValue || !!patch.bcsValue || patch.milestones.length > 0;
+        if (!wroteSomething) {
+          mark(id, 'logged', `Read by the vision model, but nothing usable was found${suffix}.${patch.assumptions[0] ? ' ' + patch.assumptions[0] : ''}`);
+          return `• ${name} — vision extraction found nothing usable`;
+        }
+        setExtraction((prev) => applyExtractionPatch(prev, patch));
+        const bits = [
+          patch.siteConditions.length ? `${patch.siteConditions.length} site condition(s)` : null,
+          patch.materialItems.length ? `${patch.materialItems.length} material item(s)` : null,
+          patch.scopeNotes.length ? `${patch.scopeNotes.length} scope note(s)` : null,
+          patch.designRefs.length ? `${patch.designRefs.length} design ref(s)` : null,
+          patch.contractStart ? `contract start ${patch.contractStart}` : null,
+          patch.milestones.length ? `${patch.milestones.length} milestone(s)` : null,
+        ].filter(Boolean);
+        mark(id, 'extracted', bits.join(' · ') + suffix);
+        return `✓ ${name} — ${bits.join(' · ')} (vision)`;
+      } catch (e) {
+        const msg = e instanceof ExtractionClientError ? e.message : e instanceof Error ? e.message : String(e);
+        mark(id, 'logged', `Vision extraction failed${suffix}: ${msg}`);
+        return `✗ ${name} — vision extraction failed`;
+      }
+    }
     const size = typeof data === 'string' ? data.length : data.byteLength;
     mark(id, 'logged', `Opened (${kb(size)}). ${noExtractorReason({ name } as DriveFile)}`);
     return `• ${name} — evidence only (${kb(size)})`;
@@ -185,7 +245,7 @@ export function Intake({
       setReading(files.length === 1 ? f.id : 'all');
       try {
         const data = await service().readFile(f);
-        log.push(applyBytes(f.name, data, f.id, extractorFor(f), false));
+        log.push(await applyBytes(f.name, data, f.id, extractorFor(f), false, f.path));
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         mark(f.id, 'pending', `Could not read: ${msg}`);
@@ -212,7 +272,8 @@ export function Intake({
       const data = isText ? await file.text() : await file.arrayBuffer();
       // classify by what the user actually uploaded, not by the Drive file it replaces
       const extractor = extractorFor({ ...target, name: file.name });
-      setReadLog((prev) => [...prev, applyBytes(file.name, data, target.id, extractor, true)]);
+      const logLine = await applyBytes(file.name, data, target.id, extractor, true, target.path);
+      setReadLog((prev) => [...prev, logLine]);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -259,11 +320,11 @@ export function Intake({
       location: scan?.folderName ?? '—',
       areaSft: area ? { value: area, provenance: 'input', source: src } : null,
       // an ingested programme carries its own commencement date; the answer only fills the gap
-      contractStart: get('q_start') || scheduleStart,
-      contractDurationCalDays: dur ? { value: dur, provenance: 'input', source: src } : null,
-      contractValue: draftInputs.contractValue ?? null,
-      bcsValue: draftInputs.bcsValue ?? null,
-      milestones: [],
+      contractStart: get('q_start') || scheduleStart || extraction.contractStart,
+      contractDurationCalDays: dur ? { value: dur, provenance: 'input', source: src } : extraction.contractDurationCalDays,
+      contractValue: draftInputs.contractValue ?? extraction.contractValue,
+      bcsValue: draftInputs.bcsValue ?? extraction.bcsValue,
+      milestones: extraction.milestones,
       boqPackages: draftInputs.boqPackages ?? [],
       scheduleActivities: draftActivities,
       provided: {
@@ -280,6 +341,10 @@ export function Intake({
       ldPercentPerWeek: null,
       ldCapPercent: null,
       dlpMonths: null,
+      siteConditions: extraction.siteConditions,
+      materialItems: extraction.materialItems,
+      scopeNotes: extraction.scopeNotes,
+      designRefs: extraction.designRefs,
     });
     setStep('done');
   };

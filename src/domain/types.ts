@@ -65,6 +65,36 @@ export interface ContractMilestone {
   description: string;
 }
 
+export interface SiteConditionNote {
+  trade: string;
+  status: 'not_started' | 'in_progress' | 'complete';
+  percentComplete?: number;
+  note: string;
+  source: string;
+}
+
+export interface MaterialListItem {
+  item: string;
+  trade: string;
+  spec?: string;
+  quantity?: Traced<number>;
+  unit?: string;
+  source: string;
+}
+
+export interface ScopeNote {
+  area: string;
+  note: string;
+  source: string;
+}
+
+export interface DesignReference {
+  packageCodeHint?: string;
+  trade: string;
+  description: string;
+  source: string;
+}
+
 export interface ProjectInputs {
   id: string;
   name: string;
@@ -84,6 +114,11 @@ export interface ProjectInputs {
   ldPercentPerWeek: number | null;
   ldCapPercent: number | null;
   dlpMonths: number | null;
+  siteConditions: SiteConditionNote[];
+  materialItems: MaterialListItem[];
+  scopeNotes: ScopeNote[];
+  designRefs: DesignReference[];
+
 }
 
 export interface BufferPolicy {

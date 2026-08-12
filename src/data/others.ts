@@ -24,6 +24,10 @@ export const emirates: ProjectInputs = {
   ldPercentPerWeek: null,
   ldCapPercent: null,
   dlpMonths: null,
+  siteConditions: [],
+  materialItems: [],
+  scopeNotes: [],
+  designRefs: [],
 };
 
 /** A project whose folder has no readable inputs — the T1-DEGRADE fixture. */
