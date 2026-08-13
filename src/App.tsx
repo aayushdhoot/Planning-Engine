@@ -20,7 +20,7 @@ import { buildSCurve } from './engine/scurve';
 import { Pert } from './ui/Pert';
 import type { PertTree } from './domain/pert';
 import { ProjectSettings } from './ui/ProjectSettings';
-import { Assistant } from './ui/Assistant';
+import { Assistant, EMPTY_CHAT_STATE, type ChatState } from './ui/Assistant';
 import { BoqIngestionService, type IngestedBoq } from './services/ingestion';
 import { FilePersistence } from './services/persistence';
 import { readDriveClientId, writeDriveClientId, readOrg, writeOrg } from './services/settings-store';
@@ -74,6 +74,10 @@ export default function App() {
   // aren't wired into this component yet.
   const [appliedDelays, setAppliedDelays] = useState<Record<string, ExternalDelay[]>>({});
   const [lastAppliedSummary, setLastAppliedSummary] = useState<Record<string, string>>({});
+  // AI Assistant chat history, keyed by project — same session-only, per-project pattern as
+  // appliedDelays above. Lifted up here (rather than living inside Assistant.tsx) so it survives
+  // switching tabs away and back, and correctly starts fresh / resumes when the project changes.
+  const [chatByProject, setChatByProject] = useState<Record<string, ChatState>>({});
   const today = new Date().toISOString().slice(0, 10);
   const ALL_PROJECTS = [...BASE_PROJECTS.map((p) => overrides[p.id] ?? p), ...extraProjects];
   const PROJECTS = ALL_PROJECTS.filter((p) => !org.archived.includes(p.id));
@@ -229,6 +233,11 @@ export default function App() {
             p={sited}
             cfg={cfg}
             today={today}
+            appliedDelays={appliedDelays[project.id] ?? []}
+            chat={chatByProject[project.id] ?? EMPTY_CHAT_STATE}
+            onChatChange={(updater) =>
+              setChatByProject((prev) => ({ ...prev, [project.id]: updater(prev[project.id] ?? EMPTY_CHAT_STATE) }))
+            }
             onApprove={(delays, summary) => {
               setAppliedDelays((prev) => ({ ...prev, [project.id]: [...(prev[project.id] ?? []), ...delays] }));
               setLastAppliedSummary((prev) => ({ ...prev, [project.id]: summary }));

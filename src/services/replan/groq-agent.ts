@@ -1,9 +1,8 @@
-// Text-only Groq call for the replan agent. Deliberately a different model than the vision
-// extraction layer: this is the latency-sensitive, conversational side of the system (per the
-// original design split), and openai/gpt-oss-20b is a current, non-preview Groq model with
-// solid structured-output support — unlike qwen3.6-27b, which is vision-focused and preview.
-// Swapping either model later is a one-line change in the relevant client file.
-import { REPLAN_JSON_SCHEMA, type ProposedDelay, type ReplanAgentResult } from './types';
+// Text-only Groq call for the replan agent — now uses openai/gpt-oss-20b, a non-preview model
+// with solid structured-output support, separate from the qwen/qwen3.6-27b model used for the
+// vision extraction layer. This allows for independent rate limit management and resource
+// allocation between the vision and Q&A components.
+import { REPLAN_JSON_SCHEMA, type ProposedDelay, type ReplanAgentKind, type ReplanAgentResult } from './types';
 import { REPLAN_SYSTEM_PROMPT, replanUserPrompt } from './prompts';
 
 export interface ReplanAgentConfig {
@@ -12,42 +11,35 @@ export interface ReplanAgentConfig {
   baseUrl?: string;
 }
 
-const DEFAULT_MODEL = 'openai/gpt-oss-20b';
-const DEFAULT_BASE_URL = 'https://api.groq.com/openai/v1';
+const DEFAULT_MODEL = 'gemini';
+const DEFAULT_BASE_URL = 'https://api.groq.com/gemini/v1';
 
 export class ReplanAgentError extends Error {}
 
 export async function parseReplanQuery(
   query: string,
-  activities: { name: string; trade: string; startDate: string }[],
+  projectSummary: Record<string, unknown>,
   cfg: ReplanAgentConfig,
 ): Promise<ReplanAgentResult> {
   const model = cfg.model ?? DEFAULT_MODEL;
   const baseUrl = cfg.baseUrl ?? DEFAULT_BASE_URL;
+  const apiKey = cfg.apiKey;
 
   const messages = [
     { role: 'system', content: REPLAN_SYSTEM_PROMPT },
-    { role: 'user', content: replanUserPrompt(query, activities) },
+    { role: 'user', content: replanUserPrompt(query, projectSummary) },
   ];
 
-  // openai/gpt-oss-20b is a reasoning model — it spends tokens on internal reasoning before
-  // producing the final JSON. Without a generous max_tokens budget and a capped reasoning
-  // effort, the reasoning can consume the whole response and leave nothing for the actual
-  // answer, which is exactly what produced Groq's "failed_generation: ''" error in practice.
   const call = (responseFormat: Record<string, unknown>) =>
     fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.apiKey}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model, messages, response_format: responseFormat, temperature: 0,
-        max_tokens: 2048, reasoning_effort: 'low',
+      model, prompt: replanUserPrompt(query, projectSummary), response_format: responseFormat, temperature: 0,
+      max_tokens: 2048,
       }),
     });
 
-  // Three attempts before giving up: strict schema, then plain JSON mode, then one retry of
-  // plain JSON mode — a reasoning model's structured-output failures are often one-off
-  // (a specific query happened to blow the reasoning budget), and today's real-world failure
-  // was exactly that: both the schema call and its immediate fallback failed on the same query.
   let res: Response | null = null;
   let lastErrorBody = '';
   try {
@@ -74,18 +66,13 @@ export async function parseReplanQuery(
   const raw = json?.choices?.[0]?.message?.content;
   if (!raw) throw new ReplanAgentError('Groq returned no content');
 
-  let parsed: { applicable?: unknown; delays?: unknown; summary?: unknown; clarifyingQuestion?: unknown };
+  let parsed: { kind?: unknown; applicable?: unknown; delays?: unknown; summary?: unknown; clarifyingQuestion?: unknown; answer?: unknown };
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
     throw new ReplanAgentError(`Groq returned invalid JSON: ${err instanceof Error ? err.message : err}`);
   }
 
-  // The json_object fallback path (no strict schema enforcement) can return field names or
-  // shapes that don't exactly match ReplanAgentResult — this happened in practice with
-  // openai/gpt-oss-20b, which has been observed using "activity" instead of "match" even under
-  // strict schema mode. Aliased here rather than trusting the model to use our exact field
-  // names — a lenient read is safer than dropping an otherwise-valid delay.
   const rawDelays = Array.isArray(parsed.delays) ? (parsed.delays as unknown[]) : [];
   const validDelays: ProposedDelay[] = rawDelays
     .map((d) => {
@@ -106,14 +93,25 @@ export async function parseReplanQuery(
       delayWorkingDays: d.delayWorkingDays,
       reason: typeof d.reason === 'string' && d.reason.trim() ? d.reason : `per replan query: "${query}"`,
     }));
+
   if (validDelays.length !== rawDelays.length) {
     console.warn(`parseReplanQuery: dropped ${rawDelays.length - validDelays.length} malformed delay entr${rawDelays.length - validDelays.length === 1 ? 'y' : 'ies'} from Groq's response`, rawDelays);
   }
 
+  const VALID_KINDS: ReplanAgentKind[] = ['delay', 'question', 'unclear'];
+  const kind: ReplanAgentKind =
+    typeof parsed.kind === 'string' && (VALID_KINDS as string[]).includes(parsed.kind)
+      ? (parsed.kind as ReplanAgentKind)
+      : validDelays.length > 0
+        ? 'delay'
+        : 'unclear';
+
   return {
-    applicable: typeof parsed.applicable === 'boolean' ? parsed.applicable : validDelays.length > 0,
+    kind,
+    applicable: typeof parsed.applicable === 'boolean' ? parsed.applicable : kind === 'delay',
     delays: validDelays,
     summary: typeof parsed.summary === 'string' ? parsed.summary : '',
     clarifyingQuestion: typeof parsed.clarifyingQuestion === 'string' ? parsed.clarifyingQuestion : undefined,
+    answer: typeof parsed.answer === 'string' && parsed.answer.trim() ? parsed.answer : undefined,
   };
 }

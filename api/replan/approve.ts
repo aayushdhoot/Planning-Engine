@@ -27,10 +27,8 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'GROQ_API_KEY is not configured on the server' }), { status: 500 });
-  }
+  const apiKey = process.env.GROQ_QA_API_KEY;
+   if (!apiKey) return new Response(JSON.stringify({ error: 'GROQ_QA_API_KEY is not set' }), { status: 500 });
 
   let body: { projectId?: string; query?: string };
   try {
@@ -54,7 +52,7 @@ export default async function handler(req: Request): Promise<Response> {
     const today = new Date().toISOString().slice(0, 10);
     const preview = await buildReplanPreview(projectInputs, DEFAULT_CFG, today, query, {
       apiKey,
-      model: process.env.GROQ_REPLAN_MODEL ?? 'openai/gpt-oss-20b',
+      model: process.env.GROQ_REPLAN_MODEL ?? 'gemini',
     });
 
     if (!preview.applicable || !preview.revised) {

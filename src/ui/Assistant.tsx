@@ -4,7 +4,7 @@ import type { ExternalDelay } from '../engine/planner';
 import { fetchReplanPreview, ReplanClientError } from '../services/replan/browser-client';
 import type { ReplanPreview } from '../services/replan/apply';
 
-interface ChatTurn {
+export interface ChatTurn {
   id: string;
   role: 'user' | 'assistant';
   text?: string; // user message, or an assistant-side error
@@ -13,26 +13,41 @@ interface ChatTurn {
   discarded?: boolean;
 }
 
+/** everything Assistant needs to resume exactly where it left off for one project */
+export interface ChatState {
+  turns: ChatTurn[];
+  pendingOriginal: string | null;
+}
+
+export const EMPTY_CHAT_STATE: ChatState = { turns: [], pendingOriginal: null };
+
 let turnCounter = 0;
 const uid = () => `turn-${++turnCounter}`;
 export function Assistant({
-  p, cfg, today, onApprove,
+  p, cfg, today, appliedDelays, chat, onChatChange, onApprove,
 }: {
   p: ProjectInputs;
   cfg: EngineConfig;
   today: string;
+  /** delays already approved this session for this project, so replies (including general
+   * answers) reflect the plan the person is actually looking at elsewhere in the app */
+  appliedDelays: ExternalDelay[];
+  /** this project's chat — lifted up to App.tsx, keyed by project id, so it survives switching
+   * tabs away and back, and starts fresh (or resumes) correctly when the project changes */
+  chat: ChatState;
+  /** functional updater (like useState's setter) — NOT a plain new value. send() below fires
+   * two updates in one async call (the user's turn, then the assistant's reply); a plain-value
+   * setter would apply both against the same stale `chat` prop and drop the first one. */
+  onChatChange: (updater: (prev: ChatState) => ChatState) => void;
   /** lifts the resolved delays up to App.tsx, which folds them into buildPlan() for this
    * project going forward — session-only for now */
   onApprove: (delays: ExternalDelay[], summary: string) => void;
 }) {
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const { turns, pendingOriginal } = chat;
+  const setTurns = (updater: (t: ChatTurn[]) => ChatTurn[]) => onChatChange((prev) => ({ ...prev, turns: updater(prev.turns) }));
+  const setPendingOriginal = (v: string | null) => onChatChange((prev) => ({ ...prev, pendingOriginal: v }));
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  // The original query a clarifying question was raised against — a chat reply while this is
-  // set is a continuation of the SAME question, not a new topic, so it gets folded in rather
-  // than sent to the agent on its own (which is how the previous non-chat version needed a
-  // separate "answer" box; here the ordinary message box just does double duty).
-  const [pendingOriginal, setPendingOriginal] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -48,8 +63,10 @@ export function Assistant({
     const effectiveQuery = pendingOriginal ? `${pendingOriginal} — ${text}` : text;
     setLoading(true);
     try {
-      const result = await fetchReplanPreview(p, cfg, today, effectiveQuery);
-      setPendingOriginal(result.applicable && result.clarifyingQuestion ? effectiveQuery : null);
+      const result = await fetchReplanPreview(p, cfg, today, effectiveQuery, appliedDelays);
+      // only a delay-kind reply with an outstanding clarifying question continues the same
+      // thread; a question/unclear reply (or a fully-resolved delay) closes it out
+      setPendingOriginal(result.kind === 'delay' && result.clarifyingQuestion ? effectiveQuery : null);
       setTurns((t) => [...t, { id: uid(), role: 'assistant', preview: result }]);
     } catch (e) {
       setPendingOriginal(null);
@@ -74,14 +91,15 @@ export function Assistant({
     <div style={{ maxWidth: 900, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 220px)', minHeight: 420 }}>
       <h2>AI Assistant</h2>
       <p className="muted" style={{ marginTop: -4, maxWidth: 780 }}>
-        Ask about a delay or change — e.g. "flooring is delayed by 10 days" — and review the revised plan before
-        anything is applied. Nothing here overwrites your source documents; approving adds a replanning constraint
-        on top, and the deterministic engine still computes every date.
+        Ask a question about this project — status, dates, what's outstanding — or describe a delay or change,
+        e.g. "flooring is delayed by 10 days", and review the revised plan before anything is applied. Nothing
+        here overwrites your source documents; approving adds a replanning constraint on top, and the
+        deterministic engine still computes every date.
       </p>
 
       <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border, #e2e2e2)', borderRadius: 10, padding: 14, marginTop: 10 }}>
         {turns.length === 0 && !loading && (
-          <p className="muted" style={{ margin: 0 }}>No messages yet — ask about a delay to get started.</p>
+          <p className="muted" style={{ margin: 0 }}>No messages yet — ask about the project's status or a delay to get started.</p>
         )}
 
         {turns.map((turn) => (
@@ -107,15 +125,15 @@ export function Assistant({
                   <>
                     <strong>{preview.summary}</strong>
 
-                    {!preview.applicable && (
-                      <p style={{ marginTop: 8, marginBottom: 0 }}>This doesn't look like a delay or replan request — nothing to apply.</p>
+                    {(preview.kind === 'question' || preview.kind === 'unclear') && (
+                      <p style={{ marginTop: 8, marginBottom: 0, whiteSpace: 'pre-wrap' }}>{preview.answer}</p>
                     )}
 
-                    {preview.applicable && preview.clarifyingQuestion && (
+                    {preview.kind === 'delay' && preview.clarifyingQuestion && (
                       <p style={{ marginTop: 8, marginBottom: 0 }}>{preview.clarifyingQuestion}</p>
                     )}
 
-                    {preview.applicable && !preview.clarifyingQuestion && preview.revised && (
+                    {preview.kind === 'delay' && !preview.clarifyingQuestion && preview.revised && (
                       <>
                         <p style={{ marginTop: 8, marginBottom: 0 }}>
                           Internal finish: <strong>{preview.internalEndBefore}</strong> → <strong>{preview.internalEndAfter}</strong>
@@ -184,7 +202,7 @@ export function Assistant({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && !loading) void send(); }}
-          placeholder={pendingOriginal ? 'e.g. "5 days"' : 'e.g. "gypsum board delivery is delayed by 5 days"'}
+          placeholder={pendingOriginal ? 'e.g. "5 days"' : 'e.g. "what\'s the project status" or "gypsum board delivery is delayed by 5 days"'}
           style={{ flex: 1, minWidth: 420 }}
           autoFocus
         />

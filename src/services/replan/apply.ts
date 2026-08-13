@@ -5,7 +5,8 @@
 import type { EngineConfig, ProjectInputs } from '../../domain/types';
 import { buildPlan, type ExternalDelay, type Plan } from '../../engine/planner';
 import { parseReplanQuery, type ReplanAgentConfig } from './groq-agent';
-import type { ProposedDelay } from './types';
+import { buildProjectSummary } from './context';
+import type { ProposedDelay, ReplanAgentKind } from './types';
 
 export interface ActivityDateChange {
   id: string;
@@ -17,9 +18,13 @@ export interface ActivityDateChange {
 }
 
 export interface ReplanPreview {
+  /** which of the agent's two jobs this query was — see services/replan/prompts.ts */
+  kind: ReplanAgentKind;
   applicable: boolean;
   summary: string;
   clarifyingQuestion?: string;
+  /** the prose answer for kind === 'question' / 'unclear' — absent for kind === 'delay' */
+  answer?: string;
   delays: ProposedDelay[];
   /** resolved per-activity floors, ready to pass straight into buildPlan()'s externalDelays —
    * exposed so the caller (e.g. the browser UI) can apply an approved replan without
@@ -62,15 +67,40 @@ export async function buildReplanPreview(
   today: string,
   query: string,
   agentCfg: ReplanAgentConfig,
+  /** delays already approved earlier this session (App.tsx's appliedDelays[project.id]) — folded
+   * into the baseline so both delay-matching and general-question answers reflect the plan the
+   * person is actually looking at elsewhere in the app, not a pristine undelayed one */
+  appliedDelays: ExternalDelay[] = [],
 ): Promise<ReplanPreview> {
-  const baseline = buildPlan(p, cfg, today);
+  const baseline = buildPlan(p, cfg, today, appliedDelays);
 
-  const activityContext = baseline.modules.timeline.activities.map((a) => ({ name: a.name, trade: a.trade, startDate: a.startDate }));
-  const agentResult = await parseReplanQuery(query, activityContext, agentCfg);
+  const projectSummary = buildProjectSummary(baseline, today);
+  const agentResult = await parseReplanQuery(query, projectSummary, agentCfg);
 
-  if (!agentResult.applicable || !agentResult.delays.length) {
+  // Not a delay request at all — a general question (answer it from projectSummary) or unclear
+  // (a short redirect). Either way there's nothing to preview/apply.
+  if (agentResult.kind !== 'delay') {
     return {
-      applicable: agentResult.applicable,
+      kind: agentResult.kind,
+      applicable: false,
+      summary: agentResult.summary,
+      answer: agentResult.answer,
+      delays: [],
+      resolvedDelays: [],
+      baseline,
+      revised: null,
+      changedActivities: [],
+      internalEndBefore: baseline.internal?.end ?? null,
+      internalEndAfter: null,
+      ieInvariantHoldsAfter: null,
+    };
+  }
+
+  if (!agentResult.delays.length) {
+    // A delay request, but the agent needs a clarification (missing day count / ambiguous match).
+    return {
+      kind: 'delay',
+      applicable: true,
       summary: agentResult.summary,
       clarifyingQuestion: agentResult.clarifyingQuestion,
       delays: [],
@@ -85,7 +115,7 @@ export async function buildReplanPreview(
   }
 
   const resolvedDelays = resolveDelays(agentResult.delays, baseline);
-  const revised = buildPlan(p, cfg, today, resolvedDelays);
+  const revised = buildPlan(p, cfg, today, [...appliedDelays, ...resolvedDelays]);
 
   const beforeById = new Map(baseline.modules.timeline.activities.map((a) => [a.id, a]));
   const changedActivities: ActivityDateChange[] = [];
@@ -100,6 +130,7 @@ export async function buildReplanPreview(
   }
 
   return {
+    kind: 'delay',
     applicable: true,
     summary: agentResult.summary,
     delays: agentResult.delays,
