@@ -37,7 +37,12 @@ if (!apiKey) return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not 
   try {
     const preview = await buildReplanPreview(
       projectInputs, engineConfig, today, query,
-      { apiKey, model: process.env.GEMINI_REPLAN_MODEL ?? 'gemini-2.0-flash' },
+      
+      {
+  apiKey,
+  model: process.env.GEMINI_REPLAN_MODEL ?? 'gemini-3.5-flash-lite',
+  baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
+},
       Array.isArray(appliedDelays) ? appliedDelays : [],
     );
     return new Response(JSON.stringify(preview), { status: 200, headers: { 'Content-Type': 'application/json' } });

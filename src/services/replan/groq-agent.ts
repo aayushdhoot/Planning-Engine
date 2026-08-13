@@ -11,7 +11,7 @@ export interface ReplanAgentConfig {
   baseUrl?: string;
 }
 
-const DEFAULT_MODEL = 'gemini-1.5-flash';
+const DEFAULT_MODEL = 'gemini-3.6-flash';
 const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/openai';
 
 export class ReplanAgentError extends Error {}
@@ -36,7 +36,7 @@ export async function parseReplanQuery(
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
       model, messages, response_format: responseFormat, temperature: 0,
-       max_tokens: 2048,
+       max_tokens: 4096,
 
       }),
     });
