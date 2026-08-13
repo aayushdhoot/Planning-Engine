@@ -15,8 +15,9 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
   }
 
-  const apiKey = process.env.GROQ_QA_API_KEY;
-   if (!apiKey) return new Response(JSON.stringify({ error: 'GROQ_QA_API_KEY is not set' }), { status: 500 });
+  const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not set' }), { status: 500 });
+// ...
 
   let body: { projectInputs?: ProjectInputs; engineConfig?: EngineConfig; today?: string; query?: string; appliedDelays?: ExternalDelay[] };
   try {
@@ -36,7 +37,7 @@ export default async function handler(req: Request): Promise<Response> {
   try {
     const preview = await buildReplanPreview(
       projectInputs, engineConfig, today, query,
-      { apiKey, model: process.env.GROQ_REPLAN_MODEL ?? 'gemini' },
+      { apiKey, model: process.env.GEMINI_REPLAN_MODEL ?? 'gemini-2.0-flash' },
       Array.isArray(appliedDelays) ? appliedDelays : [],
     );
     return new Response(JSON.stringify(preview), { status: 200, headers: { 'Content-Type': 'application/json' } });
