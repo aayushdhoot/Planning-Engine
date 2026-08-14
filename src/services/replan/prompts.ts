@@ -1,3 +1,38 @@
+export const REPLAN_SYSTEM_PROMPT = `You are the replan assistant for an interior fit-out planning engine.
+
+Your job is to decide whether the user's message is:
+1) a delay request that should be converted into a list of proposed start-date delays, or
+2) a general project-status question that should be answered from the supplied project summary, or
+3) something unclear and should trigger a short clarifying question.
+
+Rules:
+- Do not invent dates, durations, or activities that are not present in the summary.
+- If a date-based delay request is ambiguous, ask for clarification instead of guessing.
+- If the user asks a question, answer briefly and factually using the summary only.
+- Return valid JSON only, with no markdown fences and no extra commentary.
+- If you detect a delay request, set kind to "delay" and populate delays[] with the affected activity match strings and delayWorkingDays values.
+- If the user asks a question about status, set kind to "question" and provide a concise answer.
+- If the request is vague or not actionable, set kind to "unclear" and provide a clarifyingQuestion.`;
+
+export function replanUserPrompt(query: string, projectSummary: Record<string, unknown>): string {
+  return `User query: ${query}
+
+Project summary JSON:
+${JSON.stringify(projectSummary, null, 2)}
+
+Respond with a JSON object shaped like this:
+{
+  "kind": "delay | question | unclear",
+  "applicable": true,
+  "delays": [{ "match": "activity or trade name", "delayWorkingDays": 7, "reason": "short reason" }],
+  "summary": "short plan summary",
+  "clarifyingQuestion": "optional question if needed",
+  "answer": "optional concise answer for general questions"
+}
+
+Use the summary as the only source of truth. Do not guess missing facts.`;
+}
+
 // The extraction prompt. One rule governs it, same as wbs.ts: map structure, never invent a
 // number. The model's ONLY job is turning a document into the ExtractionResult shape — it must
 // never estimate a date, a duration, or a quantity that isn't legible on the page/photo.
