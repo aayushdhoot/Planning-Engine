@@ -4,7 +4,7 @@
 // logic. qwen/qwen3.6-27b is Groq's current multimodal model; Groq flags it as a preview model,
 // so this file degrades to plain JSON mode if strict json_schema mode isn't accepted, rather
 // than hard-failing the whole pilot on a provider-side capability gap.
-import { EXTRACTION_JSON_SCHEMA, type ExtractionResult } from './types';
+import { EXTRACTION_JSON_SCHEMA, type ExtractionResult, type ExtractedSiteCondition } from './types';
 import { EXTRACTION_SYSTEM_PROMPT, userPromptFor } from './prompts';
 
 export interface VisionInput {
@@ -52,6 +52,110 @@ export class VisionExtractionError extends Error {
     super(message);
     this.name = 'VisionExtractionError';
   }
+}
+
+/**
+ * Coerces the raw model JSON into ExtractionResult shape.
+ *
+ * qwen/qwen3.6-27b on Groq falls back to json_object mode (no strict schema enforcement).
+ * In that mode the model invents a different outer wrapper structure on almost every call.
+ * Observed variants so far:
+ *
+ *   v1 — { fileType, filePath, extractionDate, confidenceScore, lowConfidenceNotes: string,
+ *           extractedData: { siteConditions, trades, dates, quantities, issues } }
+ *
+ *   v2 — { extractionResult: { fileMetadata: { fileName, filePath, fileType },
+ *           siteObservations: [{ description, trade, locator }] } }
+ *
+ * This function hunts through all known wrapper keys and known field-name aliases to produce
+ * a clean ExtractionResult regardless of which variant fired. Every branch is defensive:
+ * if the field already has the right shape it is kept as-is.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeModelResponse(raw: any, fileName: string): ExtractionResult {
+  const wasNonStandard = !raw.kind || raw.fileType || raw.extractedData || raw.extractionResult;
+
+  // ── 1. Unwrap outer containers ────────────────────────────────────────────
+  // v2 wraps everything in raw.extractionResult
+  if (raw.extractionResult && typeof raw.extractionResult === 'object') {
+    raw = raw.extractionResult;
+  }
+  // v1 wraps data arrays in raw.extractedData
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const src: any = (raw.extractedData && typeof raw.extractedData === 'object') ? raw.extractedData : raw;
+
+  // ── 2. kind ───────────────────────────────────────────────────────────────
+  const KIND_MAP: Record<string, ExtractionResult['kind']> = {
+    site_photo: 'site_image', site_image: 'site_image', image: 'site_image',
+    contract: 'contract',
+    make_list: 'make_list', make_list_photo: 'make_list',
+    sales_kt: 'sales_kt',
+    drawing_or_3d: 'drawing_or_3d', drawing: 'drawing_or_3d', '3d': 'drawing_or_3d',
+    unknown: 'unknown',
+  };
+  // fileMetadata.fileType (v2) || raw.fileType (v1) || raw.kind (correct)
+  const rawKind: string =
+    raw.kind ??
+    (raw.fileMetadata && typeof raw.fileMetadata === 'object' ? raw.fileMetadata.fileType : undefined) ??
+    raw.fileType ??
+    'unknown';
+  const kind: ExtractionResult['kind'] = KIND_MAP[String(rawKind).toLowerCase()] ?? 'unknown';
+
+  // ── 3. siteConditions ─────────────────────────────────────────────────────
+  // Absorb from all observed field names:
+  //   siteConditions[]   → correct shape, note may be called description
+  //   siteObservations[] → v2 name, description instead of note
+  //   trades[]           → v1 extra field, only trade+status+locator
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const toSiteCondition = (item: any): ExtractedSiteCondition | null => {
+    if (!item || typeof item !== 'object') return null;
+    const note: string = item.note ?? item.description ?? item.observation ?? '';
+    if (!note) return null;
+    return {
+      trade: item.trade ?? 'general',
+      status: item.status ?? 'in_progress',
+      note,
+      locator: item.locator ?? undefined,
+    };
+  };
+
+  const siteConditions: ExtractionResult['siteConditions'] = [];
+  for (const item of [...(src.siteConditions ?? []), ...(src.siteObservations ?? []), ...(src.trades ?? [])]) {
+    const mapped = toSiteCondition(item);
+    if (mapped) siteConditions.push(mapped);
+  }
+
+  // ── 4. materialItems ──────────────────────────────────────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const materialItems: ExtractionResult['materialItems'] = (src.materialItems ?? src.materials ?? []).filter((m: any) =>
+    m && typeof m === 'object' && (m.item || m.name),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ).map((m: any) => ({ ...m, item: m.item ?? m.name }));
+
+  // ── 5. scopeNotes & designRefs ────────────────────────────────────────────
+  const scopeNotes: ExtractionResult['scopeNotes'] = Array.isArray(src.scopeNotes) ? src.scopeNotes : [];
+  const designRefs: ExtractionResult['designRefs'] = Array.isArray(src.designRefs) ? src.designRefs : [];
+
+  // ── 6. lowConfidenceNotes — always string[] ───────────────────────────────
+  const rawNotes = raw.lowConfidenceNotes ?? src.lowConfidenceNotes ?? raw.confidenceNotes;
+  let lowConfidenceNotes: string[] = [];
+  if (Array.isArray(rawNotes)) {
+    lowConfidenceNotes = rawNotes.map(String);
+  } else if (rawNotes != null) {
+    lowConfidenceNotes = [String(rawNotes)];
+  }
+
+  if (wasNonStandard) {
+    console.warn(
+      `[vision-client] normalizeModelResponse: "${fileName}" returned non-standard shape — remapped automatically.`,
+      { topLevelKeys: Object.keys(raw) },
+    );
+    lowConfidenceNotes.push(
+      `[auto-normalised] model returned a non-standard JSON shape for ${fileName}; data was remapped automatically.`,
+    );
+  }
+
+  return { kind, contract: raw.contract ?? null, siteConditions, materialItems, scopeNotes, designRefs, lowConfidenceNotes };
 }
 
 /**
@@ -131,7 +235,7 @@ export async function extractWithVision(input: VisionInput, cfg: VisionClientCon
 
   let parsed: ExtractionResult;
   try {
-    parsed = JSON.parse(raw);
+    parsed = normalizeModelResponse(JSON.parse(raw), input.fileName);
   } catch (err) {
     throw new VisionExtractionError(`Groq returned invalid JSON for ${input.fileName}`, input.fileName, err);
   }
