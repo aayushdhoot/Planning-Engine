@@ -1,49 +1,64 @@
 // Browser-side extraction client. This calls YOUR OWN /api/extraction/extract route (a Vercel
-// function, served locally via `vercel dev`) — it never calls Groq directly from the browser,
-// so GROQ_API_KEY stays server-side. If /api/extraction/extract isn't reachable (i.e. you're
-// running plain `npm run dev` instead of `vercel dev`), this throws a clear, actionable error
-// rather than a cryptic fetch failure.
+// function, served locally via `vercel dev` or by the dev-server middleware in vite.config.ts)
+// — it never calls Groq directly from the browser, so GROQ_API_KEY stays server-side. If the
+// route isn't reachable, this throws a clear, actionable error rather than a cryptic fetch
+// failure.
+//
+// Rasterisation happens here, before the upload: photos are down-scaled and PDFs are rendered
+// to page images (see rasterize.ts). The route itself only ever sees page images, which is what
+// keeps the server side a pure function of its input.
 import type { ExtractionPatch, SourceFile } from './extraction-service';
-
-const EXT_MIME: Record<string, 'image/png' | 'image/jpeg'> = {
-  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg',
-};
-
-function extOf(name: string): string {
-  return name.split('.').pop()?.toLowerCase() ?? '';
-}
-
-/** ArrayBuffer -> base64 via Blob/FileReader, which avoids the call-stack overflow that
- * `btoa(String.fromCharCode(...bytes))` hits on larger images. Blob is given the real MIME
- * type (rather than left untyped) purely for correctness — readAsDataURL doesn't need it to
- * produce the right bytes, since only the text after the comma is used, but an untyped Blob
- * is one fewer thing to rule out when something upstream looks wrong. */
-function arrayBufferToBase64(buf: ArrayBuffer, mimeType: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      resolve(dataUrl.slice(dataUrl.indexOf(',') + 1));
-    };
-    reader.onerror = () => reject(reader.error ?? new Error('FileReader failed'));
-    reader.readAsDataURL(new Blob([buf], { type: mimeType }));
-  });
-}
+import { imageMimeFor, prepareImagePage, renderPdfPages, PdfRenderError, type PageImage } from './rasterize';
 
 export class ExtractionClientError extends Error {}
 
-/**
- * Extracts one image file (already read as bytes by the Drive service) via the server-side
- * vision route. filePath is used purely for provenance text in the resulting ExtractionPatch.
- */
-export async function extractImageViaApi(fileName: string, filePath: string, bytes: ArrayBuffer): Promise<ExtractionPatch> {
-  const ext = extOf(fileName);
-  const mimeType = EXT_MIME[ext];
-  if (!mimeType) throw new ExtractionClientError(`Unsupported image extension ".${ext}" for ${fileName}`);
+/** What one document's read produced: the patch, plus anything the user should be told about
+ * how it was read (pages capped, say) that is not itself extracted data. */
+export interface ReadOutcome {
+  patch: ExtractionPatch;
+  notes: string[];
+  /** how many page images were sent — a PDF is more than one */
+  pagesRead: number;
+}
 
-  const imageBase64 = await arrayBufferToBase64(bytes, mimeType);
-  console.log(`[extraction/browser-client] ${fileName}: ${bytes.byteLength} raw bytes -> ${imageBase64.length} base64 chars, mimeType=${mimeType}`);
-  const files: SourceFile[] = [{ fileName, filePath, pages: [{ imageBase64, mimeType, pageLabel: 'image' }] }];
+/** True when the provider refused because the account's daily allowance is spent. Nothing
+ * further will succeed today, so a batch reading this should stop rather than keep going. */
+export function dailyLimitHit(patch: ExtractionPatch): boolean {
+  return (patch.failures ?? []).some((f) => f.rateLimit === 'day');
+}
+
+/** The first real failure reason for a document, for showing on its row. */
+export function firstFailure(patch: ExtractionPatch): string | null {
+  const f = (patch.failures ?? []).find((x) => !x.skipped) ?? (patch.failures ?? [])[0];
+  return f ? f.message : null;
+}
+
+async function pagesFor(fileName: string, bytes: ArrayBuffer, kind: 'image' | 'pdf'): Promise<{ pages: PageImage[]; notes: string[] }> {
+  if (kind === 'pdf') {
+    try {
+      const { pages, note } = await renderPdfPages(bytes);
+      return { pages, notes: note ? [note] : [] };
+    } catch (err) {
+      const why = err instanceof PdfRenderError ? err.message : err instanceof Error ? err.message : String(err);
+      throw new ExtractionClientError(`Could not render "${fileName}" — ${why}`);
+    }
+  }
+  if (!imageMimeFor(fileName)) throw new ExtractionClientError(`Unsupported image extension for ${fileName}`);
+  return { pages: [await prepareImagePage(bytes, fileName)], notes: [] };
+}
+
+/**
+ * Reads one document (a photo, or a PDF) via the server-side vision route. filePath is used
+ * purely for provenance text in the resulting ExtractionPatch.
+ */
+export async function extractFileViaApi(
+  fileName: string,
+  filePath: string,
+  bytes: ArrayBuffer,
+  kind: 'image' | 'pdf',
+): Promise<ReadOutcome> {
+  const { pages, notes } = await pagesFor(fileName, bytes, kind);
+  const files: SourceFile[] = [{ fileName, filePath, pages }];
 
   let res: Response;
   try {
@@ -54,14 +69,15 @@ export async function extractImageViaApi(fileName: string, filePath: string, byt
     });
   } catch (err) {
     throw new ExtractionClientError(
-      `Could not reach /api/extraction/extract — are you running "vercel dev" instead of "npm run dev"? (${err instanceof Error ? err.message : err})`,
+      `Could not reach /api/extraction/extract — is the dev server running? (${err instanceof Error ? err.message : err})`,
     );
   }
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
     throw new ExtractionClientError(`Extraction failed for ${fileName}: ${body.error ?? res.statusText}`);
   }
 
-  return (await res.json()) as ExtractionPatch;
+  const patch = (await res.json()) as ExtractionPatch;
+  return { patch, notes, pagesRead: pages.length };
 }

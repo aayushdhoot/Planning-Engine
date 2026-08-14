@@ -160,8 +160,19 @@ BOQ and the programme stay open at the top. Groups can be read or dropped wholes
 folder goes from 109 rows to 12.
 
 Per document: **Read now** (parse it), **Prepare by hand** (upload a file to stand in for it),
-**Drop reading** (exclude it). A contract PDF therefore never reads as "READ" — the engine holds
-it as evidence and makes you answer its dates in the questions step.
+**Drop reading** (exclude it).
+
+**PDFs are read**, not merely held: each page is rendered to an image and put through the same
+vision extraction that reads site photographs (first 12 pages; the rest is reported, not
+silently dropped). That covers the two documents a fit-out folder most often has only as a
+PDF — the brand guideline and the drawing set. It is still *not* a structural parse, so a date
+read this way is treated exactly like a date read off a photograph: it fills a gap, and never
+overrides the BOQ or an answer typed in the questions step.
+
+**Documents that are absent are listed, never enforced.** Missing required inputs are shown in
+red and missing optional ones in grey, and the plan is generated either way, recording each gap
+as an explicit assumption. Nothing on this screen blocks a plan — only the blocking questions in
+the next step do.
 
 ## Drive access
 

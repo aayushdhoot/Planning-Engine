@@ -33,8 +33,10 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response(JSON.stringify({ error: 'files[] is required — at least one file with rendered page images' }), { status: 400 });
   }
   // Cap payload size defensively — the free/developer Groq tier has real rate limits (requests
-  // and tokens per minute), so a runaway batch here starts failing mid-project with 429s rather
-  // than just running slow. Adjust once real project volumes and the tier are known.
+  // and tokens per minute, and a whole-day token allowance). Pages inside one call run through
+  // a small pool and a spent daily allowance stops the batch (see extraction-service.ts), so a
+  // rate limit now comes back as per-page `failures` rather than a wall of retries; this cap is
+  // about payload size. Adjust once real project volumes and the tier are known.
   const totalPages = files.reduce((n, f) => n + f.pages.length, 0);
   if (totalPages > 60) {
     return new Response(JSON.stringify({ error: `${totalPages} pages requested; 60 per call is the current cap. Split the request.` }), { status: 400 });

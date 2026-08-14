@@ -16,7 +16,7 @@ import { INPUT_SLOTS, type InputSlot } from './intake';
 export type ReadState = 'pending' | 'extracted' | 'logged' | 'dropped';
 
 /** Which structural parser, if any, can turn this file into engine inputs. */
-export type Extractor = 'boq' | 'schedule' | 'vision' | null;
+export type Extractor = 'boq' | 'schedule' | 'vision' | 'pdf' | null;
 
 export type FileKind = 'spreadsheet' | 'document' | 'drawing' | 'image' | 'archive' | 'other';
 
@@ -32,8 +32,13 @@ const ALL_KNOWN_EXT = new Set([...SPREADSHEET_EXT, ...DOCUMENT_EXT, ...DRAWING_E
 export function kindOf(file: DriveFile): FileKind {
   // A native Google Sheet/Doc/Slide has no file extension in Drive's display name. When we
   // have a real mimeType (OAuth-authenticated scans set this correctly), trust it directly.
-  if (file.mimeType === 'application/vnd.google-apps.spreadsheet') return 'spreadsheet';
-  if (file.mimeType.startsWith('application/vnd.google-apps.')) return 'document';
+  // Defaulted rather than dereferenced: callers legitimately build a DriveFile-shaped object
+  // from a filename alone (a hand-supplied upload standing in for a Drive document), and a
+  // TypeError here surfaced to the user as "Could not read: Cannot read properties of
+  // undefined (reading 'startsWith')" against a perfectly readable PDF.
+  const mimeType = file.mimeType ?? '';
+  if (mimeType === 'application/vnd.google-apps.spreadsheet') return 'spreadsheet';
+  if (mimeType.startsWith('application/vnd.google-apps.')) return 'document';
 
   const e = EXT(file.name);
   if (SPREADSHEET_EXT.has(e)) return 'spreadsheet';
@@ -90,6 +95,11 @@ export function extractorFor(file: DriveFile): Extractor {
   // photos, hand-marked layouts, make-list photos. Video is excluded: there is no per-frame
   // analysis here, and sending video frames to a vision model is a different, unbuilt feature.
   if (kindOf(file) === 'image' && STILL_IMAGE_EXT.has(EXT(file.name))) return 'vision';
+  // PDFs go through that same adapter, one page image per page (see rasterize.ts). There is
+  // still no *structural* PDF parser — a rendered page is read exactly as a photograph is —
+  // but "held as evidence" was the wrong answer for the brand guideline and the drawing set,
+  // which are the two documents a fit-out plan most often has only as a PDF.
+  if (kindOf(file) === 'document' && EXT(file.name) === 'pdf') return 'pdf';
   return null;
 }
 
@@ -102,7 +112,7 @@ export function noExtractorReason(file: DriveFile): string {
     case 'spreadsheet':
       return 'Spreadsheet, but the name does not identify it as a BOQ or a programme — use "Prepare by hand" to say which it is.';
     case 'document':
-      return `No structural extractor for .${EXT(file.name)} yet — contracts and PDFs are held as evidence, and their dates must be answered in the questions step.`;
+      return `No extractor for .${EXT(file.name)} yet — PDFs are rendered and read, but this format is held as evidence, so anything it contains must be answered in the questions step.`;
     case 'drawing':
       return 'CAD files are held as evidence; drawing registers are tracked in the Design module, not parsed.';
     case 'image':
@@ -119,6 +129,14 @@ export function noExtractorReason(file: DriveFile): string {
       return 'No structural extractor for this file type.';
   }
 }
+
+/** What each extractor claims it will do, in the user's words rather than the code's. */
+const READ_AS: Record<NonNullable<Extractor>, string> = {
+  boq: 'priced BOQ',
+  schedule: 'programme',
+  vision: 'site image (vision extraction)',
+  pdf: 'PDF — every page rendered, then read by vision extraction',
+};
 
 export interface CoverageRow {
   file: DriveFile;
@@ -153,6 +171,10 @@ export interface Coverage {
   extractableNotRead: number;
   /** mandatory inputs with no document at all */
   missingMandatory: string[];
+  /** optional inputs with no document at all — reported for completeness, never a blocker.
+   * A brand guideline or a fit-out manual is missing from most folders, and the plan is
+   * expected to be built anyway, with the gap recorded rather than silently ignored. */
+  missingOptional: string[];
   /** mandatory inputs with documents the engine cannot turn into numbers */
   evidenceOnlyMandatory: string[];
 }
@@ -177,11 +199,7 @@ export function buildCoverage(scan: DriveScan, states: DocStates = {}): Coverage
     const state: ReadState = saved?.state ?? 'pending';
     const detail =
       saved?.detail ??
-      (state === 'pending'
-        ? extractor
-          ? `Ready to read as a ${extractor === 'boq' ? 'priced BOQ' : extractor === 'schedule' ? 'programme' : 'site image (vision extraction)'}.`
-          : noExtractorReason(file)
-        : '');
+      (state === 'pending' ? (extractor ? `Ready to read as a ${READ_AS[extractor]}.` : noExtractorReason(file)) : '');
     return { file, slot, extractor, kind: kindOf(file), state, detail };
   });
 
@@ -202,6 +220,7 @@ export function buildCoverage(scan: DriveScan, states: DocStates = {}): Coverage
     dropped: rows.filter((r) => r.state === 'dropped').length,
     extractableNotRead: live.filter((r) => r.extractor && r.state === 'pending').length,
     missingMandatory: slots.filter((s) => s.slot.mandatory && !s.present).map((s) => s.slot.label),
+    missingOptional: slots.filter((s) => !s.slot.mandatory && !s.present).map((s) => s.slot.label),
     evidenceOnlyMandatory: slots.filter((s) => s.slot.mandatory && s.evidenceOnly).map((s) => s.slot.label),
   };
 }

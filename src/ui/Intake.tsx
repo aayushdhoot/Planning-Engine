@@ -7,10 +7,20 @@ import { ScheduleIngestionService } from '../services/schedule-ingestion';
 import { buildInventory, buildQueries, unansweredBlocking, type IntakeQuery } from '../engine/intake';
 import { extractorFor, noExtractorReason, type DocStates } from '../engine/coverage';
 import { applyExtractionPatch } from '../services/extraction/extraction-service';
-import { extractImageViaApi, ExtractionClientError } from '../services/extraction/browser-client';
+import { dailyLimitHit, extractFileViaApi, firstFailure, ExtractionClientError } from '../services/extraction/browser-client';
+import { mapPool } from '../services/extraction/pool';
 import { DriveCoverage } from './DriveCoverage';
 
 type Step = 'link' | 'drive' | 'queries' | 'done';
+
+/** Vision reads that may be in flight at once. Each one is a network round trip that the
+ * others do not depend on, so reading 130 site photos one at a time was pure wall-clock waste;
+ * the ceiling is the provider's per-minute rate limit, not this machine. */
+const READ_CONCURRENCY = 4;
+
+const DAILY_LIMIT_MESSAGE =
+  "Not read — the vision model's daily token allowance is spent. It resets on the provider's schedule; " +
+  'the plan can be built without these, and they can be re-read afterwards.';
 const ingestion = new BoqIngestionService();
 const scheduleIngestion = new ScheduleIngestionService();
 
@@ -39,6 +49,11 @@ export function Intake({
   };
   const [busy, setBusy] = useState(false);
   const [reading, setReading] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  // Refs, not state: both are read from inside an in-flight pool, where a re-rendered closure
+  // would still be looking at the value the run started with.
+  const cancelRead = useRef(false);
+  const dailyLimit = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [scan, setScan] = useState<DriveScan | null>(null);
   const [mode, setMode] = useState<'google' | 'manifest' | 'local' | 'public'>('local');
@@ -199,23 +214,37 @@ export function Intake({
       mark(id, 'extracted', bits.join(' · ') + suffix);
       return `✓ ${name} — ${bits.join(' · ')}`;
     }
-    if (extractor === 'vision') {
+    // Photos and PDFs take the same route: both become page images, both are read by the
+    // vision model. The only difference is how many pages come out of the file.
+    if (extractor === 'vision' || extractor === 'pdf') {
+      const what = extractor === 'pdf' ? 'PDF' : 'image';
       if (typeof data === 'string') {
-        mark(id, 'logged', `Could not read as an image${suffix}.`);
-        return `✗ ${name} — not readable as an image`;
+        mark(id, 'logged', `Could not read as an ${what}${suffix}.`);
+        return `✗ ${name} — not readable as an ${what}`;
       }
       try {
-        const patch = await extractImageViaApi(name, filePath, data);
+        const { patch, notes, pagesRead } = await extractFileViaApi(name, filePath, data, extractor === 'pdf' ? 'pdf' : 'image');
+        if (dailyLimitHit(patch)) dailyLimit.current = true;
+        const trailer = (notes.length ? ' ' + notes.join(' ') : '') + suffix;
         const wroteSomething =
           patch.siteConditions.length > 0 || patch.materialItems.length > 0 || patch.scopeNotes.length > 0 ||
           patch.designRefs.length > 0 || !!patch.contractStart || !!patch.contractDurationCalDays ||
           !!patch.contractValue || !!patch.bcsValue || patch.milestones.length > 0;
         if (!wroteSomething) {
-          mark(id, 'logged', `Read by the vision model, but nothing usable was found${suffix}.${patch.assumptions[0] ? ' ' + patch.assumptions[0] : ''}`);
+          // A refusal is not an empty document. Saying "nothing usable was found" about a file
+          // the model never actually saw is the false assurance this screen exists to prevent,
+          // so a failed read stays pending — i.e. still on the to-do list — and says why.
+          const failure = firstFailure(patch);
+          if (failure) {
+            mark(id, 'pending', `${dailyLimit.current ? DAILY_LIMIT_MESSAGE : `Not read — ${failure}`}${trailer}`);
+            return `✗ ${name} — ${dailyLimit.current ? 'daily token allowance spent' : failure}`;
+          }
+          mark(id, 'logged', `Read by the vision model, but nothing usable was found${trailer}`);
           return `• ${name} — vision extraction found nothing usable`;
         }
         setExtraction((prev) => applyExtractionPatch(prev, patch));
         const bits = [
+          pagesRead > 1 ? `${pagesRead} pages read` : null,
           patch.siteConditions.length ? `${patch.siteConditions.length} site condition(s)` : null,
           patch.materialItems.length ? `${patch.materialItems.length} material item(s)` : null,
           patch.scopeNotes.length ? `${patch.scopeNotes.length} scope note(s)` : null,
@@ -223,37 +252,95 @@ export function Intake({
           patch.contractStart ? `contract start ${patch.contractStart}` : null,
           patch.milestones.length ? `${patch.milestones.length} milestone(s)` : null,
         ].filter(Boolean);
-        mark(id, 'extracted', bits.join(' · ') + suffix);
+        mark(id, 'extracted', bits.join(' · ') + trailer);
         return `✓ ${name} — ${bits.join(' · ')} (vision)`;
       } catch (e) {
         const msg = e instanceof ExtractionClientError ? e.message : e instanceof Error ? e.message : String(e);
-        mark(id, 'logged', `Vision extraction failed${suffix}: ${msg}`);
-        return `✗ ${name} — vision extraction failed`;
+        mark(id, 'pending', `Not read${suffix}: ${msg}`);
+        return `✗ ${name} — ${what} extraction failed`;
       }
     }
     const size = typeof data === 'string' ? data.length : data.byteLength;
-    mark(id, 'logged', `Opened (${kb(size)}). ${noExtractorReason({ name } as DriveFile)}`);
+    mark(id, 'logged', `Opened (${kb(size)}). ${noExtractorReason({ name, mimeType: '' } as DriveFile)}`);
     return `• ${name} — evidence only (${kb(size)})`;
   };
 
-  /** Read one or many Drive documents. */
+  /**
+   * Read one or many Drive documents.
+   *
+   * Spreadsheets are read first, one at a time: they write the draft inputs the questions step
+   * prefills from, and there are never many of them. Everything that goes to the vision model —
+   * photos and PDFs — runs through a bounded pool instead, because those are independent
+   * network round trips and reading 130 of them serially is what made this step take minutes.
+   *
+   * Two things stop a run early: the user pressing Stop, and the provider reporting that the
+   * day's token allowance is spent. In both cases the untouched files stay "not read" with the
+   * reason on the row, rather than being reported as empty.
+   */
   const readFiles = async (files: DriveFile[]) => {
     if (!scan) return;
     setError(null);
-    const log: string[] = [];
-    for (const f of files) {
-      setReading(files.length === 1 ? f.id : 'all');
+    cancelRead.current = false;
+    dailyLimit.current = false;
+
+    const isVisual = (f: DriveFile) => { const e = extractorFor(f); return e === 'vision' || e === 'pdf'; };
+    const visual = files.filter(isVisual);
+    const sequential = files.filter((f) => !isVisual(f));
+
+    const total = files.length;
+    let done = 0;
+    const bump = () => setProgress({ done: ++done, total });
+    setProgress({ done: 0, total });
+    setReading(total === 1 ? files[0].id : 'all');
+
+    const readOne = async (f: DriveFile): Promise<string> => {
       try {
         const data = await service().readFile(f);
-        log.push(await applyBytes(f.name, data, f.id, extractorFor(f), false, f.path));
+        return await applyBytes(f.name, data, f.id, extractorFor(f), false, f.path);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         mark(f.id, 'pending', `Could not read: ${msg}`);
-        log.push(`✗ ${f.name} — ${msg}`);
+        return `✗ ${f.name} — ${msg}`;
       }
+    };
+
+    const log: string[] = [];
+    for (const f of sequential) {
+      if (cancelRead.current) break;
+      log.push(await readOne(f));
+      bump();
     }
+
+    const results = await mapPool(visual, readOne, {
+      concurrency: READ_CONCURRENCY,
+      onSettled: bump,
+      shouldStop: () => cancelRead.current || dailyLimit.current,
+    });
+
+    results.forEach((r, i) => {
+      const f = visual[i];
+      if (r.status === 'done') {
+        log.push(r.value);
+        return;
+      }
+      const why = dailyLimit.current ? DAILY_LIMIT_MESSAGE : 'Not read — reading was stopped before this file was reached.';
+      mark(f.id, 'pending', why);
+      log.push(`• ${f.name} — ${dailyLimit.current ? 'daily token allowance spent' : 'stopped before this file'}`);
+    });
+
     setReading(null);
+    setProgress(null);
     setReadLog((prev) => [...prev, ...log]);
+    if (dailyLimit.current)
+      setError(
+        "The vision model's daily token allowance is spent, so the remaining documents were left unread. " +
+          'Everything already read is kept, and the plan can be generated without the rest — re-read them once the allowance resets.',
+      );
+  };
+
+  /** Abandon the rest of a long read. In-flight requests finish; nothing new is dispatched. */
+  const stopReading = () => {
+    cancelRead.current = true;
   };
 
   /** "Prepare by hand" — substitute a local upload for a Drive document the engine cannot fetch or parse. */
@@ -463,6 +550,8 @@ export function Intake({
             scan={scan}
             states={docStates}
             busy={reading}
+            progress={progress}
+            onStop={stopReading}
             onRead={(files) => void readFiles(files)}
             onPrepareByHand={prepareByHand}
             onDrop={(f) => mark(f.id, 'dropped', 'Excluded by you. It will not be read, and the required input it matched now counts as uncovered.')}

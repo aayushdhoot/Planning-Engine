@@ -1,7 +1,7 @@
 // The coverage screen exists to answer "is the engine reading all my input data?".
 // Its value is entirely in not overstating what was read, so that is what these tests pin.
 import { describe, expect, it } from 'vitest';
-import { buildCoverage, coverageRank, extractorFor, folderOf, groupCoverage, kindOf, slotFor, startsCollapsed, type DocStates } from '../src/engine/coverage';
+import { buildCoverage, coverageRank, extractorFor, folderOf, groupCoverage, kindOf, noExtractorReason, slotFor, startsCollapsed, type DocStates } from '../src/engine/coverage';
 import type { DriveFile, DriveScan } from '../src/services/drive';
 
 const f = (name: string, path = `KOHLER OS/${name}`): DriveFile => ({
@@ -60,8 +60,30 @@ describe('extractorFor', () => {
   });
 
   it('claims nothing for formats with no extractor', () => {
-    for (const n of ['Signed agreement.pdf', 'GFC layout.dwg', 'render.png', 'chat.zip', 'Kohler_KT_Internal.docx'])
+    for (const n of ['GFC layout.dwg', 'chat.zip', 'Kohler_KT_Internal.docx'])
       expect(`${n}:${extractorFor(f(n))}`).toBe(`${n}:null`);
+  });
+
+  it('reads a PDF by rendering its pages, rather than holding it as evidence', () => {
+    // the brand guideline and the drawing set arrive as PDFs on most projects; "no extractor"
+    // meant the engine never looked at either of them
+    expect(extractorFor(f('22_08_29_Ascendion_brand.pdf'))).toBe('pdf');
+    expect(extractorFor(f('ASCENDION VADODARA_8TH+9TH+10TH FLOOR V15.pdf'))).toBe('pdf');
+  });
+
+  it('reads still images through the vision adapter', () => {
+    expect(extractorFor(f('render.png'))).toBe('vision');
+    expect(extractorFor(f('WhatsApp Image 2026-07-30 at 10.55.20 PM.jpeg'))).toBe('vision');
+  });
+
+  it('survives a DriveFile-shaped object with no mimeType at all', () => {
+    // a hand-supplied upload standing in for a Drive document is built from a filename alone;
+    // dereferencing mimeType here surfaced as "Cannot read properties of undefined
+    // (reading 'startsWith')" on the row of a perfectly readable PDF
+    const nameOnly = { name: 'Drawings V15.pdf' } as DriveFile;
+    expect(kindOf(nameOnly)).toBe('document');
+    expect(extractorFor(nameOnly)).toBe('pdf');
+    expect(() => noExtractorReason({ name: 'notes.vcf' } as DriveFile)).not.toThrow();
   });
 
   it('does not guess at a spreadsheet whose purpose is not in its name', () => {
@@ -92,7 +114,7 @@ describe('buildCoverage', () => {
     const cov = buildCoverage(scan(files));
     expect(cov.documents).toBe(6);
     expect(cov.extracted).toBe(0);
-    expect(cov.extractableNotRead).toBe(2); // BOQ + programme
+    expect(cov.extractableNotRead).toBe(4); // BOQ + programme + the PDF + the site photo
   });
 
   it('never reports a PDF as read just because its bytes were opened', () => {
@@ -108,7 +130,7 @@ describe('buildCoverage', () => {
     const states: DocStates = { 'priced BOQ_BCS.xlsx': { state: 'extracted', detail: '19 packages' } };
     const cov = buildCoverage(scan(files), states);
     expect(cov.extracted).toBe(1);
-    expect(cov.extractableNotRead).toBe(2); // programme + the site photo remain (BOQ now extracted)
+    expect(cov.extractableNotRead).toBe(3); // programme + PDF + site photo remain (BOQ now extracted)
     expect(cov.evidenceOnlyMandatory).not.toContain('Project BOQ (priced)');
   });
 
@@ -116,7 +138,7 @@ describe('buildCoverage', () => {
     const states: DocStates = { 'Kohler_Pune_Project_Schedule_V2.xlsx': { state: 'dropped' } };
     const cov = buildCoverage(scan(files), states);
     expect(cov.dropped).toBe(1);
-    expect(cov.extractableNotRead).toBe(2); // BOQ + the site photo remain (schedule was dropped)
+    expect(cov.extractableNotRead).toBe(3); // BOQ + PDF + site photo remain (schedule was dropped)
   });
 
   it('reports a required input as uncovered once its only document is dropped', () => {
@@ -132,6 +154,16 @@ describe('buildCoverage', () => {
     const cov = buildCoverage(scan([f('priced BOQ_BCS.xlsx')]));
     expect(cov.missingMandatory).toContain('Drawings');
     expect(cov.missingMandatory).not.toContain('Project BOQ (priced)');
+  });
+
+  it('names absent optional inputs too, so nothing is silently unaccounted for', () => {
+    // a brand guideline or a fit-out manual is missing from most folders and must never hold a
+    // plan up — but "not asked for" and "not there" are different answers, and the screen owes
+    // the user the second one
+    const cov = buildCoverage(scan([f('priced BOQ_BCS.xlsx')]));
+    expect(cov.missingOptional).toContain('Brand guideline');
+    expect(cov.missingOptional).toContain('Fitout guideline');
+    expect(cov.missingMandatory).not.toContain('Brand guideline');
   });
 
   it('maps documents to the required input they satisfy', () => {
@@ -155,7 +187,9 @@ describe('coverageRank', () => {
       { 'Schedule.xlsx': { state: 'dropped' } },
     ).rows;
     const order = [...rows].sort((x, y) => coverageRank(x) - coverageRank(y)).map((r) => r.file.name);
-    expect(order[0]).toBe('BOQ.xlsx');
+    // both the BOQ and the PDF are readable-but-unread, so both outrank the file nothing can
+    // be done with; the dropped one sinks regardless
+    expect(order.slice(0, 2).sort()).toEqual(['BOQ.xlsx', 'a.pdf']);
     expect(order.at(-1)).toBe('Schedule.xlsx');
   });
 });

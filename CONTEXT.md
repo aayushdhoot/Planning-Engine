@@ -253,8 +253,13 @@ public folder-listing HTML and downloads via `uc?export=download`.
 ## Drive coverage — "What is in Drive"
 `src/engine/coverage.ts` + `src/ui/DriveCoverage.tsx`. The screen answers "is the engine reading
 all my input data?", so its whole value is in **not overstating what was read**.
-- `extracted` ≠ `logged`. Opening a contract PDF is not reading it. Never collapse these into
+- `extracted` ≠ `logged`. Opening a document is not reading it. Never collapse these into
   one "read" badge — a contract shown as READ is exactly the false assurance this replaces.
+- A **failed** read is not an empty one either. When the vision provider refuses (rate limit,
+  network), the row stays `pending` with the reason on it. Marking it `logged` — "read, nothing
+  usable found" — would claim the engine looked at a document it never saw.
+- PDFs have an extractor (`'pdf'`): `rasterize.ts` renders their pages and they go through the
+  vision path. Formats with no renderer (DWG, DOCX) are still evidence only.
 - `extractorFor()` is deliberately conservative and checks the **path as well as the filename**:
   KOHLER's real BOQ is `KOHLER_PUNE_FS_26TH JUNE_V5.xlsx`, identified only by its parent folder
   `BOQ & Project Plan`. Filename-only matching hid the project's most important document.

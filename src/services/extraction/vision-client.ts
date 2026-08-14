@@ -33,10 +33,35 @@ const MAX_RATE_LIMIT_RETRIES = 3;
 const DEFAULT_RETRY_WAIT_MS = 5000;
 const MAX_RETRY_WAIT_MS = 20000;
 
-function parseRetryWaitMs(errorText: string): number {
-  const m = errorText.match(/try again in ([\d.]+)s/i);
-  if (m) return Math.min(MAX_RETRY_WAIT_MS, Math.ceil(parseFloat(m[1]) * 1000) + 500); // +500ms safety margin
-  return DEFAULT_RETRY_WAIT_MS;
+/**
+ * Which limit was hit. The two are nothing alike and must not be handled alike: a per-minute
+ * limit clears while you wait, a per-day one does not. Sleeping and retrying against a daily
+ * cap ("try again in 22m23.52s") just burns three more attempts and 60 seconds per image
+ * across a 130-image folder, and every one of them still fails.
+ */
+export type RateLimitScope = 'minute' | 'day' | null;
+
+export function rateLimitScopeOf(body: string): RateLimitScope {
+  if (/per\s*day|\bTPD\b|\bRPD\b/i.test(body)) return 'day';
+  if (/per\s*minute|\bTPM\b|\bRPM\b|rate.?limit/i.test(body)) return 'minute';
+  return null;
+}
+
+/**
+ * The wait Groq's own 429 body names ("Please try again in 9.15s", or "in 22m23.52s" when the
+ * daily cap is what you hit), in milliseconds. Null when the body names no figure. The minutes
+ * and hours forms matter: the previous seconds-only pattern silently missed "22m23.52s" and
+ * retried against a 22-minute wall three times, five seconds apart.
+ */
+export function parseRetryWaitMs(errorText: string): number | null {
+  const m = errorText.match(/try again in ((?:[\d.]+\s*[hms])+)/i);
+  if (!m) return null;
+  let ms = 0;
+  for (const [, value, unit] of m[1].matchAll(/([\d.]+)\s*([hms])/g)) {
+    const n = parseFloat(value);
+    ms += unit === 'h' ? n * 3600_000 : unit === 'm' ? n * 60_000 : n * 1000;
+  }
+  return Math.ceil(ms) + 500; // safety margin — Groq's figure is the earliest possible moment
 }
 
 function sleep(ms: number): Promise<void> {
@@ -48,6 +73,9 @@ export class VisionExtractionError extends Error {
     message: string,
     public readonly fileName: string,
     public readonly cause?: unknown,
+    /** set when the provider refused on a rate limit, so a batch can stop instead of retrying
+     * the same wall 129 more times */
+    public readonly rateLimit: RateLimitScope = null,
   ) {
     super(message);
     this.name = 'VisionExtractionError';
@@ -201,7 +229,12 @@ export async function extractWithVision(input: VisionInput, cfg: VisionClientCon
     let res = await rawCall(responseFormat);
     for (let attempt = 0; res.status === 429 && attempt < MAX_RATE_LIMIT_RETRIES; attempt++) {
       const text = await res.clone().text().catch(() => '');
-      await sleep(parseRetryWaitMs(text));
+      // A daily cap does not clear by waiting, and neither does a wait longer than this client
+      // will sit through — give the batch back its error immediately in both cases.
+      if (rateLimitScopeOf(text) === 'day') break;
+      const wait = parseRetryWaitMs(text) ?? DEFAULT_RETRY_WAIT_MS;
+      if (wait > MAX_RETRY_WAIT_MS) break; // longer than this client will sit through
+      await sleep(wait);
       res = await rawCall(responseFormat);
     }
     for (let attempt = 0; res.status === 400 && attempt < retriesOn400; attempt++) {
@@ -225,8 +258,14 @@ export async function extractWithVision(input: VisionInput, cfg: VisionClientCon
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    const hint = res.status === 429 ? ' (rate limit persisted after retrying — try again shortly, or read fewer images at once)' : '';
-    throw new VisionExtractionError(`Groq returned ${res.status} for ${input.fileName}: ${text.slice(0, 300)}${hint}`, input.fileName);
+    const scope = res.status === 429 ? rateLimitScopeOf(text) ?? 'minute' : null;
+    const hint =
+      scope === 'day'
+        ? " (the account's daily token allowance is spent — nothing more can be read until it resets; the plan can still be built from what was read)"
+        : scope === 'minute'
+          ? ' (rate limit persisted after retrying — try again shortly, or read fewer images at once)'
+          : '';
+    throw new VisionExtractionError(`Groq returned ${res.status} for ${input.fileName}: ${text.slice(0, 300)}${hint}`, input.fileName, undefined, scope);
   }
 
   const json = await res.json();

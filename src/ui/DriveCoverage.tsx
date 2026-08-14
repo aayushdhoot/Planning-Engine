@@ -17,6 +17,8 @@ export function DriveCoverage({
   scan,
   states,
   busy,
+  progress,
+  onStop,
   onRead,
   onPrepareByHand,
   onDrop,
@@ -28,6 +30,10 @@ export function DriveCoverage({
   scan: DriveScan;
   states: DocStates;
   busy: string | null;
+  /** how far a multi-document read has got — a 130-photo folder takes long enough that a
+   * button stuck on "Reading…" with no count reads as a hang */
+  progress?: { done: number; total: number } | null;
+  onStop?: () => void;
   onRead: (files: DriveFile[]) => void;
   onPrepareByHand: (file: DriveFile) => void;
   onDrop: (file: DriveFile) => void;
@@ -79,9 +85,24 @@ export function DriveCoverage({
               {busy ? 'Reading…' : `Read all ${readable.length} readable`}
             </button>
           )}
+          {busy && progress && (
+            <span className="muted mono" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
+              {progress.done} / {progress.total} read
+            </span>
+          )}
+          {busy && onStop && <button onClick={onStop} title="Finish the reads already in flight and stop there">Stop reading</button>}
           {onRescan && <button disabled={!!busy} onClick={onRescan}>Scan Drive now</button>}
         </div>
       </div>
+
+      {busy && progress && progress.total > 1 && (
+        <div
+          aria-label={`Reading ${progress.done} of ${progress.total}`}
+          style={{ height: 4, background: 'var(--panel2)', borderRadius: 2, marginBottom: 12, overflow: 'hidden' }}
+        >
+          <div style={{ width: `${Math.round((100 * progress.done) / Math.max(1, progress.total))}%`, height: '100%', background: 'var(--accent, #2563eb)' }} />
+        </div>
+      )}
 
       <div className="cards">
         <div className="card">
@@ -113,9 +134,29 @@ export function DriveCoverage({
           will record an assumption instead.
         </div>
       )}
-      {cov.missingMandatory.length > 0 && (
+      {/*
+        Missing documents are reported, never enforced. A brand guideline, a fit-out manual or a
+        DBR is absent from most folders, and a project head who has one waits for nobody: the
+        plan is built from what is here, and each gap is carried into the questions step as an
+        explicit assumption rather than a silently invented value.
+      */}
+      {(cov.missingMandatory.length > 0 || cov.missingOptional.length > 0) && (
         <div className="banner" style={{ marginBottom: 14 }}>
-          <strong>Not in the folder at all:</strong> {cov.missingMandatory.join(', ')}.
+          <strong>Not in the folder at all.</strong> The plan is still generated — each of these is recorded as an
+          assumption, and can be answered in the questions step or supplied later with “Prepare by hand”.
+          <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {cov.missingMandatory.map((label) => (
+              <span key={label} className="tag crit" title="A required input — the plan proceeds, but on an assumption">{label}</span>
+            ))}
+            {cov.missingOptional.map((label) => (
+              <span key={label} className="tag" title="Optional input — frequently absent, and not needed to plan">{label}</span>
+            ))}
+          </div>
+          {cov.missingMandatory.length > 0 && (
+            <div className="faint" style={{ fontSize: 11.5, marginTop: 8 }}>
+              Red = on the required-input checklist. Grey = optional, and absent from most folders.
+            </div>
+          )}
         </div>
       )}
 

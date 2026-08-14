@@ -4,8 +4,14 @@
 // a date or duration directly; contract dates/milestones pass through as `provenance: 'input'`,
 // same rule ingestion.ts already follows for spreadsheet cells.
 import type { ContractMilestone, DesignReference, MaterialListItem, ScopeNote, SiteConditionNote, Traced } from '../../domain/types';
-import { extractWithVision, type VisionClientConfig, type VisionInput } from './vision-client';
+import { extractWithVision, VisionExtractionError, type RateLimitScope, type VisionClientConfig, type VisionInput } from './vision-client';
+import { mapPool } from './pool';
 import type { ExtractionResult } from './types';
+
+/** How many vision calls this service keeps in flight. Four is empirically under Groq's
+ * per-minute ceiling for this model while being roughly four times faster than one at a time;
+ * the caller can override it per request. */
+export const DEFAULT_CONCURRENCY = 4;
 
 const VALID_TRADES = new Set([
   'general', 'civil', 'plumbing', 'partition', 'electrical', 'hvac',
@@ -19,6 +25,18 @@ export interface SourceFile {
   /** one entry per page/photo already rendered to an image (PDF->PNG conversion happens
    * upstream, in the intake step — this service only calls the vision model) */
   pages: { imageBase64: string; mimeType: 'image/png' | 'image/jpeg'; pageLabel: string }[];
+}
+
+/** One page that could not be read, and why. Kept structured rather than folded into
+ * `assumptions` so the caller can tell a rate limit (retry later, nothing is wrong with the
+ * document) apart from an unreadable file, and stop a 130-file batch on the former. */
+export interface ExtractionFailure {
+  fileName: string;
+  pageLabel: string;
+  message: string;
+  rateLimit: RateLimitScope;
+  /** true when the page was never attempted, because the batch stopped early */
+  skipped?: boolean;
 }
 
 /** What this service produces: a patch to merge into an existing ProjectInputs, plus assumptions
@@ -37,6 +55,8 @@ export interface ExtractionPatch {
   /** files that were sent to the model but yielded nothing at all — logged, not extracted,
    * same distinction coverage.ts already draws for the Excel path */
   emptyFiles: string[];
+  /** pages the model never returned anything for, with the reason attached */
+  failures: ExtractionFailure[];
 }
 
 function sourceOf(fileName: string, locator: string | undefined | null): string {
@@ -118,35 +138,87 @@ function mergeOne(fileName: string, r: ExtractionResult, patch: ExtractionPatch)
 
 /**
  * Runs every page of every file through the vision model and merges into one patch.
- * Files run sequentially per-page to keep error attribution clean (which file/page failed);
- * parallelize later if extraction latency becomes a problem — correctness first.
+ *
+ * Pages run through a bounded pool rather than one at a time: a page is an independent network
+ * round trip, and reading a folder of site photos serially is what made the intake step take
+ * minutes. Error attribution survives the change because results come back index-aligned and
+ * are merged in the original order, so a patch is still a deterministic function of its input.
+ *
+ * A daily rate limit stops the batch. Every remaining page would fail identically, and failing
+ * them fast — with the reason recorded against each one — is what lets the caller say "the
+ * allowance is spent, here is what was read" instead of grinding through 100 more refusals.
  */
-export async function extractProjectDocuments(files: SourceFile[], cfg: VisionClientConfig): Promise<ExtractionPatch> {
+export async function extractProjectDocuments(
+  files: SourceFile[],
+  cfg: VisionClientConfig,
+  opts: { concurrency?: number } = {},
+): Promise<ExtractionPatch> {
   const patch: ExtractionPatch = {
     milestones: [], siteConditions: [], materialItems: [], scopeNotes: [], designRefs: [],
-    assumptions: [], emptyFiles: [],
+    assumptions: [], emptyFiles: [], failures: [],
   };
 
-  for (const file of files) {
-    let fileWroteSomething = false;
-    for (const page of file.pages) {
+  const tasks = files.flatMap((file) => file.pages.map((page) => ({ file, page })));
+  let halted: RateLimitScope = null;
+
+  const results = await mapPool(
+    tasks,
+    async ({ file, page }) => {
       const input: VisionInput = {
         fileName: file.fileName, filePath: file.filePath,
         imageBase64: page.imageBase64, mimeType: page.mimeType,
       };
       try {
-        const result = await extractWithVision(input, cfg);
-        const wrote = mergeOne(`${file.fileName} (${page.pageLabel})`, result, patch);
-        fileWroteSomething = fileWroteSomething || wrote;
+        return await extractWithVision(input, cfg);
       } catch (err) {
-        // A single bad page must not abort the whole batch — record it as an assumption and
-        // move on, same T1-DEGRADE spirit as planner.ts's missing-input handling.
-        const msg = err instanceof Error ? err.message : String(err);
-        patch.assumptions.push(`${file.fileName} (${page.pageLabel}): extraction failed — ${msg}`);
+        // Raised here rather than after the pool drains, so shouldStop can actually see it:
+        // pages still queued behind a spent daily allowance are abandoned, not attempted.
+        if (err instanceof VisionExtractionError && err.rateLimit === 'day') halted = 'day';
+        throw err;
       }
+    },
+    {
+      concurrency: opts.concurrency ?? DEFAULT_CONCURRENCY,
+      shouldStop: () => halted !== null,
+    },
+  );
+
+  const wroteByFile = new Map<string, boolean>();
+  const failedByFile = new Map<string, boolean>();
+  for (const [i, r] of results.entries()) {
+    const { file, page } = tasks[i];
+    wroteByFile.set(file.fileName, wroteByFile.get(file.fileName) ?? false);
+    if (r.status === 'done') {
+      const wrote = mergeOne(`${file.fileName} (${page.pageLabel})`, r.value, patch);
+      if (wrote) wroteByFile.set(file.fileName, true);
+      continue;
     }
-    if (!fileWroteSomething) patch.emptyFiles.push(file.fileName);
+    failedByFile.set(file.fileName, true);
+    if (r.status === 'skipped') {
+      patch.failures.push({
+        fileName: file.fileName, pageLabel: page.pageLabel, rateLimit: halted, skipped: true,
+        message: halted === 'day'
+          ? 'Not attempted — the daily token allowance was already spent by an earlier page in this batch.'
+          : 'Not attempted — the batch was stopped before this page was reached.',
+      });
+      continue;
+    }
+    // A single bad page must not abort the whole batch — record it and move on, same
+    // T1-DEGRADE spirit as planner.ts's missing-input handling.
+    const msg = r.error instanceof Error ? r.error.message : String(r.error);
+    patch.failures.push({
+      fileName: file.fileName,
+      pageLabel: page.pageLabel,
+      message: msg,
+      rateLimit: r.error instanceof VisionExtractionError ? r.error.rateLimit : null,
+    });
+    patch.assumptions.push(`${file.fileName} (${page.pageLabel}): extraction failed — ${msg}`);
   }
+
+  // "Empty" means the model looked and found nothing. A file whose pages all failed was never
+  // read at all, and calling that empty would be the same false assurance coverage.ts exists
+  // to prevent.
+  for (const [fileName, wrote] of wroteByFile) if (!wrote && !failedByFile.get(fileName)) patch.emptyFiles.push(fileName);
 
   return patch;
 }
