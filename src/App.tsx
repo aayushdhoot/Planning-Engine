@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import type { CalendarConfig, EngineConfig, ProjectInputs, ScheduleDates, Traced } from './domain/types';
 import type { DesignRow, MaterialInspection, MaterialRow, MaterialStatus, MaterialSupply, TodoRow, TrackStatus } from './domain/trackers';
 import {
@@ -28,6 +28,7 @@ import { emptyOrg, type OrgState } from './domain/org';
 import { Admin } from './ui/Admin';
 import { renderReport } from './reports/render';
 import { buildDeck } from './reports/deck';
+import { syncPlanToTrackingEngine } from './services/dnbos-sync';
 
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
@@ -118,6 +119,10 @@ export default function App() {
   const trace = auditTrace(plan);
   const pending = plan.project.status === 'pending_inputs';
 
+  useEffect(() => {
+    syncPlanToTrackingEngine(project.id, sited, full);
+  }, [project.id, sited, full]);
+
   // Emirates ships with an issued MS-Project programme; everything else derives one.
   const pert = useMemo(
     () => (project.id === 'emirates' ? buildEmiratesPert(today) : buildPertFromPlan(plan, today)),
@@ -154,6 +159,7 @@ export default function App() {
         <button onClick={() => download(`${plan.project.id}-${view}.json`, canonicalJson(plan))}>JSON</button>
         <button onClick={() => openReport(renderReport(plan, view === 'external' ? 'client' : 'internal'))}>PDF report</button>
         <button className="primary" onClick={() => void buildDeck(plan, view === 'external' ? 'client' : 'internal').writeFile({ fileName: `${plan.project.id}-${view}-deck.pptx` })}>Deck</button>
+        {!pending && <button className="track-btn" onClick={() => window.open(`/tracking/index.html?pid=${encodeURIComponent(project.id)}`, '_blank')}>Track</button>}
       </header>
 
       <nav className="tabs">

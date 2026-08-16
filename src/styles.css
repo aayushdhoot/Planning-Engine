@@ -48,6 +48,8 @@ button { cursor: pointer; box-shadow: var(--shadow); transition: background .12s
 button:hover { border-color: var(--accent); color: var(--accent); }
 button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
 button.primary:hover { background: #0a5ad6; color: #fff; }
+button.track-btn { background: #5b5bd6; color: #fff; border-color: #5b5bd6; font-weight: 600; border-radius: 8px; }
+button.track-btn:hover { background: #4a48c4; color: #fff; border-color: #4a48c4; }
 button.ghost { box-shadow: none; border-color: transparent; background: transparent; }
 
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
