@@ -21873,7 +21873,7 @@ if (CLIENT) { document.body.classList.add("client"); stripTeamChrome(); }
         asks: []
       };
     }
-  } catch (e) { /* silent — seed data is the fallback */ }
+  } catch (e) { console.warn("[PE bridge]", e); }
 })();
 
 render();

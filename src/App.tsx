@@ -159,7 +159,7 @@ export default function App() {
         <button onClick={() => download(`${plan.project.id}-${view}.json`, canonicalJson(plan))}>JSON</button>
         <button onClick={() => openReport(renderReport(plan, view === 'external' ? 'client' : 'internal'))}>PDF report</button>
         <button className="primary" onClick={() => void buildDeck(plan, view === 'external' ? 'client' : 'internal').writeFile({ fileName: `${plan.project.id}-${view}-deck.pptx` })}>Deck</button>
-        {!pending && <button className="track-btn" onClick={() => window.open(`/tracking/index.html?pid=${encodeURIComponent(project.id)}`, '_blank')}>Track</button>}
+        {!pending && <button className="track-btn" onClick={() => { syncPlanToTrackingEngine(project.id, sited, full); window.open(`/tracking/index.html?pid=${encodeURIComponent(project.id)}`, '_blank'); }}>Track</button>}
       </header>
 
       <nav className="tabs">
