@@ -94,8 +94,7 @@ describe('page rendering decisions', () => {
 // ------------------------------------------------------------ extraction service
 
 const okBody = (payload: unknown) =>
-  new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify(payload) } }] }), { status: 200 });
-
+  new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(payload) }] } }] }), { status: 200 });
 const TPD_BODY =
   '{"error":{"message":"Rate limit reached for model `qwen/qwen3.6-27b` in organization `org_x` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199695, Requested 3415. Please try again in 22m23.52s."}}';
 

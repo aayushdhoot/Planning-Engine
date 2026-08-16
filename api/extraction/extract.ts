@@ -16,9 +16,12 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
+  // Deliberately a separate key/model from GEMINI_API_KEY (used by the AI planning assistant
+  // elsewhere in the app) — keeping extraction's read volume on its own key means a heavy
+  // folder scan never eats into the assistant's quota, and vice versa.
+  const apiKey = process.env.GEMINI_EXTRACTION_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'GROQ_API_KEY is not configured on the server' }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'GEMINI_EXTRACTION_API_KEY is not configured on the server' }), { status: 500 });
   }
 
   let body: { files?: SourceFile[] };
@@ -43,7 +46,7 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   try {
-    const patch = await extractProjectDocuments(files, { apiKey, model: process.env.GROQ_VISION_MODEL ?? 'qwen/qwen3.6-27b' });
+    const patch = await extractProjectDocuments(files, { apiKey, model: process.env.GEMINI_EXTRACTION_MODEL ?? 'gemini-3.5-flash-lite' });
     return new Response(JSON.stringify(patch), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

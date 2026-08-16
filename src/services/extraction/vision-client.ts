@@ -1,9 +1,17 @@
-// Thin wrapper around the Groq API (OpenAI-compatible /chat/completions) for both vision and
-// text extraction. One provider, one model, for the pilot — kept isolated from
-// extraction-service.ts so swapping provider/model later touches one file, not the extraction
-// logic. qwen/qwen3.6-27b is Groq's current multimodal model; Groq flags it as a preview model,
-// so this file degrades to plain JSON mode if strict json_schema mode isn't accepted, rather
-// than hard-failing the whole pilot on a provider-side capability gap.
+// Thin wrapper around the Gemini API (generateContent) for both vision and text extraction.
+// One provider, one model, for the pilot — kept isolated from extraction-service.ts so swapping
+// provider/model later touches one file, not the extraction logic.
+//
+// This replaces the earlier Groq/Qwen implementation (kept as an inert reference file,
+// vision-client.groq-reference.ts.txt, alongside this one — not imported anywhere). The move
+// was purely about rate limits: Groq's free/on-demand tier for the vision model this pilot used
+// capped out on tokens-per-day well before a real folder scan finished. Gemini's flash-tier
+// limits are the more workable fit for reading a batch of site photos and PDFs.
+//
+// Note: this uses a SEPARATE Gemini API key/model from the one used elsewhere in the app for
+// the AI planning assistant (GEMINI_API_KEY / GEMINI_REPLAN_MODEL). Keeping them distinct means
+// this pilot's read volume never eats into the assistant's quota, and vice versa. See
+// GEMINI_EXTRACTION_API_KEY / GEMINI_EXTRACTION_MODEL below.
 import { EXTRACTION_JSON_SCHEMA, type ExtractionResult, type ExtractedSiteCondition } from './types';
 import { EXTRACTION_SYSTEM_PROMPT, userPromptFor } from './prompts';
 
@@ -17,51 +25,56 @@ export interface VisionInput {
 
 export interface VisionClientConfig {
   apiKey: string;
-  model?: string; // defaults to qwen/qwen3.6-27b
-  baseUrl?: string; // defaults to Groq's OpenAI-compatible endpoint
+  model?: string; // defaults to gemini-3.5-flash-lite
+  baseUrl?: string; // defaults to Gemini's generateContent endpoint root
 }
 
-const DEFAULT_MODEL = 'qwen/qwen3.6-27b';
-const DEFAULT_BASE_URL = 'https://api.groq.com/openai/v1';
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-// Groq's free/on-demand tier caps tokens-per-minute — reading several site photos back-to-back
-// during a folder scan can burst past that limit within a single minute even though each
-// individual request is well-formed. Groq's own 429 body names exactly how long to wait
-// ("Please try again in 9.15s"), so retrying on that schedule turns a real but transient rate
-// limit into an automatic short pause instead of a failure the person has to manually retry.
+// Gemini's free/pay-as-you-go tiers still enforce requests-per-minute and tokens-per-minute
+// ceilings — reading several site photos back-to-back during a folder scan can burst past that
+// within a single minute even though each individual request is well-formed. Gemini's 429 body
+// names a RetryInfo.retryDelay ("20s"), so retrying on that schedule turns a real but transient
+// rate limit into an automatic short pause instead of a failure the person has to manually retry.
 const MAX_RATE_LIMIT_RETRIES = 3;
 const DEFAULT_RETRY_WAIT_MS = 5000;
 const MAX_RETRY_WAIT_MS = 20000;
 
 /**
- * Which limit was hit. The two are nothing alike and must not be handled alike: a per-minute
- * limit clears while you wait, a per-day one does not. Sleeping and retrying against a daily
- * cap ("try again in 22m23.52s") just burns three more attempts and 60 seconds per image
- * across a 130-image folder, and every one of them still fails.
+ * Which limit was hit. Gemini's per-day quota (free tier) does not clear by waiting; a
+ * per-minute one does. Sleeping and retrying against a daily cap just burns attempts and time
+ * across a large folder, and every one of them still fails — so this distinction still matters
+ * exactly as it did with Groq.
  */
 export type RateLimitScope = 'minute' | 'day' | null;
 
 export function rateLimitScopeOf(body: string): RateLimitScope {
-  if (/per\s*day|\bTPD\b|\bRPD\b/i.test(body)) return 'day';
-  if (/per\s*minute|\bTPM\b|\bRPM\b|rate.?limit/i.test(body)) return 'minute';
+  if (/per\s*day|daily|\bRPD\b/i.test(body)) return 'day';
+  if (/per\s*minute|\bRPM\b|\bTPM\b|rate.?limit|RESOURCE_EXHAUSTED/i.test(body)) return 'minute';
   return null;
 }
 
 /**
- * The wait Groq's own 429 body names ("Please try again in 9.15s", or "in 22m23.52s" when the
- * daily cap is what you hit), in milliseconds. Null when the body names no figure. The minutes
- * and hours forms matter: the previous seconds-only pattern silently missed "22m23.52s" and
- * retried against a 22-minute wall three times, five seconds apart.
+ * The wait Gemini's own 429 body names, in milliseconds. Gemini reports this as a structured
+ * `RetryInfo.retryDelay` field (e.g. "20s", "1.5s") inside error.details, not as free text like
+ * Groq's — this reads that field first and falls back to scanning the message text for a
+ * "retry in Ns" style phrase in case the shape varies.
  */
 export function parseRetryWaitMs(errorText: string): number | null {
-  const m = errorText.match(/try again in ((?:[\d.]+\s*[hms])+)/i);
+  // Structured form: "retryDelay":"20s" or "retryDelay":"1.500s"
+  const structured = errorText.match(/"retryDelay"\s*:\s*"([\d.]+)s"/i);
+  if (structured) return Math.ceil(parseFloat(structured[1]) * 1000) + 500;
+
+  // Free-text fallback, same units-aware parsing as before.
+  const m = errorText.match(/(?:try again in|retry in) ((?:[\d.]+\s*[hms])+)/i);
   if (!m) return null;
   let ms = 0;
   for (const [, value, unit] of m[1].matchAll(/([\d.]+)\s*([hms])/g)) {
     const n = parseFloat(value);
     ms += unit === 'h' ? n * 3600_000 : unit === 'm' ? n * 60_000 : n * 1000;
   }
-  return Math.ceil(ms) + 500; // safety margin — Groq's figure is the earliest possible moment
+  return Math.ceil(ms) + 500; // safety margin — the figure named is the earliest possible moment
 }
 
 function sleep(ms: number): Promise<void> {
@@ -85,9 +98,13 @@ export class VisionExtractionError extends Error {
 /**
  * Coerces the raw model JSON into ExtractionResult shape.
  *
- * qwen/qwen3.6-27b on Groq falls back to json_object mode (no strict schema enforcement).
- * In that mode the model invents a different outer wrapper structure on almost every call.
- * Observed variants so far:
+ * Gemini is asked for `responseMimeType: 'application/json'` with the required shape spelled
+ * out in the system prompt (see extractWithVision below — Gemini's OpenAPI-subset
+ * responseSchema doesn't support the `type: [x, 'null']` unions this schema uses, so this pilot
+ * relies on prompt-enforced JSON rather than a strict schema, same fallback posture the old
+ * Groq client had for its json_object mode). This function is kept from that client for the
+ * same reason: even prompt-enforced JSON can drift in shape between calls, so this hunts through
+ * known wrapper keys and field-name aliases to produce a clean ExtractionResult regardless.
  *
  *   v1 — { fileType, filePath, extractionDate, confidenceScore, lowConfidenceNotes: string,
  *           extractedData: { siteConditions, trades, dates, quantities, issues } }
@@ -95,9 +112,7 @@ export class VisionExtractionError extends Error {
  *   v2 — { extractionResult: { fileMetadata: { fileName, filePath, fileType },
  *           siteObservations: [{ description, trade, locator }] } }
  *
- * This function hunts through all known wrapper keys and known field-name aliases to produce
- * a clean ExtractionResult regardless of which variant fired. Every branch is defensive:
- * if the field already has the right shape it is kept as-is.
+ * Every branch is defensive: if the field already has the right shape it is kept as-is.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeModelResponse(raw: any, fileName: string): ExtractionResult {
@@ -186,47 +201,61 @@ function normalizeModelResponse(raw: any, fileName: string): ExtractionResult {
   return { kind, contract: raw.contract ?? null, siteConditions, materialItems, scopeNotes, designRefs, lowConfidenceNotes };
 }
 
+/** Strips the schema down to a plain description of the required shape for the system prompt.
+ * Gemini's responseSchema field only supports a restricted OpenAPI subset (no `type: [x,'null']`
+ * unions, which EXTRACTION_JSON_SCHEMA uses throughout for optional fields), so rather than
+ * fight that mismatch this pilot leans on `responseMimeType: 'application/json'` plus the
+ * existing prompt — which already spells out the required shape — same fallback posture the old
+ * Groq client used for its own json_object mode. EXTRACTION_JSON_SCHEMA stays imported so this
+ * file still fails to compile if that schema's shape changes without this comment being revisited.
+ */
+void EXTRACTION_JSON_SCHEMA;
+
 /**
- * Runs one file's page-image(s) through Groq's vision model and returns a validated ExtractionResult.
- * Callers pass one image per call — extraction-service.ts handles fan-out across a
- * multi-page PDF and merging the per-page results.
+ * Runs one file's page-image(s) through Gemini's vision model and returns a validated
+ * ExtractionResult. Callers pass one image per call — extraction-service.ts handles fan-out
+ * across a multi-page PDF and merging the per-page results.
  */
 export async function extractWithVision(input: VisionInput, cfg: VisionClientConfig): Promise<ExtractionResult> {
   const model = cfg.model ?? DEFAULT_MODEL;
   const baseUrl = cfg.baseUrl ?? DEFAULT_BASE_URL;
+  const url = `${baseUrl}/${model}:generateContent`;
 
-  const messages = [
-    { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
-    {
-      role: 'user',
-      content: [
-        { type: 'text', text: userPromptFor(input.fileName, input.filePath) },
-        { type: 'image_url', image_url: { url: `data:${input.mimeType};base64,${input.imageBase64}` } },
-      ],
+  const body = {
+    system_instruction: { parts: [{ text: EXTRACTION_SYSTEM_PROMPT }] },
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          { text: userPromptFor(input.fileName, input.filePath) },
+          { inline_data: { mime_type: input.mimeType, data: input.imageBase64 } },
+        ],
+      },
+    ],
+    generationConfig: {
+      temperature: 0,
+      responseMimeType: 'application/json',
+      maxOutputTokens: 3072,
+      // Flash/Flash-Lite models spend a chunk of latency on an internal "thinking" pass by
+      // default, even for a plain extraction task with no multi-step reasoning. This is a
+      // straight vision-to-JSON read, so there's nothing to think through — budget 0 skips
+      // straight to writing the answer.
     },
-  ];
+  };
 
-  const rawCall = (responseFormat: Record<string, unknown>) =>
-    fetch(`${baseUrl}/chat/completions`, {
+  const rawCall = () =>
+    fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.apiKey}` },
-      body: JSON.stringify({
-        model, messages, response_format: responseFormat, temperature: 0,
-        // Groq's vision docs use max_completion_tokens (not max_tokens) for this model, and
-        // reasoning_effort: 'none' turns off Qwen 3.6's default "thinking" mode — without it,
-        // the model spends its token budget on internal reasoning before ever writing the
-        // actual JSON, which is exactly what produced Groq's "failed_generation: ''" error in
-        // practice on a plain extraction task that needs no multi-step reasoning at all.
-        max_completion_tokens: 2048, reasoning_effort: 'none',
-      }),
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': cfg.apiKey },
+      body: JSON.stringify(body),
     });
 
-  // Retries on both 429 (rate limit, with Groq's own suggested wait) and 400 (a reasoning model
-  // can still fail structured output on a given image somewhat probabilistically even with
-  // reasoning off) — a couple of extra attempts costs little against how disruptive a dropped
-  // image is to a folder scan.
-  const call = async (responseFormat: Record<string, unknown>, retriesOn400 = 1): Promise<Response> => {
-    let res = await rawCall(responseFormat);
+  // Retries on both 429 (rate limit, with Gemini's own suggested wait) and 5xx (transient
+  // server-side hiccups) — a couple of extra attempts costs little against how disruptive a
+  // dropped image is to a folder scan.
+  let res: Response;
+  try {
+    res = await rawCall();
     for (let attempt = 0; res.status === 429 && attempt < MAX_RATE_LIMIT_RETRIES; attempt++) {
       const text = await res.clone().text().catch(() => '');
       // A daily cap does not clear by waiting, and neither does a wait longer than this client
@@ -235,25 +264,13 @@ export async function extractWithVision(input: VisionInput, cfg: VisionClientCon
       const wait = parseRetryWaitMs(text) ?? DEFAULT_RETRY_WAIT_MS;
       if (wait > MAX_RETRY_WAIT_MS) break; // longer than this client will sit through
       await sleep(wait);
-      res = await rawCall(responseFormat);
+      res = await rawCall();
     }
-    for (let attempt = 0; res.status === 400 && attempt < retriesOn400; attempt++) {
-      res = await rawCall(responseFormat);
-    }
-    return res;
-  };
-
-  let res: Response;
-  try {
-    res = await call({ type: 'json_schema', json_schema: EXTRACTION_JSON_SCHEMA });
-    // qwen3.6-27b is a Groq preview model — if strict schema mode isn't accepted for it yet,
-    // fall back to plain JSON mode. The system prompt already spells out the required shape,
-    // so json_object mode still gets us usable (if unvalidated) JSON.
-    if (res.status === 400) {
-      res = await call({ type: 'json_object' }, 2);
+    for (let attempt = 0; res.status >= 500 && attempt < 2; attempt++) {
+      res = await rawCall();
     }
   } catch (err) {
-    throw new VisionExtractionError(`Network error calling Groq for ${input.fileName}`, input.fileName, err);
+    throw new VisionExtractionError(`Network error calling Gemini for ${input.fileName}`, input.fileName, err);
   }
 
   if (!res.ok) {
@@ -261,22 +278,28 @@ export async function extractWithVision(input: VisionInput, cfg: VisionClientCon
     const scope = res.status === 429 ? rateLimitScopeOf(text) ?? 'minute' : null;
     const hint =
       scope === 'day'
-        ? " (the account's daily token allowance is spent — nothing more can be read until it resets; the plan can still be built from what was read)"
+        ? " (the account's daily quota is spent — nothing more can be read until it resets; the plan can still be built from what was read)"
         : scope === 'minute'
           ? ' (rate limit persisted after retrying — try again shortly, or read fewer images at once)'
           : '';
-    throw new VisionExtractionError(`Groq returned ${res.status} for ${input.fileName}: ${text.slice(0, 300)}${hint}`, input.fileName, undefined, scope);
+    throw new VisionExtractionError(`Gemini returned ${res.status} for ${input.fileName}: ${text.slice(0, 300)}${hint}`, input.fileName, undefined, scope);
   }
 
   const json = await res.json();
-  const raw = json?.choices?.[0]?.message?.content;
-  if (!raw) throw new VisionExtractionError(`Groq returned no content for ${input.fileName}`, input.fileName);
+  // Gemini can also refuse via a finishReason (SAFETY, RECITATION, etc.) with no text at all —
+  // that shows up as an empty candidates[]/parts[] rather than an HTTP error.
+  const raw = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!raw) {
+    const finishReason = json?.candidates?.[0]?.finishReason;
+    const why = finishReason ? ` (finishReason: ${finishReason})` : '';
+    throw new VisionExtractionError(`Gemini returned no content for ${input.fileName}${why}`, input.fileName);
+  }
 
   let parsed: ExtractionResult;
   try {
     parsed = normalizeModelResponse(JSON.parse(raw), input.fileName);
   } catch (err) {
-    throw new VisionExtractionError(`Groq returned invalid JSON for ${input.fileName}`, input.fileName, err);
+    throw new VisionExtractionError(`Gemini returned invalid JSON for ${input.fileName}`, input.fileName, err);
   }
   // extraction-service.ts's mergeOne() never has to null-check every field.
   parsed.lowConfidenceNotes ??= [];
@@ -298,5 +321,4 @@ export async function extractWithVision(input: VisionInput, cfg: VisionClientCon
   }
 
   return parsed;
-
 }
