@@ -21804,6 +21804,78 @@ function fillClientPhotos(model, photoIndex) {
 
 if (CLIENT) { document.body.classList.add("client"); stripTeamChrome(); }
 
+// --- Planning Engine bridge: override project identity and compare pack ---
+// When the Planning Engine writes a spine snapshot for a project, this bridge
+// reads the snapshot and overrides the tracking engine's hardcoded seed data
+// so the top bar, Compare view and reports show the real project identity and
+// plan data. No DnB-OS source file is edited — this code lives in Planning
+// Engine's own generated copy of the tracking build.
+(function bridgeFromSpine() {
+  try {
+    var pid = PROJECT_ID;
+    var raw = localStorage.getItem("dnbos-spine:snap:" + pid);
+    if (!raw) return;
+    var snap = JSON.parse(raw);
+    if (!snap || !snap.project || !snap.project.name) return;
+    var p = snap.project;
+
+    // Override project identity in seed data
+    if (typeof TRACK_PROJECT !== "undefined" && TRACK_PROJECT.PROJECT) {
+      TRACK_PROJECT.PROJECT.name = p.name;
+      TRACK_PROJECT.PROJECT.code = p.id || pid;
+      TRACK_PROJECT.PROJECT.site = p.location || "";
+    }
+
+    // Build a Compare pack from the published plan so Compare shows plan bars
+    // even without site walk observations. Each task becomes a row with its
+    // planned start/finish and site = null (no reading yet).
+    var plans = snap.plan || [];
+    var last = plans.length ? plans[plans.length - 1] : null;
+    if (last && last.tasks && last.tasks.length) {
+      var byTrade = {};
+      for (var i = 0; i < last.tasks.length; i++) {
+        var t = last.tasks[i];
+        var trade = t.trade || "General";
+        if (!byTrade[trade]) byTrade[trade] = [];
+        byTrade[trade].push({
+          name: t.name,
+          ps: t.ES,
+          pf: t.EF,
+          site: null,
+          note: t.critical ? "Critical path" : ""
+        });
+      }
+      var groups = [];
+      var trades = Object.keys(byTrade);
+      for (var j = 0; j < trades.length; j++) {
+        groups.push({ label: trades[j], rows: byTrade[trades[j]] });
+      }
+      // Find earliest start and latest finish for calendar math
+      var allDates = last.tasks.map(function(t) { return t.ES; }).concat(last.tasks.map(function(t) { return t.EF; })).sort();
+      var earliest = allDates[0];
+      var latest = allDates[allDates.length - 1];
+      var DAY_MS = 86400000;
+      var span = Math.max(1, Math.round((new Date(latest) - new Date(earliest)) / DAY_MS));
+      var elapsed = Math.max(1, Math.round((new Date() - new Date(earliest)) / DAY_MS));
+
+      window.TRACK_COMPARE_SKF = {
+        project: p.name,
+        asOf: new Date().toISOString().slice(0, 10),
+        day: Math.min(elapsed, span),
+        days: span,
+        handover: latest,
+        source: "Planning Engine published plan",
+        groups: groups,
+        siteMap: {},
+        week: [],
+        insights: [],
+        challenges: {},
+        asks: []
+      };
+    }
+  } catch (e) { /* silent — seed data is the fallback */ }
+})();
+
 render();
 
 // The Drive index scans itself when the engine opens and again once a
