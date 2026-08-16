@@ -19,9 +19,9 @@ async function main() {
     process.exit(1);
   }
 
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = process.env.GEMINI_EXTRACTION_API_KEY;
   if (!apiKey) {
-    console.error('GROQ_API_KEY is not set. Export it or add it to your .env before running this.');
+    console.error('GEMINI_EXTRACTION_API_KEY is not set. Export it or add it to your .env before running this.');
     process.exit(1);
   }
 
@@ -34,7 +34,7 @@ async function main() {
 
   const bytes = readFileSync(filePath);
   const imageBase64 = bytes.toString('base64');
-  console.log(`Loaded ${filePath} (${(bytes.length / 1024).toFixed(0)} KB) — calling Groq (qwen/qwen3.6-27b)...`);
+  console.log(`Loaded ${filePath} (${(bytes.length / 1024).toFixed(0)} KB) — calling Gemini (${process.env.GEMINI_EXTRACTION_MODEL ?? 'gemini-3.6-flash'})`);
 
   const started = Date.now();
   try {
@@ -69,7 +69,7 @@ async function main() {
   } catch (err) {
     console.error(`\n❌ Extraction failed after ${((Date.now() - started) / 1000).toFixed(1)}s`);
     console.error(err instanceof Error ? err.message : err);
-    console.error('\nCommon causes: wrong/expired GROQ_API_KEY, model name changed on Groq\'s side (check console.groq.com/docs/vision), or a 429 rate limit on the free tier.');
+    console.error('\nCommon causes: wrong/expired GEMINI_EXTRACTION_API_KEY, model name changed on Gemini\'s side (check console.gemini.com/docs/vision), or a 429 rate limit on the free tier.');
     process.exit(1);
   }
 }
