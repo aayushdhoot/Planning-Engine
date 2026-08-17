@@ -34,9 +34,9 @@ import { ProjectDashboard } from './ui/ProjectDashboard';
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
-const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material at site', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant', 'Project settings'] as const;
+const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material at site', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant'] as const;
 type Tab = (typeof PROJECT_TABS)[number];
-type Screen = 'dashboard' | 'project' | 'admin' | 'settings';
+type Screen = 'dashboard' | 'project' | 'admin' | 'settings' | 'new-project';
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 const P = ({ t }: { t: Traced<number> | null }) =>
@@ -148,12 +148,7 @@ export default function App() {
 
   const goHome = () => setScreen('dashboard');
 
-  const openNewProject = () => {
-    const first = PROJECTS[0];
-    if (first) setProjectId(first.id);
-    setTab('Project settings');
-    setScreen('project');
-  };
+  const openNewProject = () => setScreen('new-project');
 
   if (screen === 'dashboard') {
     return (
@@ -236,6 +231,34 @@ export default function App() {
     );
   }
 
+  if (screen === 'new-project') {
+    return (
+      <div className="app">
+        <header className="top standalone-header">
+          <button className="ghost home-btn" onClick={goHome} title="Back to all projects">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </button>
+          <div className="brand">New Project<small>Link a Drive folder and set up inputs</small></div>
+        </header>
+        <main className="fade-in">
+          <ProjectSettings
+            project={project}
+            org={org}
+            setOrg={setOrg}
+            clientId={clientId}
+            existingIds={PROJECTS.map((p) => p.id)}
+            onCreate={(p) => {
+              setExtraProjects((prev) => [...prev, p]);
+              setProjectId(p.id);
+              setTab('Cockpit');
+              setScreen('project');
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="top">
@@ -269,10 +292,10 @@ export default function App() {
       </nav>
 
       <main className="fade-in">
-        {pending && tab !== 'Project settings' && (
+        {pending && (
           <div className="banner">
             <strong>{plan.project.name} — pending inputs.</strong> No plan generated; the engine does not fabricate numbers.
-            Missing: {plan.missingInputs.join(', ')}. Use the <strong>Project settings</strong> tab to link a Drive folder and answer the intake questions.
+            Missing: {plan.missingInputs.join(', ')}. Go to the home page and use <strong>New Project</strong> to link a Drive folder and answer the intake questions.
           </div>
         )}
         {view === 'external' && !pending && (
@@ -349,20 +372,6 @@ export default function App() {
             onApprove={(delays, summary) => {
               setAppliedDelays((prev) => ({ ...prev, [project.id]: [...(prev[project.id] ?? []), ...delays] }));
               setLastAppliedSummary((prev) => ({ ...prev, [project.id]: summary }));
-            }}
-          />
-        )}
-        {tab === 'Project settings' && (
-          <ProjectSettings
-            project={project}
-            org={org}
-            setOrg={setOrg}
-            clientId={clientId}
-            existingIds={PROJECTS.map((p) => p.id)}
-            onCreate={(p) => {
-              setExtraProjects((prev) => [...prev, p]);
-              setProjectId(p.id);
-              setTab('Cockpit');
             }}
           />
         )}

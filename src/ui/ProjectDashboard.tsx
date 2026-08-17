@@ -37,7 +37,7 @@ export function ProjectDashboard({
           const site = siteFor(org, p.id);
           const lifecycle = org.lifecycle[p.id] ?? 'Planning';
           const teamCount = teamFor(org, p.id).filter((m) => m.employeeCode).length;
-          const pending = p.status === 'pending_inputs';
+          const pending = !p.provided.boq || !p.provided.contract;
 
           return (
             <button
