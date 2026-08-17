@@ -183,7 +183,7 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
 
 .dash-header { text-align: center; margin-bottom: 48px; }
 
-.dash-logo { height: 36px; width: auto; color: var(--text); }
+.dash-logo { height: 42px; width: auto; }
 
 .dash-subtitle {
   font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--faint);

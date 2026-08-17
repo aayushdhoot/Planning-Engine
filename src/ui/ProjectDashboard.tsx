@@ -79,11 +79,13 @@ export function ProjectDashboard({
 
 function FlipspacesLogo() {
   return (
-    <svg className="dash-logo" viewBox="0 0 280 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Yellow geometric mark — two overlapping triangles forming the Flipspaces chevron */}
-      <path d="M4,36 L18,4 L32,36Z" fill="#c8d500" />
-      <path d="M20,36 L34,4 L48,36Z" fill="#c8d500" opacity="0.6" />
-      <text x="58" y="30" fontFamily="'Montserrat', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" fontSize="26" fontWeight="800" letterSpacing="3" fill="currentColor">FLIPSPACES</text>
+    <svg className="dash-logo" viewBox="0 0 360 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Three overlapping yellow triangles — the Flipspaces geometric mark */}
+      <polygon points="8,40 20,6 32,40" fill="#FFD600" />
+      <polygon points="16,40 28,6 40,40" fill="#FFD600" opacity="0.75" />
+      <polygon points="24,40 36,6 48,40" fill="#FFD600" opacity="0.55" />
+      <text x="58" y="33" fontFamily="'Arial Black', 'Helvetica Neue', Arial, sans-serif" fontSize="28" fontWeight="900" letterSpacing="1.5" fill="#1a1a1a">FLIPSPACES</text>
+      <text x="296" y="18" fontFamily="Arial, sans-serif" fontSize="10" fill="#1a1a1a">®</text>
     </svg>
   );
 }
