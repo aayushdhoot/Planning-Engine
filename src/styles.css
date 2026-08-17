@@ -241,6 +241,9 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
 /* top bar on dashboard */
 .dash-topbar { justify-content: flex-end; border-bottom: none; box-shadow: none; background: transparent; }
 
+/* standalone pages (admin, settings) */
+.standalone-header { border-bottom: 1px solid var(--line); }
+
 .dash-topbtn {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
   font-size: 13px; font-weight: 500; border-radius: 8px; border: 1px solid var(--line);
