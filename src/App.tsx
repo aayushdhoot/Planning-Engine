@@ -29,12 +29,15 @@ import { Admin } from './ui/Admin';
 import { renderReport } from './reports/render';
 import { buildDeck } from './reports/deck';
 import { syncPlanToTrackingEngine } from './services/dnbos-sync';
+import { ProjectDashboard } from './ui/ProjectDashboard';
 
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
-const TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material at site', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant', 'Project settings', 'Admin', 'Settings'] as const;
+const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material at site', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant', 'Project settings'] as const;
+const TABS = [...PROJECT_TABS, 'Admin', 'Settings'] as const;
 type Tab = (typeof TABS)[number];
+type Screen = 'dashboard' | 'project';
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 const P = ({ t }: { t: Traced<number> | null }) =>
@@ -50,6 +53,7 @@ export default function App() {
   const [projectId, setProjectId] = useState(BASE_PROJECTS[0].id);
   const [view, setView] = useState<'internal' | 'external'>('internal');
   const [tab, setTab] = useState<Tab>('Cockpit');
+  const [screen, setScreen] = useState<Screen>('dashboard');
   const [sundaysOff, setSundaysOff] = useState(false);
   const [holidays, setHolidays] = useState('');
   const [workMode, setWorkMode] = useState(1);
@@ -137,11 +141,53 @@ export default function App() {
   const val = <T,>(rowId: string, field: string, fallback: T): T | string =>
     edits[project.id]?.[rowId]?.[field] ?? fallback;
 
+  const openProject = (id: string) => {
+    setProjectId(id);
+    setTab('Cockpit');
+    setScreen('project');
+  };
+
+  const goHome = () => setScreen('dashboard');
+
+  const openNewProject = () => {
+    const first = PROJECTS[0];
+    if (first) setProjectId(first.id);
+    setTab('Project settings');
+    setScreen('project');
+  };
+
+  if (screen === 'dashboard') {
+    return (
+      <div className="app">
+        <header className="top dash-topbar">
+          <div className="spacer" />
+          <button className="dash-topbtn" onClick={() => { setTab('Admin'); setScreen('project'); }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Admin
+          </button>
+          <button className="dash-topbtn" onClick={() => { setTab('Settings'); setScreen('project'); }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
+          </button>
+        </header>
+        <ProjectDashboard
+          projects={PROJECTS}
+          org={org}
+          onSelect={openProject}
+          onNewProject={openNewProject}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       <header className="top">
+        <button className="ghost home-btn" onClick={goHome} title="Back to all projects">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
         <div className="brand">DnB Planning Engine<small>v{plan.engine.version} · {plan.engine.normsVersion}</small></div>
-        <select value={projectId} onChange={(e) => setProjectId(e.target.value)}>
+        <select value={projectId} onChange={(e) => { setProjectId(e.target.value); setTab('Cockpit'); }}>
           {PROJECTS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         <div className="seg">
@@ -163,10 +209,13 @@ export default function App() {
       </header>
 
       <nav className="tabs">
-        {TABS.map((t) => <button key={t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}
+        {PROJECT_TABS.map((t) => <button key={t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}
+        <div className="spacer" />
+        <button className={tab === 'Admin' ? 'on' : ''} onClick={() => setTab('Admin')}>Admin</button>
+        <button className={tab === 'Settings' ? 'on' : ''} onClick={() => setTab('Settings')}>Settings</button>
       </nav>
 
-      <main>
+      <main className="fade-in">
         {pending && tab !== 'Project settings' && (
           <div className="banner">
             <strong>{plan.project.name} — pending inputs.</strong> No plan generated; the engine does not fabricate numbers.

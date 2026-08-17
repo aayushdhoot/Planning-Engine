@@ -154,6 +154,111 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
 .filebar { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); margin-bottom: 7px; box-shadow: var(--shadow); }
 .filebar .nm { flex: 1; font-size: 13px; }
 
+/* ------------------------------------------------------------------ animations */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes dashFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in { animation: fadeIn .3s ease-out both; }
+
+/* ------------------------------------------------------------------ dashboard */
+
+.dashboard {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: 60px 32px 48px; opacity: 0; transition: opacity .4s ease;
+}
+.dashboard.dash-in { opacity: 1; }
+
+.dash-header { text-align: center; margin-bottom: 48px; }
+
+.dash-logo { height: 36px; width: auto; color: var(--text); }
+
+.dash-subtitle {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--faint);
+  margin-top: 8px; font-weight: 600;
+}
+
+.dash-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+  width: 100%; max-width: 1100px;
+}
+
+.dash-card {
+  all: unset; cursor: pointer; display: flex;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: var(--shadow); transition: all .25s cubic-bezier(.4, 0, .2, 1);
+  animation: cardSlideUp .45s ease-out both;
+  min-height: 170px;
+}
+.dash-card:hover {
+  transform: translateY(-4px); box-shadow: 0 8px 24px rgba(16, 24, 40, 0.1), 0 2px 6px rgba(16, 24, 40, 0.06);
+  border-color: var(--accent);
+}
+.dash-card:active { transform: translateY(-1px); transition-duration: .08s; }
+
+.dash-card-inner { padding: 22px 24px; display: flex; flex-direction: column; gap: 6px; width: 100%; }
+
+.dash-card-top { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.dash-card-name { font-size: 18px; font-weight: 700; letter-spacing: -.3px; margin-top: 4px; color: var(--text); }
+
+.dash-card-client { font-size: 13px; color: var(--muted); }
+
+.dash-card-meta {
+  display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 10px;
+  font-size: 12px; color: var(--faint); border-top: 1px solid var(--line2);
+}
+
+.dash-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--faint); flex-shrink: 0; }
+
+/* new project card */
+.dash-card-new {
+  border-style: dashed; border-color: var(--faint); background: var(--panel2);
+  align-items: center; justify-content: center; text-align: center;
+}
+.dash-card-new:hover { border-color: var(--accent); background: var(--accent-soft); }
+.dash-card-new .dash-card-inner { align-items: center; }
+
+.dash-new-icon {
+  width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 300; color: var(--accent);
+  background: var(--accent-soft); border: 1px solid var(--accent); transition: transform .2s ease;
+}
+.dash-card-new:hover .dash-new-icon { transform: scale(1.08); }
+
+/* top bar on dashboard */
+.dash-topbar { justify-content: flex-end; border-bottom: none; box-shadow: none; background: transparent; }
+
+.dash-topbtn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+  font-size: 13px; font-weight: 500; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--muted); transition: all .15s ease;
+}
+.dash-topbtn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* home button in project header */
+.home-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; padding: 0; border-radius: 8px;
+  color: var(--muted); transition: all .15s ease;
+}
+.home-btn:hover { color: var(--accent); background: var(--accent-soft); }
+
+/* tab transitions */
+nav.tabs button { transition: color .15s ease, border-color .15s ease; }
+
 @media print {
   header.top, nav.tabs { display: none; }
   body { background: #fff; }
