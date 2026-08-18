@@ -79,13 +79,14 @@ export function ProjectDashboard({
 
 function FlipspacesLogo() {
   return (
-    <svg className="dash-logo" viewBox="0 0 360 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Three overlapping yellow triangles — the Flipspaces geometric mark */}
-      <polygon points="8,40 20,6 32,40" fill="#FFD600" />
-      <polygon points="16,40 28,6 40,40" fill="#FFD600" opacity="0.75" />
-      <polygon points="24,40 36,6 48,40" fill="#FFD600" opacity="0.55" />
-      <text x="58" y="33" fontFamily="'Arial Black', 'Helvetica Neue', Arial, sans-serif" fontSize="28" fontWeight="900" letterSpacing="1.5" fill="#1a1a1a">FLIPSPACES</text>
-      <text x="296" y="18" fontFamily="Arial, sans-serif" fontSize="10" fill="#1a1a1a">®</text>
+    <svg className="dash-logo" viewBox="0 0 380 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Two hollow overlapping triangles forming the Flipspaces chevron mark */}
+      {/* Left hollow triangle */}
+      <path fillRule="evenodd" d="M22,4 L6,42 L38,42Z M22,14 L14,38 L30,38Z" fill="#FFD600" />
+      {/* Right hollow triangle, overlapping */}
+      <path fillRule="evenodd" d="M38,4 L22,42 L54,42Z M38,14 L30,38 L46,38Z" fill="#FFD600" />
+      <text x="66" y="36" fontFamily="'Arial Black', 'Helvetica Neue', Arial, sans-serif" fontSize="30" fontWeight="900" letterSpacing="2" fill="#1a1a1a">FLIPSPACES</text>
+      <text x="355" y="20" fontFamily="Arial, sans-serif" fontSize="11" fill="#1a1a1a">®</text>
     </svg>
   );
 }
