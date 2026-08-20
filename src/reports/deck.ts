@@ -178,7 +178,7 @@ export function internalDeck(plan: Plan): Pptx {
 
   const mat = plan.modules.materials;
   const matSlide = pptx.addSlide();
-  titleBar(matSlide, 'Material at site — delivery register', brand);
+  titleBar(matSlide, 'Material Registry — delivery register', brand);
   kpis(matSlide, [
     ['Materials tracked', String(mat.summary.items)],
     ['Short on site', String(mat.summary.shortOnSite), 'required date passed'],

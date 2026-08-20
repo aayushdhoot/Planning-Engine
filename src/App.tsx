@@ -1,8 +1,8 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import type { CalendarConfig, EngineConfig, ProjectInputs, ScheduleDates, Traced } from './domain/types';
-import type { DesignRow, MaterialInspection, MaterialRow, MaterialStatus, MaterialSupply, TodoRow, TrackStatus } from './domain/trackers';
+import type { DesignRow, MaterialInspection, MaterialRow, MaterialStatus, MaterialSupply, TodoRow, TrackStatus, TradeWeeklySchedule } from './domain/trackers';
 import {
-  MATERIAL_INSPECTIONS, MATERIAL_STATUSES, MATERIAL_SUPPLIES, SUPPLY_LABEL, TRACK_STATUSES, delayDays, summariseMaterials,
+  MATERIAL_INSPECTIONS, MATERIAL_STATUSES, MATERIAL_SUPPLIES, SUPPLY_LABEL, TRACK_STATUSES, delayDays, summariseMaterials, buildWeeklyMaterialSchedule,
 } from './domain/trackers';
 import { buildPlan, clientView, type ExternalDelay, type Plan } from './engine/planner';
 import { auditTrace, canonicalJson, validatePlan } from './engine/schema';
@@ -34,7 +34,7 @@ import { ProjectDashboard } from './ui/ProjectDashboard';
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
-const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material at site', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant'] as const;
+const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material Registry', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant'] as const;
 type Tab = (typeof PROJECT_TABS)[number];
 type Screen = 'dashboard' | 'project' | 'admin' | 'settings' | 'new-project';
 
@@ -310,7 +310,7 @@ export default function App() {
               setTab(
                 area === 'design' ? 'Design'
                 : area === 'procurement' ? 'Procurement'
-                : area === 'materials' ? 'Material at site'
+                : area === 'materials' ? 'Material Registry'
                 : area === 'billing' ? 'RA Milestones'
                 : area === 'manpower' ? 'Manpower'
                 : 'PERT',
@@ -323,7 +323,7 @@ export default function App() {
         {tab === 'Manpower' && <Manpower plan={plan} />}
         {tab === 'Design' && <Design plan={plan} edit={edit} val={val} />}
         {tab === 'Procurement' && <Procurement plan={plan} view={view} edit={edit} val={val} />}
-        {tab === 'Material at site' && <Materials plan={plan} view={view} today={today} edit={edit} val={val} />}
+        {tab === 'Material Registry' && <Materials plan={plan} view={view} today={today} edit={edit} val={val} />}
         {tab === 'To-do' && (
           <Todos
             plan={plan}
@@ -891,11 +891,10 @@ function Materials({
   const [cat, setCat] = useState<string>('all');
   const [route, setRoute] = useState<'all' | MaterialSupply>('all');
   const [riskOnly, setRiskOnly] = useState(false);
+  const [subView, setSubView] = useState<'weekly' | 'register'>('weekly');
   const rows = plan.modules.materials.rows;
   const procById = useMemo(() => new Map(plan.modules.procurement.map((p) => [p.id, p])), [plan.modules.procurement]);
 
-  // The register is a live document: every count below is computed from what the team has
-  // actually recorded, never from the generated defaults.
   const live: MaterialRow[] = rows.map((r) => ({
     ...r,
     supply: val(r.id, 'supply', r.supply) as MaterialSupply,
@@ -904,6 +903,12 @@ function Materials({
     actualDelivery: (val(r.id, 'actualDelivery', r.actualDelivery ?? '') as string) || null,
   }));
   const summary = summariseMaterials(live, today);
+
+  const projectStart = plan.internal.start;
+  const weeklySchedule = useMemo(
+    () => buildWeeklyMaterialSchedule(live, projectStart),
+    [live, projectStart],
+  );
 
   if (!rows.length)
     return <p className="muted">No material register — the programme has not been generated yet.</p>;
@@ -992,131 +997,219 @@ function Materials({
         </div>
       )}
 
-      <h2>Material delivery register</h2>
-      <p className="muted" style={{ marginTop: -4, fontSize: 12.5, maxWidth: 900 }}>
-        Each material is dated against the activity that consumes it — on site two days before that activity starts,
-        ordered that many days earlier again for its own lead time. Quantities, delivery dates, storage and
-        inspection are recorded by site; the engine does not invent what was unloaded.
-      </p>
-      <div className="row" style={{ margin: '10px 0' }}>
-        {/* nineteen cost heads do not fit a segmented control — this is a list, not a toggle */}
-        <div className="field" style={{ minWidth: 260 }}>
-          <label>Cost head</label>
-          <select value={cat} onChange={(e) => setCat(e.target.value)}>
-            <option value="all">All cost heads ({rows.length})</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c} ({rows.filter((r) => r.category === c).length})</option>
-            ))}
-          </select>
-        </div>
-        <div className="field" style={{ minWidth: 210 }}>
-          <label>Supply route</label>
-          <select value={route} onChange={(e) => setRoute(e.target.value as 'all' | MaterialSupply)}>
-            <option value="all">Every route ({rows.length})</option>
-            {MATERIAL_SUPPLIES.map((s) => (
-              <option key={s} value={s}>{SUPPLY_LABEL[s]} ({live.filter((r) => r.supply === s).length})</option>
-            ))}
-          </select>
-        </div>
-        <button className={riskOnly ? 'primary' : ''} onClick={() => setRiskOnly(!riskOnly)}>
-          {riskOnly ? 'Showing at-risk only' : `At risk (${live.filter(atRisk).length})`}
-        </button>
+      <div className="row" style={{ margin: '10px 0', gap: 8, alignItems: 'center' }}>
+        <button className={subView === 'weekly' ? 'primary' : ''} onClick={() => setSubView('weekly')}>Weekly Schedule</button>
+        <button className={subView === 'register' ? 'primary' : ''} onClick={() => setSubView('register')}>Delivery Register</button>
       </div>
 
-      {!shown.length ? (
-        <p className="muted">Nothing matches that filter.</p>
-      ) : (
-        <div className="tblwrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Cost head</th><th>Material</th><th>Make</th><th>Unit</th><th>Supply</th><th>Vendor / PO</th>
-                <th>Ordered</th><th>Received</th><th>Balance</th>
-                <th>Order by</th><th>Required on site</th><th>Expected</th><th>Actual (GRN)</th>
-                <th>Status</th><th>Inspection</th><th>Storage</th><th>Consumed by</th><th>Remarks</th>
-              </tr>
-            </thead>
-            <tbody>{shown.map((r) => {
-              const proc = r.procurementId ? procById.get(r.procurementId) ?? null : null;
-              // a material we buy ourselves takes its vendor from the procurement row that raises
-              // the PO, so appointing a vendor once there shows up here rather than being retyped
-              const procVendor = proc ? (val(proc.id, 'vendor', proc.vendor) as string) : '';
-              const ordered = num(r.id, 'orderedQty', r.orderedQty);
-              const received = num(r.id, 'deliveredQty', r.deliveredQty);
-              const balance = ordered === null || received === null ? null : ordered - received;
-              const late = r.status !== 'Delivered' && r.requiredOnSite !== null && r.requiredOnSite < today;
-              return (
-                <tr key={r.id} style={late ? { background: 'var(--crit-soft)' } : r.supply === 'client' ? { background: 'var(--ext-soft)' } : undefined}>
-                  <td className="muted">{r.category}</td>
-                  <td title={[r.basis, ...r.issues].join(' · ')}>
-                    {r.item}
-                    {r.issues.length > 0 && <span className="tag crit" style={{ marginLeft: 6 }}>!</span>}
-                    <div className="faint" style={{ fontSize: 11 }}>{r.leadDays}d lead</div>
-                  </td>
-                  <TextCell id={r.id} field="make" current={r.make} edit={edit} val={val} placeholder="make" />
-                  <td className="muted mono">{r.unit}</td>
-                  <td className="edit">
-                    <select value={r.supply} onChange={(e) => edit(r.id, 'supply', e.target.value)}
-                      className={`tag ${r.supply === 'client' ? 'ext' : r.supply === 'vendor' ? 'warn' : 'info'}`}>
-                      {MATERIAL_SUPPLIES.map((s) => <option key={s} value={s}>{SUPPLY_LABEL[s]}</option>)}
-                    </select>
-                  </td>
-                  <td className="edit" style={{ minWidth: 190 }}>
-                    {r.supply === 'procured' && proc ? (
-                      <div className="faint" style={{ fontSize: 11.5 }}>
-                        {procVendor || <em>vendor not appointed</em>}
-                        <div>via procurement · {proc.category} · {val(proc.id, 'orderStatus', proc.orderStatus) as string}</div>
-                      </div>
-                    ) : (
-                      <input value={val(r.id, 'vendor', r.vendor) as string}
-                        placeholder={r.supply === 'client' ? 'client contact' : 'vendor'}
-                        onChange={(e) => edit(r.id, 'vendor', e.target.value)} />
-                    )}
-                    <input value={val(r.id, 'poNumber', r.poNumber) as string} placeholder="PO / WO no."
-                      onChange={(e) => edit(r.id, 'poNumber', e.target.value)} />
-                  </td>
-                  <td className="edit"><input style={{ width: 70 }} placeholder="—" value={val(r.id, 'orderedQty', r.orderedQty === null ? '' : String(r.orderedQty)) as string}
-                    onChange={(e) => edit(r.id, 'orderedQty', e.target.value)} /></td>
-                  <td className="edit"><input style={{ width: 70 }} placeholder="—" value={val(r.id, 'deliveredQty', r.deliveredQty === null ? '' : String(r.deliveredQty)) as string}
-                    onChange={(e) => edit(r.id, 'deliveredQty', e.target.value)} /></td>
-                  <td className="mono">
-                    {balance === null ? <span className="faint">—</span>
-                      : balance > 0 ? <span className="tag warn">{balance} {r.unit}</span>
-                      : <span className="tag ok">nil</span>}
-                  </td>
-                  <td className="mono" title={r.basis}>
-                    {r.orderBy ?? '—'}
-                    {r.orderBy && r.orderBy < today && r.status === 'Not Ordered' && (
-                      <div className="faint" style={{ fontSize: 11, color: 'var(--crit)' }}>passed</div>
-                    )}
-                  </td>
-                  <td className="mono" title={r.basis}>
-                    <strong style={late ? { color: 'var(--crit)' } : undefined}>{r.requiredOnSite ?? '—'}</strong>
-                  </td>
-                  <DateCell id={r.id} field="expectedDelivery" current={r.expectedDelivery} edit={edit} val={val} />
-                  <DateCell id={r.id} field="actualDelivery" current={r.actualDelivery} edit={edit} val={val} />
-                  <td className="edit">
-                    <select value={r.status} onChange={(e) => edit(r.id, 'status', e.target.value)} className={`tag ${materialStatusClass(r.status)}`}>
-                      {MATERIAL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </td>
-                  <td className="edit">
-                    <select value={r.inspection} onChange={(e) => edit(r.id, 'inspection', e.target.value)}
-                      className={`tag ${r.inspection === 'Accepted' ? 'ok' : r.inspection === 'Rejected' ? 'crit' : r.inspection === 'Accepted with deviation' ? 'warn' : ''}`}>
-                      {MATERIAL_INSPECTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </td>
-                  <TextCell id={r.id} field="storage" current={r.storage} edit={edit} val={val} placeholder="area / bay" />
-                  <td className="faint" style={{ maxWidth: 200 }}>
-                    {r.consumedBy ?? '—'}
-                    {r.gatedBy && <div style={{ fontSize: 11 }}>gated by {r.gatedBy}</div>}
-                  </td>
-                  <TextCell id={r.id} field="remarks" current={r.remarks} edit={edit} val={val} />
-                </tr>
-              );
-            })}</tbody>
-          </table>
-        </div>
+      {subView === 'weekly' && (
+        <>
+          <h2>Weekly material schedule</h2>
+          <p className="muted" style={{ marginTop: -4, fontSize: 12.5, maxWidth: 900 }}>
+            What material for each trade should be on site in each week of the programme, derived from the BOQ
+            and PERT schedule. Week 1 starts on the project start date ({projectStart}).
+          </p>
+          {!weeklySchedule.length ? (
+            <p className="muted">No dated materials to schedule.</p>
+          ) : (
+            weeklySchedule.map((ts) => (
+              <div key={ts.trade} style={{ marginBottom: 24 }}>
+                <h3 style={{ marginBottom: 6, fontSize: 14, borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>{ts.trade}</h3>
+                <div className="tblwrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style={{ minWidth: 120 }}>Week</th>
+                        <th>Dates</th>
+                        <th>Material</th>
+                        <th>Unit</th>
+                        <th>Lead time</th>
+                        <th>Order by</th>
+                        <th>Required on site</th>
+                        <th>Supply</th>
+                        <th>Status</th>
+                        <th>Consumed by</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ts.weeks.filter((w) => w.items.length > 0).map((w) =>
+                        w.items.map((r, ri) => {
+                          const late = r.status !== 'Delivered' && r.requiredOnSite !== null && r.requiredOnSite < today;
+                          return (
+                            <tr key={`${w.weekNumber}-${r.id}`} style={late ? { background: 'var(--crit-soft)' } : undefined}>
+                              {ri === 0 && (
+                                <>
+                                  <td rowSpan={w.items.length} style={{ verticalAlign: 'top', fontWeight: 600, fontSize: 13 }}>
+                                    Week {w.weekNumber}
+                                  </td>
+                                  <td rowSpan={w.items.length} className="mono" style={{ verticalAlign: 'top', fontSize: 11.5 }}>
+                                    {w.startDate}<br />to {w.endDate}
+                                  </td>
+                                </>
+                              )}
+                              <td>
+                                {r.item}
+                                {r.issues.length > 0 && <span className="tag crit" style={{ marginLeft: 6 }}>!</span>}
+                              </td>
+                              <td className="muted mono">{r.unit}</td>
+                              <td className="mono">{r.leadDays}d</td>
+                              <td className="mono">
+                                {r.orderBy ?? '—'}
+                                {r.orderBy && r.orderBy < today && r.status === 'Not Ordered' && (
+                                  <div className="faint" style={{ fontSize: 11, color: 'var(--crit)' }}>passed</div>
+                                )}
+                              </td>
+                              <td className="mono">
+                                <strong style={late ? { color: 'var(--crit)' } : undefined}>{r.requiredOnSite ?? '—'}</strong>
+                              </td>
+                              <td>
+                                <span className={`tag ${r.supply === 'client' ? 'ext' : r.supply === 'vendor' ? 'warn' : 'info'}`}>
+                                  {SUPPLY_LABEL[r.supply]}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`tag ${materialStatusClass(r.status)}`}>{r.status}</span>
+                              </td>
+                              <td className="faint" style={{ maxWidth: 200, fontSize: 12 }}>{r.consumedBy ?? '—'}</td>
+                            </tr>
+                          );
+                        }),
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))
+          )}
+        </>
+      )}
+
+      {subView === 'register' && (
+        <>
+          <h2>Material delivery register</h2>
+          <p className="muted" style={{ marginTop: -4, fontSize: 12.5, maxWidth: 900 }}>
+            Each material is dated against the activity that consumes it — on site two days before that activity starts,
+            ordered that many days earlier again for its own lead time. Quantities, delivery dates, storage and
+            inspection are recorded by site; the engine does not invent what was unloaded.
+          </p>
+          <div className="row" style={{ margin: '10px 0' }}>
+            <div className="field" style={{ minWidth: 260 }}>
+              <label>Cost head</label>
+              <select value={cat} onChange={(e) => setCat(e.target.value)}>
+                <option value="all">All cost heads ({rows.length})</option>
+                {categories.map((c) => (
+                  <option key={c} value={c}>{c} ({rows.filter((r) => r.category === c).length})</option>
+                ))}
+              </select>
+            </div>
+            <div className="field" style={{ minWidth: 210 }}>
+              <label>Supply route</label>
+              <select value={route} onChange={(e) => setRoute(e.target.value as 'all' | MaterialSupply)}>
+                <option value="all">Every route ({rows.length})</option>
+                {MATERIAL_SUPPLIES.map((s) => (
+                  <option key={s} value={s}>{SUPPLY_LABEL[s]} ({live.filter((r) => r.supply === s).length})</option>
+                ))}
+              </select>
+            </div>
+            <button className={riskOnly ? 'primary' : ''} onClick={() => setRiskOnly(!riskOnly)}>
+              {riskOnly ? 'Showing at-risk only' : `At risk (${live.filter(atRisk).length})`}
+            </button>
+          </div>
+
+          {!shown.length ? (
+            <p className="muted">Nothing matches that filter.</p>
+          ) : (
+            <div className="tblwrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cost head</th><th>Material</th><th>Make</th><th>Unit</th><th>Supply</th><th>Vendor / PO</th>
+                    <th>Ordered</th><th>Received</th><th>Balance</th>
+                    <th>Order by</th><th>Required on site</th><th>Expected</th><th>Actual (GRN)</th>
+                    <th>Status</th><th>Inspection</th><th>Storage</th><th>Consumed by</th><th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>{shown.map((r) => {
+                  const proc = r.procurementId ? procById.get(r.procurementId) ?? null : null;
+                  const procVendor = proc ? (val(proc.id, 'vendor', proc.vendor) as string) : '';
+                  const ordered = num(r.id, 'orderedQty', r.orderedQty);
+                  const received = num(r.id, 'deliveredQty', r.deliveredQty);
+                  const balance = ordered === null || received === null ? null : ordered - received;
+                  const late = r.status !== 'Delivered' && r.requiredOnSite !== null && r.requiredOnSite < today;
+                  return (
+                    <tr key={r.id} style={late ? { background: 'var(--crit-soft)' } : r.supply === 'client' ? { background: 'var(--ext-soft)' } : undefined}>
+                      <td className="muted">{r.category}</td>
+                      <td title={[r.basis, ...r.issues].join(' · ')}>
+                        {r.item}
+                        {r.issues.length > 0 && <span className="tag crit" style={{ marginLeft: 6 }}>!</span>}
+                        <div className="faint" style={{ fontSize: 11 }}>{r.leadDays}d lead</div>
+                      </td>
+                      <TextCell id={r.id} field="make" current={r.make} edit={edit} val={val} placeholder="make" />
+                      <td className="muted mono">{r.unit}</td>
+                      <td className="edit">
+                        <select value={r.supply} onChange={(e) => edit(r.id, 'supply', e.target.value)}
+                          className={`tag ${r.supply === 'client' ? 'ext' : r.supply === 'vendor' ? 'warn' : 'info'}`}>
+                          {MATERIAL_SUPPLIES.map((s) => <option key={s} value={s}>{SUPPLY_LABEL[s]}</option>)}
+                        </select>
+                      </td>
+                      <td className="edit" style={{ minWidth: 190 }}>
+                        {r.supply === 'procured' && proc ? (
+                          <div className="faint" style={{ fontSize: 11.5 }}>
+                            {procVendor || <em>vendor not appointed</em>}
+                            <div>via procurement · {proc.category} · {val(proc.id, 'orderStatus', proc.orderStatus) as string}</div>
+                          </div>
+                        ) : (
+                          <input value={val(r.id, 'vendor', r.vendor) as string}
+                            placeholder={r.supply === 'client' ? 'client contact' : 'vendor'}
+                            onChange={(e) => edit(r.id, 'vendor', e.target.value)} />
+                        )}
+                        <input value={val(r.id, 'poNumber', r.poNumber) as string} placeholder="PO / WO no."
+                          onChange={(e) => edit(r.id, 'poNumber', e.target.value)} />
+                      </td>
+                      <td className="edit"><input style={{ width: 70 }} placeholder="—" value={val(r.id, 'orderedQty', r.orderedQty === null ? '' : String(r.orderedQty)) as string}
+                        onChange={(e) => edit(r.id, 'orderedQty', e.target.value)} /></td>
+                      <td className="edit"><input style={{ width: 70 }} placeholder="—" value={val(r.id, 'deliveredQty', r.deliveredQty === null ? '' : String(r.deliveredQty)) as string}
+                        onChange={(e) => edit(r.id, 'deliveredQty', e.target.value)} /></td>
+                      <td className="mono">
+                        {balance === null ? <span className="faint">—</span>
+                          : balance > 0 ? <span className="tag warn">{balance} {r.unit}</span>
+                          : <span className="tag ok">nil</span>}
+                      </td>
+                      <td className="mono" title={r.basis}>
+                        {r.orderBy ?? '—'}
+                        {r.orderBy && r.orderBy < today && r.status === 'Not Ordered' && (
+                          <div className="faint" style={{ fontSize: 11, color: 'var(--crit)' }}>passed</div>
+                        )}
+                      </td>
+                      <td className="mono" title={r.basis}>
+                        <strong style={late ? { color: 'var(--crit)' } : undefined}>{r.requiredOnSite ?? '—'}</strong>
+                      </td>
+                      <DateCell id={r.id} field="expectedDelivery" current={r.expectedDelivery} edit={edit} val={val} />
+                      <DateCell id={r.id} field="actualDelivery" current={r.actualDelivery} edit={edit} val={val} />
+                      <td className="edit">
+                        <select value={r.status} onChange={(e) => edit(r.id, 'status', e.target.value)} className={`tag ${materialStatusClass(r.status)}`}>
+                          {MATERIAL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </td>
+                      <td className="edit">
+                        <select value={r.inspection} onChange={(e) => edit(r.id, 'inspection', e.target.value)}
+                          className={`tag ${r.inspection === 'Accepted' ? 'ok' : r.inspection === 'Rejected' ? 'crit' : r.inspection === 'Accepted with deviation' ? 'warn' : ''}`}>
+                          {MATERIAL_INSPECTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </td>
+                      <TextCell id={r.id} field="storage" current={r.storage} edit={edit} val={val} placeholder="area / bay" />
+                      <td className="faint" style={{ maxWidth: 200 }}>
+                        {r.consumedBy ?? '—'}
+                        {r.gatedBy && <div style={{ fontSize: 11 }}>gated by {r.gatedBy}</div>}
+                      </td>
+                      <TextCell id={r.id} field="remarks" current={r.remarks} edit={edit} val={val} />
+                    </tr>
+                  );
+                })}</tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
     </>
   );
