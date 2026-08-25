@@ -8,6 +8,7 @@ import { buildPlan, clientView, type ExternalDelay, type Plan } from './engine/p
 import { auditTrace, canonicalJson, validatePlan } from './engine/schema';
 import { buildPertFromPlan } from './engine/pert-build';
 import { skf } from './data/skf';
+import { skfPhase2 } from './data/skf-phase2';
 import { emirates } from './data/emirates';
 import { pendingKohler } from './data/others';
 import { kohler } from './data/kohler';
@@ -34,7 +35,7 @@ import {
 } from './services/dnbos-bridge';
 import { ProjectDashboard } from './ui/ProjectDashboard';
 
-const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
+const BASE_PROJECTS: ProjectInputs[] = [skf, skfPhase2, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
 const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material Registry', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant'] as const;
