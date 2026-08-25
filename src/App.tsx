@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
+﻿import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { CalendarConfig, EngineConfig, ProjectInputs, ScheduleDates, Traced } from './domain/types';
 import type { DesignRow, MaterialInspection, MaterialRow, MaterialStatus, MaterialSupply, TodoRow, TrackStatus, TradeWeeklySchedule } from './domain/trackers';
 import {
@@ -29,6 +29,9 @@ import { Admin } from './ui/Admin';
 import { renderReport } from './reports/render';
 import { buildDeck } from './reports/deck';
 import { syncPlanToTrackingEngine } from './services/dnbos-sync';
+import {
+  TRACKING_ENGINE_URL, buildBridgeModules, dnbosProjectId, pushPlan, pullState, pushEdits, type EditOverlay,
+} from './services/dnbos-bridge';
 import { ProjectDashboard } from './ui/ProjectDashboard';
 
 const BASE_PROJECTS: ProjectInputs[] = [skf, emirates, kohler, pendingKohler];
@@ -38,9 +41,9 @@ const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Proc
 type Tab = (typeof PROJECT_TABS)[number];
 type Screen = 'dashboard' | 'project' | 'admin' | 'settings' | 'new-project';
 
-const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+const inr = (n: number) => 'â‚¹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 const P = ({ t }: { t: Traced<number> | null }) =>
-  t ? <span className="prov" title={t.source}>{t.provenance} · {t.source.slice(0, 44)}{t.source.length > 44 ? '…' : ''}</span> : null;
+  t ? <span className="prov" title={t.source}>{t.provenance} Â· {t.source.slice(0, 44)}{t.source.length > 44 ? 'â€¦' : ''}</span> : null;
 
 const statusClass = (s: TrackStatus): string =>
   s === 'Completed' ? 'ok' : s === 'Delayed' ? 'crit' : s === 'WIP' ? 'info' : s === 'Hold' ? 'warn' : '';
@@ -59,13 +62,13 @@ export default function App() {
   const [buffer, setBuffer] = useState(normsData.bufferPolicy.defaultInternalBufferDays);
   const [leadOverrides, setLeadOverrides] = useState<Record<string, number>>({});
 
-  // Persisted, or it would be lost on every reload — see services/settings-store.ts.
+  // Persisted, or it would be lost on every reload â€” see services/settings-store.ts.
   const [clientId, setClientIdState] = useState(readDriveClientId);
   const setClientId = (v: string) => {
     setClientIdState(v);
     writeDriveClientId(v);
   };
-  // organisation directory, teams and project lifecycle — local to this machine
+  // organisation directory, teams and project lifecycle â€” local to this machine
   const [org, setOrgState] = useState<OrgState>(() => readOrg(emptyOrg()));
   const setOrg = (o: OrgState) => { setOrgState(o); writeOrg(o); };
   // user-added and user-removed to-dos, per project
@@ -73,12 +76,12 @@ export default function App() {
   const [deletedTodos, setDeletedTodos] = useState<Record<string, string[]>>({});
   // live tracker edits, keyed by project then row id
   const [edits, setEdits] = useState<Record<string, Record<string, Record<string, string>>>>({});
-  // approved AI-replan constraints, keyed by project — session-only for now: the API routes for
+  // approved AI-replan constraints, keyed by project â€” session-only for now: the API routes for
   // durable Supabase persistence exist (api/projects/create.ts, api/replan/approve.ts) but
   // aren't wired into this component yet.
   const [appliedDelays, setAppliedDelays] = useState<Record<string, ExternalDelay[]>>({});
   const [lastAppliedSummary, setLastAppliedSummary] = useState<Record<string, string>>({});
-  // AI Assistant chat history, keyed by project — same session-only, per-project pattern as
+  // AI Assistant chat history, keyed by project â€” same session-only, per-project pattern as
   // appliedDelays above. Lifted up here (rather than living inside Assistant.tsx) so it survives
   // switching tabs away and back, and correctly starts fresh / resumes when the project changes.
   const [chatByProject, setChatByProject] = useState<Record<string, ChatState>>({});
@@ -105,12 +108,12 @@ export default function App() {
   }, [sundaysOff, holidays, workMode, buffer, leadOverrides, org.dates, projectId]);
 
   // Carpet area set in project settings is an input like any other, and overrides the BOQ
-  // figure — the two are not always the same number. It carries its own provenance so the
+  // figure â€” the two are not always the same number. It carries its own provenance so the
   // difference stays traceable rather than silently replacing the document.
   const sited = useMemo(() => {
     const area = org.sites?.[project.id]?.carpetAreaSft;
     return area
-      ? { ...project, areaSft: { value: area, provenance: 'input' as const, source: 'project settings · site details (carpet area)' } }
+      ? { ...project, areaSft: { value: area, provenance: 'input' as const, source: 'project settings Â· site details (carpet area)' } }
       : project;
   }, [project, org.sites]);
   const full = useMemo(
@@ -132,11 +135,84 @@ export default function App() {
     [project.id, plan, today],
   );
 
-  const edit = (rowId: string, field: string, value: string) =>
+  // ---- the tracking engine, kept in step -------------------------------------
+  // The programme is authored here and watched there, so the two have to be one
+  // thing. `full` is used rather than `plan` deliberately: the client view nulls
+  // the internal dates and strips float, and the tracking engine is an internal
+  // surface â€” pushing a redacted plan would quietly blank the site's schedule the
+  // moment somebody here flipped to the client tab.
+  const scurveAll = useMemo(
+    () => buildSCurve(full.modules.timeline.activities, today),
+    [full, today],
+  );
+  const [bridgeAt, setBridgeAt] = useState<string | null>(null);
+  const bridgeRev = useRef(-1);
+  const projectRef = useRef(project.id);
+  projectRef.current = project.id;
+
+  /**
+   * The one place a reply from the sync store is taken in. Every call to it
+   * returns the whole state, so every reply is a chance to notice a correction
+   * made in the tracking engine.
+   *
+   * It has to be shared rather than left to the poller: a plan push also returns
+   * the current rev, and an earlier version of this recorded that rev without
+   * applying the edits attached to it. The poller then saw its own rev, decided
+   * nothing had moved, and a change made on site never appeared here. Anything
+   * that learns the rev must also apply what came with it.
+   *
+   * The overlay is compared rather than rev-gated. rev is only an optimisation;
+   * the overlay is the fact, so a missed or out-of-order reply self-corrects on
+   * the next tick instead of sticking.
+   */
+  const applyRemote = (s: Awaited<ReturnType<typeof pullState>>) => {
+    if (!s) return;
+    bridgeRev.current = s.rev;
+    if (s.pushedAt) setBridgeAt(s.pushedAt);
+    const remote = (s.edits ?? {}) as Record<string, Record<string, string>>;
+    const pid = projectRef.current;
+    setEdits((prev) => {
+      if (JSON.stringify(prev[pid] ?? {}) === JSON.stringify(remote)) return prev;
+      return { ...prev, [pid]: remote };
+    });
+  };
+
+  useEffect(() => {
+    if (full.project.status === 'pending_inputs') return;
+    const pertForPush =
+      project.id === 'emirates' ? buildEmiratesPert(today) : buildPertFromPlan(full, today);
+    let alive = true;
+    void pushPlan(project.id, sited, buildBridgeModules(full, pertForPush, scurveAll)).then((r) => {
+      if (alive) applyRemote(r);
+    });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project.id, sited, full, scurveAll, today]);
+
+  // Corrections made in the tracking engine come back here.
+  useEffect(() => {
+    let alive = true;
+    const tick = async () => {
+      const s = await pullState(projectRef.current);
+      if (alive) applyRemote(s);
+    };
+    void tick();
+    const h = setInterval(() => void tick(), 4000);
+    return () => { alive = false; clearInterval(h); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project.id]);
+
+  const edit = (rowId: string, field: string, value: string) => {
+    // applied locally first so the field answers the keystroke, then confirmed by
+    // whatever the store says the merged overlay actually is
     setEdits((prev) => ({
       ...prev,
       [project.id]: { ...(prev[project.id] ?? {}), [rowId]: { ...(prev[project.id]?.[rowId] ?? {}), [field]: value } },
     }));
+    // pushed as a single-row overlay, so two people editing different rows at the
+    // same time do not overwrite each other with a whole-table snapshot
+    void pushEdits(project.id, { [rowId]: { [field]: value } } as EditOverlay).then(applyRemote);
+  };
   const val = <T,>(rowId: string, field: string, fallback: T): T | string =>
     edits[project.id]?.[rowId]?.[field] ?? fallback;
 
@@ -265,7 +341,7 @@ export default function App() {
         <button className="ghost home-btn" onClick={goHome} title="Back to all projects">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
-        <div className="brand">DnB Planning Engine<small>v{plan.engine.version} · {plan.engine.normsVersion}</small></div>
+        <div className="brand">DnB Planning Engine<small>v{plan.engine.version} Â· {plan.engine.normsVersion}</small></div>
         <select value={projectId} onChange={(e) => { setProjectId(e.target.value); setTab('Cockpit'); }}>
           {PROJECTS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
@@ -284,7 +360,24 @@ export default function App() {
         <button onClick={() => download(`${plan.project.id}-${view}.json`, canonicalJson(plan))}>JSON</button>
         <button onClick={() => openReport(renderReport(plan, view === 'external' ? 'client' : 'internal'))}>PDF report</button>
         <button className="primary" onClick={() => void buildDeck(plan, view === 'external' ? 'client' : 'internal').writeFile({ fileName: `${plan.project.id}-${view}-deck.pptx` })}>Deck</button>
-        {!pending && <button className="track-btn" onClick={() => { syncPlanToTrackingEngine(project.id, sited, full); window.open(`/tracking/index.html?pid=${encodeURIComponent(project.id)}`, '_blank'); }}>Track</button>}
+        {bridgeAt && <span className="tag ok" title={`programme pushed to the tracking engine at ${bridgeAt}`}>tracking synced</span>}
+        {/* Opens the DnB-OS tracking engine on this same project. The push above has
+            already run, so what opens is this programme and not a stale copy. The old
+            button pointed at /tracking/index.html â€” a build of the retired shell bundled
+            into public/ â€” which has not been the engine in use for some time. */}
+        {!pending && (
+          <button
+            className="track-btn"
+            title="open this project in the DnB-OS tracking engine"
+            onClick={async () => {
+              const pertForPush = project.id === 'emirates' ? buildEmiratesPert(today) : buildPertFromPlan(full, today);
+              await pushPlan(project.id, sited, buildBridgeModules(full, pertForPush, scurveAll));
+              window.open(`${TRACKING_ENGINE_URL}?project=${encodeURIComponent(dnbosProjectId(project.id))}`, '_blank');
+            }}
+          >
+            Track â†’
+          </button>
+        )}
       </header>
 
       <nav className="tabs">
@@ -294,12 +387,12 @@ export default function App() {
       <main className="fade-in">
         {pending && (
           <div className="banner">
-            <strong>{plan.project.name} — pending inputs.</strong> No plan generated; the engine does not fabricate numbers.
+            <strong>{plan.project.name} â€” pending inputs.</strong> No plan generated; the engine does not fabricate numbers.
             Missing: {plan.missingInputs.join(', ')}. Go to the home page and use <strong>New Project</strong> to link a Drive folder and answer the intake questions.
           </div>
         )}
         {view === 'external' && !pending && (
-          <div className="banner info">Client view — anchored to contract dates. Buffer, cost, margin, float and manpower are withheld.</div>
+          <div className="banner info">Client view â€” anchored to contract dates. Buffer, cost, margin, float and manpower are withheld.</div>
         )}
 
         {tab === 'Cockpit' && (
@@ -415,7 +508,7 @@ function StatusCell({ id, field, current, edit, val }: { id: string; field: stri
 function TextCell({ id, field, current, edit, val, placeholder }: { id: string; field: string; current: string; edit: EditFn; val: ValFn; placeholder?: string }) {
   return (
     <td className="edit">
-      <input value={val(id, field, current) as string} placeholder={placeholder ?? '—'} onChange={(e) => edit(id, field, e.target.value)} />
+      <input value={val(id, field, current) as string} placeholder={placeholder ?? 'â€”'} onChange={(e) => edit(id, field, e.target.value)} />
     </td>
   );
 }
@@ -434,12 +527,12 @@ function Overview({ plan, view }: { plan: Plan; view: string }) {
     <>
       <div className="cards">
         <div className="card"><div className="k">Client</div><div className="v" style={{ fontSize: 15 }}>{plan.project.client}</div><div className="s">{plan.project.location}</div></div>
-        <div className="card"><div className="k">Area</div><div className="v">{plan.project.areaSft ? plan.project.areaSft.value.toLocaleString('en-IN') + ' sft' : '—'}</div><P t={plan.project.areaSft} /></div>
-        <div className="card"><div className="k">Contract value</div><div className="v">{plan.project.contractValue ? inr(plan.project.contractValue.value) : '—'}</div><P t={plan.project.contractValue} /></div>
-        <div className="card"><div className="k">{view === 'external' ? 'Contract finish' : 'Internal finish'}</div><div className="v">{view === 'external' ? plan.external?.end ?? '—' : plan.internal?.end ?? '—'}</div><div className="s">{view === 'external' ? 'contract baseline' : `${plan.internal?.durationWorkingDays ?? 0} working days (CPM)`}</div></div>
-        {view === 'internal' && <div className="card"><div className="k">Buffer</div><div className="v">{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div><div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH'}</div></div>}
+        <div className="card"><div className="k">Area</div><div className="v">{plan.project.areaSft ? plan.project.areaSft.value.toLocaleString('en-IN') + ' sft' : 'â€”'}</div><P t={plan.project.areaSft} /></div>
+        <div className="card"><div className="k">Contract value</div><div className="v">{plan.project.contractValue ? inr(plan.project.contractValue.value) : 'â€”'}</div><P t={plan.project.contractValue} /></div>
+        <div className="card"><div className="k">{view === 'external' ? 'Contract finish' : 'Internal finish'}</div><div className="v">{view === 'external' ? plan.external?.end ?? 'â€”' : plan.internal?.end ?? 'â€”'}</div><div className="s">{view === 'external' ? 'contract baseline' : `${plan.internal?.durationWorkingDays ?? 0} working days (CPM)`}</div></div>
+        {view === 'internal' && <div className="card"><div className="k">Buffer</div><div className="v">{plan.ieInvariant.bufferCalendarDays ?? 'â€”'} d</div><div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH'}</div></div>}
         <div className="card"><div className="k">Critical activities</div><div className="v">{m.timeline.criticalPath.length} / {m.timeline.activities.length}</div><div className="s">zero total float</div></div>
-        {view === 'internal' && <div className="card"><div className="k">Peak manpower</div><div className="v">{m.manpower.peak}</div><div className="s">avg {m.manpower.averageDaily} · smoothness {m.manpower.smoothness}</div></div>}
+        {view === 'internal' && <div className="card"><div className="k">Peak manpower</div><div className="v">{m.manpower.peak}</div><div className="s">avg {m.manpower.averageDaily} Â· smoothness {m.manpower.smoothness}</div></div>}
         <div className="card"><div className="k">Design approved</div><div className="v">{m.design.summary.percentComplete}%</div><div className="s">{m.design.summary.approved} of {m.design.summary.drawings} drawings</div></div>
         <div className="card"><div className="k">Confidence</div><div className="v">{Math.round(plan.confidence.score * 100)}%</div><div className="s">{plan.confidence.basis}</div></div>
       </div>
@@ -479,7 +572,7 @@ function PertSection({ tree, today, plan, view }: { tree: PertTree; today: strin
 }
 
 function SCurveView({ curve, today }: { curve: ReturnType<typeof buildSCurve>; today: string }) {
-  if (!curve.points.length) return <p className="muted">No schedule — inputs pending.</p>;
+  if (!curve.points.length) return <p className="muted">No schedule â€” inputs pending.</p>;
   const behind = curve.varianceToday < 0;
   return (
     <>
@@ -496,7 +589,7 @@ function SCurveView({ curve, today }: { curve: ReturnType<typeof buildSCurve>; t
       {curve.actualToday === 0 && (
         <div className="banner" style={{ marginBottom: 12 }}>
           No progress has been recorded against any activity yet, so the actual curve sits at zero. The engine will not
-          infer progress from the calendar — a date passing is not evidence that work happened.
+          infer progress from the calendar â€” a date passing is not evidence that work happened.
         </div>
       )}
       <SCurveChart curve={curve} today={today} />
@@ -524,13 +617,13 @@ function ScheduleSummary({ plan, view, today }: { plan: Plan; view: string; toda
     <div className="cards" style={{ marginBottom: 16 }}>
       <div className="card">
         <div className="k">{client ? 'Committed baseline' : 'Internal baseline'}</div>
-        <div className="v" style={{ fontSize: 15 }}>{baseStart ?? '—'} → {baseEnd ?? '—'}</div>
+        <div className="v" style={{ fontSize: 15 }}>{baseStart ?? 'â€”'} â†’ {baseEnd ?? 'â€”'}</div>
         <div className="s">{client ? 'dates the client is held to' : `${plan.internal?.durationWorkingDays ?? 0} working days (CPM)`}</div>
       </div>
       <div className="card">
         <div className="k">Time remaining</div>
         <div className="v" style={{ color: daysLeft !== null && daysLeft < 0 ? 'var(--crit)' : undefined }}>
-          {daysLeft === null ? '—' : `${daysLeft} d`}
+          {daysLeft === null ? 'â€”' : `${daysLeft} d`}
         </div>
         <div className="s">{daysLeft !== null && daysLeft < 0 ? 'past the baseline finish' : `to ${baseEnd}`}</div>
       </div>
@@ -547,15 +640,15 @@ function ScheduleSummary({ plan, view, today }: { plan: Plan; view: string; toda
       {nextMilestone && (
         <div className="card">
           <div className="k">Next milestone</div>
-          <div className="v" style={{ fontSize: 15 }}>{nextMilestone.code} · {nextMilestone.date}</div>
+          <div className="v" style={{ fontSize: 15 }}>{nextMilestone.code} Â· {nextMilestone.date}</div>
           <div className="s">{nextMilestone.percent}% of contract value</div>
         </div>
       )}
       {!client && (
         <div className="card">
           <div className="k">Buffer to client date</div>
-          <div className="v">{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div>
-          <div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH — internal finish is past the client date'}</div>
+          <div className="v">{plan.ieInvariant.bufferCalendarDays ?? 'â€”'} d</div>
+          <div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH â€” internal finish is past the client date'}</div>
         </div>
       )}
       {!client && plan.internal?.target && (
@@ -573,7 +666,7 @@ function ScheduleSummary({ plan, view, today }: { plan: Plan; view: string; toda
 
 function GanttView({ plan, view, today }: { plan: Plan; view: string; today: string }) {
   const acts = plan.modules.timeline.activities;
-  if (!acts.length) return <p className="muted">No schedule — inputs pending.</p>;
+  if (!acts.length) return <p className="muted">No schedule â€” inputs pending.</p>;
   // progress is whatever has actually been recorded against an activity, never inferred
   const progress = Object.fromEntries(
     acts.filter((a) => a.percentComplete).map((a) => [a.id, { percent: a.percentComplete!.value }]),
@@ -588,7 +681,7 @@ function GanttView({ plan, view, today }: { plan: Plan; view: string; today: str
         </div>
       )}
       <Gantt plan={plan} today={today} progress={progress} />
-      <h2>Activities {view === 'external' ? '(client view — float withheld)' : '(internal — full CPM)'}</h2>
+      <h2>Activities {view === 'external' ? '(client view â€” float withheld)' : '(internal â€” full CPM)'}</h2>
       <div className="tblwrap">
         <table>
           <thead><tr><th>#</th><th>Activity</th><th>Phase</th><th>Trade</th><th>Dur</th><th>Start</th><th>Finish</th>{view === 'internal' && <><th>Float</th><th>Crit</th></>}<th>Duration source</th></tr></thead>
@@ -613,7 +706,7 @@ function GanttView({ plan, view, today }: { plan: Plan; view: string; today: str
 
 function Manpower({ plan }: { plan: Plan }) {
   const mp = plan.modules.manpower;
-  if (!mp.days.length) return <p className="muted">Manpower loading is internal — switch to the Internal view, or inputs are pending.</p>;
+  if (!mp.days.length) return <p className="muted">Manpower loading is internal â€” switch to the Internal view, or inputs are pending.</p>;
   const trades = mp.trades.map((t) => t.trade);
   return (
     <>
@@ -631,7 +724,7 @@ function Manpower({ plan }: { plan: Plan }) {
         </div>
       )}
 
-      <h2>Contractor gangs — core team held across the engagement</h2>
+      <h2>Contractor gangs â€” core team held across the engagement</h2>
       <p className="muted" style={{ marginTop: -4, fontSize: 12.5 }}>
         Work content is levelled across each trade&apos;s window against a realistic gang cap, rather than
         summing nominal crews per active activity. That is what produced implausible spikes before.
@@ -661,7 +754,7 @@ function Manpower({ plan }: { plan: Plan }) {
           <tbody>{mp.days.map((d) => (
             <tr key={d.date}>
               <td className="mono">{d.date}</td>
-              {trades.map((t) => <td key={t} className={d.byTrade[t] ? 'mono' : 'faint'}>{d.byTrade[t] ?? '·'}</td>)}
+              {trades.map((t) => <td key={t} className={d.byTrade[t] ? 'mono' : 'faint'}>{d.byTrade[t] ?? 'Â·'}</td>)}
               <td className="mono"><strong>{d.total}</strong></td>
               <td style={{ width: 130 }}><div className="bar"><div style={{ width: `${(d.total / mp.peak) * 100}%` }} /></div></td>
             </tr>
@@ -692,7 +785,7 @@ function Resources({ plan }: { plan: Plan }) {
 function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
   const { rows, summary } = plan.modules.design;
   const [cat, setCat] = useState<'all' | DesignRow['category']>('all');
-  if (!rows.length) return <p className="muted">No design tracker — inputs pending.</p>;
+  if (!rows.length) return <p className="muted">No design tracker â€” inputs pending.</p>;
   const shown = cat === 'all' ? rows : rows.filter((r) => r.category === cat);
   return (
     <>
@@ -712,7 +805,7 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
         <span className="muted" style={{ fontSize: 12, maxWidth: 640 }}>
           Two targets only: when the drawing is ready to issue, and when the client must have approved it. Both are
           back-scheduled from the site activity the drawing releases, then re-timed so no drawing is approved after
-          something drawn from it is issued — a partition layout cannot precede the furniture layout it is set out from.
+          something drawn from it is issued â€” a partition layout cannot precede the furniture layout it is set out from.
         </span>
       </div>
 
@@ -722,7 +815,7 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
           <div className="banner" style={{ marginBottom: 12 }}>
             <strong>{flagged.length} drawing deadline{flagged.length === 1 ? '' : 's'} will not work as scheduled.</strong>
             <ul style={{ margin: '6px 0 0 18px', padding: 0 }}>
-              {flagged.slice(0, 5).map((r) => <li key={r.id}><strong>{r.drawingName}</strong> — {r.issues[0]}</li>)}
+              {flagged.slice(0, 5).map((r) => <li key={r.id}><strong>{r.drawingName}</strong> â€” {r.issues[0]}</li>)}
             </ul>
             {flagged.length > 5 && <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>+{flagged.length - 5} more, marked in the table.</div>}
           </div>
@@ -742,18 +835,18 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
             <tr key={r.id}>
               <td><span className={`tag ${r.category === 'MEP' ? 'ext' : r.category === 'SAMPLING' ? 'warn' : 'info'}`}>{r.category}</span></td>
               <td className="muted">{r.subCategory}</td>
-              <td className="muted">{r.zone ?? '—'}</td>
+              <td className="muted">{r.zone ?? 'â€”'}</td>
               <td title={r.issues.join(' ')}>
                 {r.drawingName}
                 {r.issues.length > 0 && <span className="tag crit" style={{ marginLeft: 6 }}>!</span>}
               </td>
               <td><span className={`tag ${r.criticality === 'Very Critical' ? 'crit' : r.criticality === 'High' ? 'warn' : ''}`}>{r.criticality}</span></td>
               <TextCell id={r.id} field="revision" current={r.revision} edit={edit} val={val} />
-              <td className="mono" title={r.basis}>{r.readyBy ?? '—'}</td>
+              <td className="mono" title={r.basis}>{r.readyBy ?? 'â€”'}</td>
               <StatusCell id={r.id} field="statusInt" current={r.statusInt} edit={edit} val={val} />
-              <td className="mono" title={r.basis}>{r.approvalBy ?? '—'}</td>
+              <td className="mono" title={r.basis}>{r.approvalBy ?? 'â€”'}</td>
               <StatusCell id={r.id} field="statusClient" current={r.statusClient} edit={edit} val={val} />
-              <td className="faint" style={{ maxWidth: 220 }}>{r.releases.slice(0, 2).join(', ') || '—'}</td>
+              <td className="faint" style={{ maxWidth: 220 }}>{r.releases.slice(0, 2).join(', ') || 'â€”'}</td>
             </tr>
           ))}</tbody>
         </table>
@@ -766,7 +859,7 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
   const all = plan.modules.procurement;
   const [longLeadOnly, setLongLeadOnly] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
-  if (!all.length) return <p className="muted">No procurement tracker — inputs pending.</p>;
+  if (!all.length) return <p className="muted">No procurement tracker â€” inputs pending.</p>;
   const longLead = all.filter((i) => i.longLead);
   const items = longLeadOnly ? longLead : all;
   const overdue = all.filter((i) => i.orderBy && i.orderBy < today).length;
@@ -793,11 +886,11 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
       {longLeadOverdue > 0 && (
         <div className="banner" style={{ marginBottom: 12 }}>
           <strong>{longLeadOverdue} long-lead package{longLeadOverdue === 1 ? '' : 's'} are already past their order-by date.</strong>{' '}
-          {longLead.filter((i) => i.orderBy && i.orderBy < today).map((i) => `${i.category} (${i.leadDays}d lead, order-by ${i.orderBy})`).join(' · ')}
+          {longLead.filter((i) => i.orderBy && i.orderBy < today).map((i) => `${i.category} (${i.leadDays}d lead, order-by ${i.orderBy})`).join(' Â· ')}
         </div>
       )}
 
-      <h2>Package plan — order and delivery dates</h2>
+      <h2>Package plan â€” order and delivery dates</h2>
       <p className="muted" style={{ marginTop: -4, fontSize: 12.5 }}>
         Commercial values are deliberately not shown here. Order-by is derived from the delivery date the
         programme needs, less the lead time; each package also shows the design approval that gates it.
@@ -832,7 +925,7 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
                   const late = d !== null && d < 0;
                   return (
                     <>
-                      <strong style={late ? { color: 'var(--crit)' } : i.longLead ? { color: 'var(--ext)' } : undefined}>{i.orderBy ?? '—'}</strong>
+                      <strong style={late ? { color: 'var(--crit)' } : i.longLead ? { color: 'var(--ext)' } : undefined}>{i.orderBy ?? 'â€”'}</strong>
                       {d !== null && (
                         <div className="faint" style={{ fontSize: 11, color: late ? 'var(--crit)' : undefined }}>
                           {late ? `${Math.abs(d)}d overdue` : `in ${d}d`}
@@ -842,7 +935,7 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
                   );
                 })()}
               </td>
-              <td className="mono">{i.deliveryRequired ?? '—'}</td>
+              <td className="mono">{i.deliveryRequired ?? 'â€”'}</td>
               <DateCell id={i.id} field="revised" current={i.revisedDate} edit={edit} val={val} />
               {view === 'internal' && <TextCell id={i.id} field="vendor" current={i.vendor} edit={edit} val={val} placeholder="vendor" />}
               <td className="edit">
@@ -856,8 +949,8 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
                 </select>
               </td>
               <TextCell id={i.id} field="responsibility" current={i.responsibility} edit={edit} val={val} />
-              <td className="faint" style={{ maxWidth: 200 }}>{i.gatedBy ?? '—'}</td>
-              <td className="faint" style={{ maxWidth: 200 }}>{i.feeds ?? '—'}</td>
+              <td className="faint" style={{ maxWidth: 200 }}>{i.gatedBy ?? 'â€”'}</td>
+              <td className="faint" style={{ maxWidth: 200 }}>{i.feeds ?? 'â€”'}</td>
               {view === 'internal' && <TextCell id={i.id} field="remarks" current={i.remarks} edit={edit} val={val} />}
             </tr>
           ))}</tbody>
@@ -871,17 +964,17 @@ const materialStatusClass = (s: MaterialStatus): string =>
   s === 'Delivered' ? 'ok' : s === 'In Transit' ? 'info' : s === 'Partially Delivered' ? 'warn' : s === 'Returned' ? 'crit' : '';
 
 /**
- * Material tracker at site — one level below the procurement packages.
+ * Material tracker at site â€” one level below the procurement packages.
  *
  * Procurement plans the package: "Electrical, order by 12-Jun, on site by 30-Jun". Site does
  * not receive a package. It receives gypsum boards, ply, wire drums, GI ducting and
- * workstations, each with its own lead time, its own vendor and its own delivery note — and a
+ * workstations, each with its own lead time, its own vendor and its own delivery note â€” and a
  * package reading "Partially Delivered" never says which of those the floor is waiting on.
  *
  * Every row states how the material arrives. Bought on our own PO, and the vendor is then read
  * live off the procurement row that raises it rather than typed twice; supplied by the work
  * contractor against their own PO; or free-issued by the client. Quantities, GRN dates, storage
- * and inspection are entered by site — the engine computes the dates and the links, nothing else.
+ * and inspection are entered by site â€” the engine computes the dates and the links, nothing else.
  */
 function Materials({
   plan, view, today, edit, val,
@@ -911,13 +1004,13 @@ function Materials({
   );
 
   if (!rows.length)
-    return <p className="muted">No material register — the programme has not been generated yet.</p>;
+    return <p className="muted">No material register â€” the programme has not been generated yet.</p>;
 
   if (view === 'external')
     return (
       <>
         <div className="banner info" style={{ marginBottom: 14 }}>
-          The site material register — vendors, purchase orders, storage bays and goods-received notes — is an
+          The site material register â€” vendors, purchase orders, storage bays and goods-received notes â€” is an
           internal working document. What is shown here is the material <strong>you supply to us</strong>, with the
           date each has to be on site for the programme to hold.
         </div>
@@ -929,9 +1022,9 @@ function Materials({
               <tr key={r.id}>
                 <td>{r.item}</td>
                 <td className="muted">{r.unit}</td>
-                <td className="mono">{r.requiredOnSite ?? '—'}</td>
+                <td className="mono">{r.requiredOnSite ?? 'â€”'}</td>
                 <td><span className={`tag ${materialStatusClass(r.status)}`}>{r.status}</span></td>
-                <td className="faint" style={{ maxWidth: 240 }}>{r.consumedBy ?? '—'}</td>
+                <td className="faint" style={{ maxWidth: 240 }}>{r.consumedBy ?? 'â€”'}</td>
               </tr>
             ))}</tbody>
           </table>
@@ -973,11 +1066,11 @@ function Materials({
         <div className="card" style={{ borderColor: 'var(--ext)' }}>
           <div className="k">Client free issue</div>
           <div className="v" style={{ color: 'var(--ext)' }}>{summary.clientSupplied}</div>
-          <div className="s">not on our PO — chase the client</div>
+          <div className="s">not on our PO â€” chase the client</div>
         </div>
         <div className="card">
           <div className="k">Next required</div>
-          <div className="v" style={{ fontSize: 14 }}>{summary.nextRequired ? summary.nextRequired.requiredOnSite : '—'}</div>
+          <div className="v" style={{ fontSize: 14 }}>{summary.nextRequired ? summary.nextRequired.requiredOnSite : 'â€”'}</div>
           <div className="s">{summary.nextRequired ? summary.nextRequired.item : 'everything received'}</div>
         </div>
       </div>
@@ -988,8 +1081,8 @@ function Materials({
           <ul style={{ margin: '6px 0 0 18px', padding: 0 }}>
             {short.slice(0, 5).map((r) => (
               <li key={r.id}>
-                <strong>{r.item}</strong> — needed {r.requiredOnSite} for {r.consumedBy ?? 'site'}
-                {r.supply === 'client' ? ' · client free issue' : r.supply === 'vendor' ? ' · vendor supplied' : ''}
+                <strong>{r.item}</strong> â€” needed {r.requiredOnSite} for {r.consumedBy ?? 'site'}
+                {r.supply === 'client' ? ' Â· client free issue' : r.supply === 'vendor' ? ' Â· vendor supplied' : ''}
               </li>
             ))}
           </ul>
@@ -1054,13 +1147,13 @@ function Materials({
                               <td className="muted mono">{r.unit}</td>
                               <td className="mono">{r.leadDays}d</td>
                               <td className="mono">
-                                {r.orderBy ?? '—'}
+                                {r.orderBy ?? 'â€”'}
                                 {r.orderBy && r.orderBy < today && r.status === 'Not Ordered' && (
                                   <div className="faint" style={{ fontSize: 11, color: 'var(--crit)' }}>passed</div>
                                 )}
                               </td>
                               <td className="mono">
-                                <strong style={late ? { color: 'var(--crit)' } : undefined}>{r.requiredOnSite ?? '—'}</strong>
+                                <strong style={late ? { color: 'var(--crit)' } : undefined}>{r.requiredOnSite ?? 'â€”'}</strong>
                               </td>
                               <td>
                                 <span className={`tag ${r.supply === 'client' ? 'ext' : r.supply === 'vendor' ? 'warn' : 'info'}`}>
@@ -1070,7 +1163,7 @@ function Materials({
                               <td>
                                 <span className={`tag ${materialStatusClass(r.status)}`}>{r.status}</span>
                               </td>
-                              <td className="faint" style={{ maxWidth: 200, fontSize: 12 }}>{r.consumedBy ?? '—'}</td>
+                              <td className="faint" style={{ maxWidth: 200, fontSize: 12 }}>{r.consumedBy ?? 'â€”'}</td>
                             </tr>
                           );
                         }),
@@ -1088,7 +1181,7 @@ function Materials({
         <>
           <h2>Material delivery register</h2>
           <p className="muted" style={{ marginTop: -4, fontSize: 12.5, maxWidth: 900 }}>
-            Each material is dated against the activity that consumes it — on site two days before that activity starts,
+            Each material is dated against the activity that consumes it â€” on site two days before that activity starts,
             ordered that many days earlier again for its own lead time. Quantities, delivery dates, storage and
             inspection are recorded by site; the engine does not invent what was unloaded.
           </p>
@@ -1139,7 +1232,7 @@ function Materials({
                   return (
                     <tr key={r.id} style={late ? { background: 'var(--crit-soft)' } : r.supply === 'client' ? { background: 'var(--ext-soft)' } : undefined}>
                       <td className="muted">{r.category}</td>
-                      <td title={[r.basis, ...r.issues].join(' · ')}>
+                      <td title={[r.basis, ...r.issues].join(' Â· ')}>
                         {r.item}
                         {r.issues.length > 0 && <span className="tag crit" style={{ marginLeft: 6 }}>!</span>}
                         <div className="faint" style={{ fontSize: 11 }}>{r.leadDays}d lead</div>
@@ -1156,7 +1249,7 @@ function Materials({
                         {r.supply === 'procured' && proc ? (
                           <div className="faint" style={{ fontSize: 11.5 }}>
                             {procVendor || <em>vendor not appointed</em>}
-                            <div>via procurement · {proc.category} · {val(proc.id, 'orderStatus', proc.orderStatus) as string}</div>
+                            <div>via procurement Â· {proc.category} Â· {val(proc.id, 'orderStatus', proc.orderStatus) as string}</div>
                           </div>
                         ) : (
                           <input value={val(r.id, 'vendor', r.vendor) as string}
@@ -1166,23 +1259,23 @@ function Materials({
                         <input value={val(r.id, 'poNumber', r.poNumber) as string} placeholder="PO / WO no."
                           onChange={(e) => edit(r.id, 'poNumber', e.target.value)} />
                       </td>
-                      <td className="edit"><input style={{ width: 70 }} placeholder="—" value={val(r.id, 'orderedQty', r.orderedQty === null ? '' : String(r.orderedQty)) as string}
+                      <td className="edit"><input style={{ width: 70 }} placeholder="â€”" value={val(r.id, 'orderedQty', r.orderedQty === null ? '' : String(r.orderedQty)) as string}
                         onChange={(e) => edit(r.id, 'orderedQty', e.target.value)} /></td>
-                      <td className="edit"><input style={{ width: 70 }} placeholder="—" value={val(r.id, 'deliveredQty', r.deliveredQty === null ? '' : String(r.deliveredQty)) as string}
+                      <td className="edit"><input style={{ width: 70 }} placeholder="â€”" value={val(r.id, 'deliveredQty', r.deliveredQty === null ? '' : String(r.deliveredQty)) as string}
                         onChange={(e) => edit(r.id, 'deliveredQty', e.target.value)} /></td>
                       <td className="mono">
-                        {balance === null ? <span className="faint">—</span>
+                        {balance === null ? <span className="faint">â€”</span>
                           : balance > 0 ? <span className="tag warn">{balance} {r.unit}</span>
                           : <span className="tag ok">nil</span>}
                       </td>
                       <td className="mono" title={r.basis}>
-                        {r.orderBy ?? '—'}
+                        {r.orderBy ?? 'â€”'}
                         {r.orderBy && r.orderBy < today && r.status === 'Not Ordered' && (
                           <div className="faint" style={{ fontSize: 11, color: 'var(--crit)' }}>passed</div>
                         )}
                       </td>
                       <td className="mono" title={r.basis}>
-                        <strong style={late ? { color: 'var(--crit)' } : undefined}>{r.requiredOnSite ?? '—'}</strong>
+                        <strong style={late ? { color: 'var(--crit)' } : undefined}>{r.requiredOnSite ?? 'â€”'}</strong>
                       </td>
                       <DateCell id={r.id} field="expectedDelivery" current={r.expectedDelivery} edit={edit} val={val} />
                       <DateCell id={r.id} field="actualDelivery" current={r.actualDelivery} edit={edit} val={val} />
@@ -1199,7 +1292,7 @@ function Materials({
                       </td>
                       <TextCell id={r.id} field="storage" current={r.storage} edit={edit} val={val} placeholder="area / bay" />
                       <td className="faint" style={{ maxWidth: 200 }}>
-                        {r.consumedBy ?? '—'}
+                        {r.consumedBy ?? 'â€”'}
                         {r.gatedBy && <div style={{ fontSize: 11 }}>gated by {r.gatedBy}</div>}
                       </td>
                       <TextCell id={r.id} field="remarks" current={r.remarks} edit={edit} val={val} />
@@ -1218,7 +1311,7 @@ function Materials({
 /**
  * The general project to-do list.
  *
- * It used to fold in every activity, PO and drawing in the next three weeks — over a hundred
+ * It used to fold in every activity, PO and drawing in the next three weeks â€” over a hundred
  * rows restating the PERT, Procurement and Design tabs, which made it unreadable. Those rows
  * are still available behind a toggle, but the default is the general list: the standard
  * mobilisation checklist plus whatever the team adds. Rows can be added and removed here.
@@ -1253,7 +1346,7 @@ function Todos({
   if (view === 'external')
     return (
       <div className="banner info">
-        The to-do list is an internal working register — mobilisation tasks, site actions and PO chases — so it is
+        The to-do list is an internal working register â€” mobilisation tasks, site actions and PO chases â€” so it is
         withheld from the client view. Switch to <strong>Internal</strong> to see and edit it.
       </div>
     );
@@ -1267,7 +1360,7 @@ function Todos({
         </div>
         <span className="muted" style={{ fontSize: 12, maxWidth: 560 }}>
           {showDerived
-            ? 'Schedule-derived rows also appear in the PERT, Procurement and Design tabs — shown here only when you ask.'
+            ? 'Schedule-derived rows also appear in the PERT, Procurement and Design tabs â€” shown here only when you ask.'
             : 'The tasks that are not derivable from the schedule. Add your own below.'}
         </span>
         {deleted.size > 0 && <button onClick={onRestore}>Restore {deleted.size} removed</button>}
@@ -1319,10 +1412,10 @@ function Todos({
                   </select>
                 </td>
                 <StatusCell id={r.id} field="status" current={r.status} edit={edit} val={val} />
-                <td className="mono">{r.endDate ?? '—'}</td>
+                <td className="mono">{r.endDate ?? 'â€”'}</td>
                 <DateCell id={r.id} field="revised" current={r.revisedDate} edit={edit} val={val} />
                 <TextCell id={r.id} field="notes" current={r.notes} edit={edit} val={val} />
-                <td><button title="Remove from the list" onClick={() => onDelete(r.id)}>✕</button></td>
+                <td><button title="Remove from the list" onClick={() => onDelete(r.id)}>âœ•</button></td>
               </tr>
             ))}</tbody>
           </table>
@@ -1334,7 +1427,7 @@ function Todos({
 
 function Dependencies({ plan, today, edit, val }: { plan: Plan; today: string; edit: EditFn; val: ValFn }) {
   const rows = plan.modules.dependencies;
-  if (!rows.length) return <p className="muted">No dependency tracker — inputs pending.</p>;
+  if (!rows.length) return <p className="muted">No dependency tracker â€” inputs pending.</p>;
   const open = rows.filter((r) => r.status !== 'Completed').length;
   return (
     <>
@@ -1356,9 +1449,9 @@ function Dependencies({ plan, today, edit, val }: { plan: Plan; today: string; e
                 <td><span className="tag">{r.area}</span></td>
                 <td>{r.description}</td>
                 <TextCell id={r.id} field="responsibility" current={r.responsibility} edit={edit} val={val} />
-                <td className="mono">{r.planDate ?? '—'}</td>
+                <td className="mono">{r.planDate ?? 'â€”'}</td>
                 <DateCell id={r.id} field="actual" current={r.actualDate} edit={edit} val={val} />
-                <td className="mono">{d === null ? '—' : d > 0 ? <span className="tag crit">{d}d</span> : <span className="tag ok">on time</span>}</td>
+                <td className="mono">{d === null ? 'â€”' : d > 0 ? <span className="tag crit">{d}d</span> : <span className="tag ok">on time</span>}</td>
                 <StatusCell id={r.id} field="status" current={r.status} edit={edit} val={val} />
                 <TextCell id={r.id} field="remarks" current={r.remarks} edit={edit} val={val} />
               </tr>
@@ -1371,7 +1464,7 @@ function Dependencies({ plan, today, edit, val }: { plan: Plan; today: string; e
 }
 
 /**
- * RA billing milestones — replaces the cashflow curve.
+ * RA billing milestones â€” replaces the cashflow curve.
  *
  * The point is that a milestone is only billable when the physical work named in the contract
  * clause is actually done, so each clause is a row the project team ticks off. Readiness is
@@ -1386,7 +1479,7 @@ function RaMilestones({
 }) {
   const rows = plan.modules.raMilestones;
   const [open, setOpen] = useState<Set<string>>(new Set());
-  if (!rows.length) return <p className="muted">No billing milestones — the contract payment terms have not been read yet.</p>;
+  if (!rows.length) return <p className="muted">No billing milestones â€” the contract payment terms have not been read yet.</p>;
 
   const statusOf = (r: (typeof rows)[number]) => String(val(r.id, 'status', r.status)) as TrackStatus;
   const cpStatusOf = (c: { id: string; status: TrackStatus }) => String(val(c.id, 'status', c.status)) as TrackStatus;
@@ -1412,15 +1505,15 @@ function RaMilestones({
         </div>
         <div className="card">
           <div className="k">Next due</div>
-          <div className="v" style={{ fontSize: 16 }}>{next ? next.code : '—'}</div>
-          <div className="s">{next ? `${next.dueDate} · ${readinessOf(next)}% ready` : 'all billed'}</div>
+          <div className="v" style={{ fontSize: 16 }}>{next ? next.code : 'â€”'}</div>
+          <div className="s">{next ? `${next.dueDate} Â· ${readinessOf(next)}% ready` : 'all billed'}</div>
         </div>
       </div>
 
       <h2>RA milestone tracker</h2>
       <p className="muted" style={{ marginTop: -6, maxWidth: 860 }}>
         The payment schedule in its working format: each RA expands into the milestones the contract requires, and
-        each milestone into its sub-milestones. Tick a sub-milestone when site confirms it — readiness is the share
+        each milestone into its sub-milestones. Tick a sub-milestone when site confirms it â€” readiness is the share
         complete, so an RA never reads as billable just because its date arrived. Invoiced and received figures are
         entered by the team; the engine has no way to know what a client actually paid.
       </p>
@@ -1451,22 +1544,22 @@ function RaMilestones({
                         style={{ padding: '0 6px', boxShadow: 'none' }}
                         onClick={() => setOpen((p) => { const n = new Set(p); if (n.has(r.id)) n.delete(r.id); else n.add(r.id); return n; })}
                       >
-                        {isOpen ? '▾' : '▸'}
+                        {isOpen ? 'â–¾' : 'â–¸'}
                       </button>
                     </td>
                     <td><strong>{r.code}</strong></td>
                     <td className="mono">{r.dayOffset}</td>
                     <td className="mono">{r.percent}%</td>
                     {view === 'internal' && <>
-                      <td className="mono">{r.amount == null ? '—' : inr(r.amount)}</td>
-                      <td className="mono faint">{r.amountIncTax == null ? '—' : inr(r.amountIncTax)}</td>
-                      <td className="mono faint">{r.postRetention == null ? '—' : inr(r.postRetention)}</td>
+                      <td className="mono">{r.amount == null ? 'â€”' : inr(r.amount)}</td>
+                      <td className="mono faint">{r.amountIncTax == null ? 'â€”' : inr(r.amountIncTax)}</td>
+                      <td className="mono faint">{r.postRetention == null ? 'â€”' : inr(r.postRetention)}</td>
                     </>}
                     <td className="mono">{r.dueDate}</td>
                     <td><input type="date" value={String(val(r.id, 'revisedDate', r.revisedDate ?? ''))} onChange={(e) => edit(r.id, 'revisedDate', e.target.value)} /></td>
                     <td style={{ minWidth: 110 }}>
                       <div className="bar"><div style={{ width: `${ready}%`, background: ready === 100 ? 'var(--ok)' : 'var(--accent)' }} /></div>
-                      <span className="faint" style={{ fontSize: 11 }}>{ready}% · {r.checkpoints.length} sub-milestones</span>
+                      <span className="faint" style={{ fontSize: 11 }}>{ready}% Â· {r.checkpoints.length} sub-milestones</span>
                     </td>
                     <td>
                       <select value={statusOf(r)} onChange={(e) => edit(r.id, 'status', e.target.value)}>
@@ -1489,7 +1582,7 @@ function RaMilestones({
                             {idx === 0 ? group : ''}
                           </td>
                           <td colSpan={view === 'internal' ? 4 : 1}>{c.description}</td>
-                          <td className="mono faint">{c.plannedDate ?? '—'}</td>
+                          <td className="mono faint">{c.plannedDate ?? 'â€”'}</td>
                           <td><input type="date" value={String(val(c.id, 'actualDate', c.actualDate ?? ''))} onChange={(e) => edit(c.id, 'actualDate', e.target.value)} /></td>
                           <td className="faint" style={{ fontSize: 11 }}>{c.activityName ?? ''}</td>
                           <td>
@@ -1567,13 +1660,13 @@ function Settings(p: {
           </select>
         </div>
         <div className="field">
-          <label>Internal buffer (working days) {normsData.bufferPolicy.min}–{normsData.bufferPolicy.max}</label>
+          <label>Internal buffer (working days) {normsData.bufferPolicy.min}â€“{normsData.bufferPolicy.max}</label>
           <input type="number" min={normsData.bufferPolicy.min} max={normsData.bufferPolicy.max} value={p.buffer} onChange={(e) => p.setBuffer(Number(e.target.value))} />
         </div>
       </div>
 
       <div className="banner info" style={{ maxWidth: 900, marginBottom: 18 }}>
-        Project dates moved to <strong>Project settings → Schedule dates</strong>. They are per project and a change
+        Project dates moved to <strong>Project settings â†’ Schedule dates</strong>. They are per project and a change
         now needs BU Head approval before the plan is recomputed, so they no longer belong in global settings.
       </div>
 
@@ -1593,15 +1686,15 @@ function Settings(p: {
             <ol style={{ margin: '8px 0 6px 18px', padding: 0, lineHeight: 1.7 }}>
               <li>Create/pick a project at <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noreferrer">console.cloud.google.com</a>.</li>
               <li><a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noreferrer">Enable the Google Drive API</a>.</li>
-              <li><strong>Google Auth Platform → Branding</strong> → name the app, give a support email.</li>
-              <li><strong>Audience</strong> → <em>Internal</em> for a Workspace account, else <em>External</em> and add your own Google address under <strong>Test users</strong>.</li>
-              <li><strong>Clients → Create client → Web application</strong>.</li>
-              <li><strong>Authorised JavaScript origins</strong> → add exactly <code>{typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'}</code></li>
+              <li><strong>Google Auth Platform â†’ Branding</strong> â†’ name the app, give a support email.</li>
+              <li><strong>Audience</strong> â†’ <em>Internal</em> for a Workspace account, else <em>External</em> and add your own Google address under <strong>Test users</strong>.</li>
+              <li><strong>Clients â†’ Create client â†’ Web application</strong>.</li>
+              <li><strong>Authorised JavaScript origins</strong> â†’ add exactly <code>{typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'}</code></li>
               <li>Paste the client ID above.</li>
             </ol>
-            Scope is <code>drive.readonly</code>, which Google treats as restricted — fine while the app stays in
-            <em> Testing</em>, but an External app will show an “unverified app” screen (Advanced → Go to…).
-            Until then, the New project tab reads a folder straight off this computer — no setup, same steps.
+            Scope is <code>drive.readonly</code>, which Google treats as restricted â€” fine while the app stays in
+            <em> Testing</em>, but an External app will show an â€œunverified appâ€ screen (Advanced â†’ Go toâ€¦).
+            Until then, the New project tab reads a folder straight off this computer â€” no setup, same steps.
           </>
         )}
       </div>
@@ -1621,7 +1714,7 @@ function Settings(p: {
         <pre className="json" style={{ marginTop: 10, maxHeight: '50vh', overflow: 'auto' }}>{canonicalJson(p.plan)}</pre>
       </details>
 
-      <h2 style={{ marginTop: 26 }}>Upload a priced BOQ into “{p.project.name}”</h2>
+      <h2 style={{ marginTop: 26 }}>Upload a priced BOQ into â€œ{p.project.name}â€</h2>
       <div className="row">
         <input type="file" accept=".xlsx,.xls,.csv,.tsv,.txt" onChange={(e) => { const f = e.target.files?.[0]; if (f) void handle(f); }} />
         <button onClick={p.onSaveWorkspace}>Save workspace (JSON)</button>
@@ -1630,10 +1723,10 @@ function Settings(p: {
       {p.ingestResult && (
         <>
           <div className="cards" style={{ marginTop: 14 }}>
-            <div className="card"><div className="k">File</div><div className="v" style={{ fontSize: 13 }}>{p.ingestResult.file}</div><div className="s">{p.ingestResult.boq.rowsScanned} rows · {p.ingestResult.boq.rowsSkipped} skipped</div></div>
+            <div className="card"><div className="k">File</div><div className="v" style={{ fontSize: 13 }}>{p.ingestResult.file}</div><div className="s">{p.ingestResult.boq.rowsScanned} rows Â· {p.ingestResult.boq.rowsSkipped} skipped</div></div>
             <div className="card"><div className="k">Packages</div><div className="v">{p.ingestResult.boq.packages.length}</div></div>
-            <div className="card"><div className="k">Area</div><div className="v">{p.ingestResult.boq.areaSft ? p.ingestResult.boq.areaSft.value.toLocaleString('en-IN') + ' sft' : '—'}</div></div>
-            <div className="card"><div className="k">Grand total</div><div className="v">{p.ingestResult.boq.contractValue ? inr(p.ingestResult.boq.contractValue.value) : '—'}</div></div>
+            <div className="card"><div className="k">Area</div><div className="v">{p.ingestResult.boq.areaSft ? p.ingestResult.boq.areaSft.value.toLocaleString('en-IN') + ' sft' : 'â€”'}</div></div>
+            <div className="card"><div className="k">Grand total</div><div className="v">{p.ingestResult.boq.contractValue ? inr(p.ingestResult.boq.contractValue.value) : 'â€”'}</div></div>
           </div>
           {p.ingestResult.boq.warnings.length > 0 && (
             <div className="banner"><strong>Parser notes</strong><ul>{p.ingestResult.boq.warnings.map((w, i) => <li key={i}>{w}</li>)}</ul></div>
@@ -1641,7 +1734,7 @@ function Settings(p: {
         </>
       )}
 
-      <h2>Norms — package lead times ({normsData.version})</h2>
+      <h2>Norms â€” package lead times ({normsData.version})</h2>
       <p className="muted" style={{ marginTop: -4, fontSize: 12.5 }}>Norms are versioned data, not code. Editing here re-drives every order-by date.</p>
       <div className="tblwrap" style={{ maxHeight: 340 }}>
         <table>
@@ -1673,7 +1766,7 @@ function Settings(p: {
         <table>
           <thead><tr><th>Material</th><th>Make</th><th>Days</th><th>Source</th></tr></thead>
           <tbody>{normsData.materialLeadTimesDays.map((m) => (
-            <tr key={m.item}><td>{m.item}</td><td className="muted">{m.make || '—'}</td><td className="mono">{m.days}</td><td className="prov">{m.source}</td></tr>
+            <tr key={m.item}><td>{m.item}</td><td className="muted">{m.make || 'â€”'}</td><td className="mono">{m.days}</td><td className="prov">{m.source}</td></tr>
           ))}</tbody>
         </table>
       </div>

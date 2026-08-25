@@ -89,6 +89,17 @@ export default defineConfig({
         followRedirects: true,
         rewrite: (p) => p.replace(/^\/gdocs/, ''),
       },
+      // The DnB-OS tracking engine (tools/serve-engine.js) holds the sync store the
+      // two apps share. It runs on its own port, so calling it directly would be
+      // cross-origin: a preflight on every JSON POST, and a hard failure the moment
+      // this app is served from anywhere but localhost. Proxying keeps the browser
+      // on its own origin and takes CORS out of the picture entirely.
+      // Set VITE_DNBOS_ORIGIN if the engine is not on 8901.
+      '/dnbos': {
+        target: process.env.VITE_DNBOS_ORIGIN || 'http://localhost:8901',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/dnbos/, ''),
+      },
     },
   },
 });
