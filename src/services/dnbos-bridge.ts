@@ -80,6 +80,9 @@ export interface BridgeModules {
   manpower: Plan['modules']['manpower'];
   procurement: Plan['modules']['procurement'];
   design: Plan['modules']['design'];
+  /** the mobilisation checklist, including the schedule-derived rows so the
+      tracking engine can offer the same "show derived" toggle this app does */
+  todos: Plan['modules']['todos'];
   /** the headline figures the tracking engine prints above the programme */
   summary: {
     internalStart: string | null; internalEnd: string | null;
@@ -112,6 +115,7 @@ export function buildBridgeModules(plan: Plan, pert: PertTree, scurve: SCurve): 
     manpower: plan.modules.manpower,
     procurement: plan.modules.procurement,
     design: plan.modules.design,
+    todos: plan.modules.todos,
     summary: {
       internalStart: plan.internal?.start ?? null,
       internalEnd: plan.internal?.end ?? null,
