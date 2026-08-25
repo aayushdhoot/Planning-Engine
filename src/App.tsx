@@ -784,9 +784,26 @@ function Resources({ plan }: { plan: Plan }) {
 }
 
 function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
-  const { rows, summary } = plan.modules.design;
+  const { rows } = plan.modules.design;
   const [cat, setCat] = useState<'all' | DesignRow['category']>('all');
   if (!rows.length) return <p className="muted">No design tracker — inputs pending.</p>;
+  /**
+   * The cards count what the table shows.
+   *
+   * They printed `design.summary`, which the planner computes from the rows as
+   * ISSUED — before anyone, here or on site, has set a status. So a screen where
+   * nineteen drawings read "Completed" in the table still headlined "Approved 0",
+   * and the two halves of one screen disagreed about the same rows. The summary
+   * is the opening position; the edit overlay is what has happened since, and a
+   * count of progress has to include it.
+   */
+  const approved = rows.filter((r) => val(r.id, 'statusClient', r.statusClient) === 'Completed').length;
+  const summary = {
+    drawings: rows.length,
+    approved,
+    pending: rows.length - approved,
+    percentComplete: rows.length ? Math.round((approved / rows.length) * 100) : 0,
+  };
   const shown = cat === 'all' ? rows : rows.filter((r) => r.category === cat);
   return (
     <>

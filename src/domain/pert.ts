@@ -79,7 +79,21 @@ export function rollUp(nodes: PertNode[], today: string): PertNode[] {
         n.children.reduce((s, c) => s + c.percentComplete * Math.max(1, c.durationDays), 0) / totalW,
       );
     } else {
-      n.percentComplete = n.actualFinish ? 100 : n.actualStart ? 50 : 0;
+      // A leaf's percent comes from its actual dates: finished is 100, started
+      // but unfinished is 50, untouched is 0.
+      //
+      // The exception is a leaf the builder has already given a real recorded
+      // figure. Overwriting that with the 50 that stands for "somewhere in the
+      // middle" reported a 20%-complete activity as half done — and the S-curve,
+      // which reads the same source directly, then disagreed with the PERT about
+      // the same activity on the same screen. A number somebody recorded beats a
+      // placeholder for one.
+      const recorded = n.percentComplete;
+      n.percentComplete = n.actualFinish
+        ? 100
+        : recorded > 0 && recorded < 100
+          ? recorded
+          : n.actualStart ? 50 : 0;
     }
     if (n.percentComplete >= 100) n.status = 'complete';
     else if (n.finish && n.finish < today && n.percentComplete < 100) n.status = 'delayed';

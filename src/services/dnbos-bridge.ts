@@ -72,7 +72,9 @@ export interface BridgeModules {
   /** what Gantt.tsx needs, flattened so the tracking engine draws the same bars */
   gantt: {
     activities: { id: string; name: string; startDate: string; endDate: string;
-      durationDays: number; totalFloat: number; critical: boolean; phase: string | null }[];
+      durationDays: number; totalFloat: number; critical: boolean; phase: string | null;
+      /** recorded progress 0..100, or null where the site has reported nothing */
+      percentComplete: number | null }[];
     externalStart: string | null; externalEnd: string | null;
     internalEnd: string | null; internalTarget: string | null;
   };
@@ -105,6 +107,7 @@ export function buildBridgeModules(plan: Plan, pert: PertTree, scurve: SCurve): 
         totalFloat: a.totalFloat,
         critical: !!a.critical,
         phase: a.phase ?? null,
+        percentComplete: a.percentComplete?.value ?? null,
       })),
       externalStart: plan.external?.start ?? null,
       externalEnd: plan.external?.end ?? null,

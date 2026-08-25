@@ -45,6 +45,47 @@ const scalePkg = (p: BoqPackage): BoqPackage => ({
 // Durations round UP: a fifth more work in a trade that took five days is six,
 // not five. Rounding down would quietly hand the programme free capacity it
 // does not have, which is the failure this whole engine exists to prevent.
+//
+// ---- RECORDED PROGRESS: THIS PROJECT IS 20% BUILT ----
+// Phase 2 carries actuals so the progress path can be seen working end to end —
+// the S-curve's actual line, the PERT's percent and actual dates, the Gantt's
+// fill, and the statuses on Design, Procurement and the to-do list.
+//
+// It is NOT a flat 20 on every row. A site 20% through has some things finished,
+// some running and most not started; painting every activity "20% done" would
+// draw a curve no real project has ever produced and would hide exactly the
+// bugs this is meant to expose. Work is taken in programme order until a fifth
+// of the total work content is used up: early activities read 100, the one on
+// the boundary reads a part, the rest read 0.
+const PROGRESS_SHARE = 0.2;
+const workOf = (a: Activity) => Math.max(1, a.duration.value) * Math.max(1, a.crew.value);
+
+function withProgress(list: Activity[]): Activity[] {
+  const live = list.filter((a) => !a.isMilestone);
+  const total = live.reduce((s, a) => s + workOf(a), 0);
+  let budget = total * PROGRESS_SHARE;
+  // programme order, so progress runs front-to-back the way a floor is built
+  const order = [...live].sort((a, b) =>
+    (a.plannedStartFromInput ?? '') < (b.plannedStartFromInput ?? '') ? -1 : 1);
+  const pct = new Map<string, number>();
+  for (const a of order) {
+    const w = workOf(a);
+    if (budget <= 0) { pct.set(a.id, 0); continue; }
+    if (budget >= w) { pct.set(a.id, 100); budget -= w; continue; }
+    pct.set(a.id, Math.round((budget / w) * 100));   // the one that straddles the line
+    budget = 0;
+  }
+  return list.map((a) => {
+    const p = pct.get(a.id);
+    if (p == null || p === 0) return a;
+    return {
+      ...a,
+      percentComplete: { value: p, provenance: 'input' as const,
+        source: `site progress recorded on ${NOTE.replace('derived from ', '')} — ${Math.round(PROGRESS_SHARE * 100)}% of work content complete` },
+    };
+  });
+}
+
 const scaleActivity = (a: Activity): Activity => ({
   ...a,
   duration: {
@@ -67,7 +108,7 @@ export const skfPhase2: ProjectInputs = {
   contractStart: skf.contractStart,
   contractDurationCalDays: skf.contractDurationCalDays,
   boqPackages: skf.boqPackages.map(scalePkg),
-  scheduleActivities: skf.scheduleActivities.map(scaleActivity),
+  scheduleActivities: withProgress(skf.scheduleActivities.map(scaleActivity)),
   materialItems: skf.materialItems.map((m) => ({
     ...m,
     quantity: m.quantity
