@@ -1,0 +1,107 @@
+{
+ "1": {
+  "name": "Cabin 07",
+  "by": "inferred from the render read",
+  "why": "pin 27 sees gypsum board, a glass partition, a door frame and a cove pelmet in 86 sqft"
+ },
+ "3": {
+  "name": "Coffee Station + Microwave",
+  "by": "ASSUMPTION — no evidence",
+  "why": "pin 37 has no render and the drawing labels nothing inside this outline. 38 sqft. The drawing names a Coffee Station + Microwave that no area carries, and this is the only unassigned space small enough. NOTHING WAS READ TO SUPPORT THIS — it is a placeholder so the floor can be planned, and it should be the first name checked"
+ },
+ "6": {
+  "name": "MR - 4 Pax 03",
+  "by": "inferred from the render read",
+  "why": "pin 33 sees three acoustic panels, four loose furniture pieces and an AV display in 84 sqft — a small meeting room"
+ },
+ "10": {
+  "name": "Dry Pantry",
+  "by": "render filename",
+  "why": "the design team named the render for pins 43/44 \"Dry Pantry\", and the read confirms a counter, two joinery runs and storage units"
+ },
+ "14": {
+  "name": "MR - 4 Pax 02",
+  "by": "render filename",
+  "why": "the design team named the render for pin 21 \"4PAX MR\"; the read confirms four glass partitions and three acoustic panels"
+ },
+ "16": {
+  "name": "MR - 6 Pax 01",
+  "by": "inferred from the render read",
+  "why": "pin 73 sees five acoustic panels and five loose furniture pieces in 91 sqft"
+ },
+ "17": {
+  "name": "Collab Area - 2",
+  "by": "inferred from the render read",
+  "why": "pin 72 sees wallpaper, a cove pelmet and three loose furniture pieces in 95 sqft — a soft-seating collaboration space, matching the named Collab Area - 1"
+ },
+ "19": {
+  "name": "MR - 6 Pax 02",
+  "by": "inferred from the render read",
+  "why": "pin 77 sees six loose furniture pieces, a joinery run and an AV display in 91 sqft"
+ },
+ "23": {
+  "name": "Refuge Area",
+  "by": "inferred from the render read",
+  "why": "pins 80/81 see almost nothing but paint, lights, sprinkler and two glass partitions across 812 sqft — an open area kept clear. The drawing names a Refuge Area that no area carries"
+ },
+ "28": {
+  "name": "Cabin 03",
+  "by": "inferred from the render read",
+  "why": "pin 17 sees a glass partition and two light fittings in 100 sqft"
+ },
+ "29": {
+  "name": "Cabin 02",
+  "by": "inferred from the render read",
+  "why": "pin 14 sees a glass partition, two joinery runs and a door shutter in 111 sqft — the same signature as the named cabins"
+ },
+ "31": {
+  "name": "Phone Booth 02",
+  "by": "render filename",
+  "why": "the design team named the render for pin 24 \"phone Booth\"; 23 sqft with one glass partition, matching the existing Phone Booth exactly"
+ },
+ "35": {
+  "name": "Focus Pod 01",
+  "by": "inferred from the render read",
+  "why": "pin 58 sees one glass partition and one door shutter in 51 sqft — too small for a meeting room, larger than a phone booth"
+ },
+ "36": {
+  "name": "Meeting Room 01",
+  "by": "inferred from the render read",
+  "why": "pin 57 sees two door frames, three ceiling cutouts and loose furniture in 66 sqft. The drawing names a Meeting Room that no area carries"
+ },
+ "37": {
+  "name": "Washroom 02",
+  "by": "inferred from the render read",
+  "why": "pin 61 sees two sanitary fixtures in 58 sqft — a second single-occupancy washroom"
+ },
+ "38": {
+  "name": "Gents Restroom Wash Area",
+  "by": "inferred from the render read",
+  "why": "pins 66/67 see three sanitary fixtures and two to three cubicles, adjoining space 40"
+ },
+ "39": {
+  "name": "Gents Restroom",
+  "by": "inferred from the render read",
+  "why": "pins 64/65 see sanitaryware, four ceiling cutouts and door shutters. The drawing names a Gents Restroom that no area carries. The ladies/gents split between this block and space 42 is an assumption"
+ },
+ "40": {
+  "name": "Accessible Washroom",
+  "by": "inferred from the render read",
+  "why": "pin 7 sees two sanitary fixtures and one joinery run in 62 sqft — a single-occupancy washroom, too small for a block"
+ },
+ "41": {
+  "name": "Ladies Restroom",
+  "by": "inferred from the render read",
+  "why": "pins 12/13 see three cubicles, four sanitary fixtures and six door shutters. The drawing names a Ladies Restroom that no area carries. WHICH of the two restroom blocks is ladies and which is gents is NOT established by any read — this half is an assumption"
+ },
+ "42": {
+  "name": "Ladies Restroom Wash Area",
+  "by": "inferred from the render read",
+  "why": "pins 10/11 see five cubicles, a cove pelmet and wall finishes, adjoining space 42; read as the second half of the same block"
+ },
+ "48": {
+  "name": "Elevator Lobby",
+  "by": "inferred from the render read",
+  "why": "pins 8/9 see six ceiling cutouts, six light fittings, a cove pelmet and a door frame, and no fixtures of any trade — a circulation space. The drawing names an Elevator Lobby that no area carries"
+ }
+}
