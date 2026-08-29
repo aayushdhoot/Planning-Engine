@@ -386,3 +386,26 @@ nav.tabs button { transition: color .15s ease, border-color .15s ease; }
   .chat-layout { grid-template-columns: 1fr; }
   .chat-side { height: auto; min-height: 0; max-height: 220px; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
 }
+
+/* ---- Asking the assistant out loud ------------------------------------- */
+.chat-mic {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; padding: 0; flex: 0 0 auto;
+  border: 1px solid var(--line); border-radius: 9px; background: var(--panel);
+  color: var(--muted); cursor: pointer;
+}
+.chat-mic:hover:not(:disabled) { color: var(--text); border-color: var(--faint); }
+.chat-mic:disabled { opacity: .45; cursor: not-allowed; }
+/* Listening is a state worth being unmistakable about — the microphone is open. */
+.chat-mic.on { background: var(--crit); border-color: var(--crit); color: #fff; animation: mic-pulse 1.4s ease-in-out infinite; }
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217, 45, 32, .45); }
+  50%      { box-shadow: 0 0 0 6px rgba(217, 45, 32, 0); }
+}
+/* Respect a reader who has asked the system for less movement. */
+@media (prefers-reduced-motion: reduce) { .chat-mic.on { animation: none; } }
+
+.chat-listening { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--crit); margin: 8px 0 0; }
+.chat-mic-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--crit); animation: mic-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .chat-mic-dot { animation: none; } }
+.chat-voice-err { font-size: 12px; color: var(--warn); margin: 8px 0 0; }
