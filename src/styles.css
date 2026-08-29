@@ -169,6 +169,12 @@ input:disabled, select:disabled { background: var(--panel2); color: var(--muted)
 .qcard .q { font-weight: 600; margin-bottom: 4px; }
 .qcard .why { color: var(--muted); font-size: 12px; margin-bottom: 9px; }
 .qcard.answered { border-left-color: var(--ok); }
+/* Read from the documents and waiting on a person: not yet an answer, so not green. */
+.qcard.proposed { border-left-color: var(--warn); }
+.qcard .read-from { color: var(--muted); font-size: 12px; margin: 8px 0 4px; }
+.qcard .read-from em { color: var(--ext); font-style: normal; }
+.qcard .confirm { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 12px; color: var(--muted); }
+.qcard .confirm input { width: auto; margin: 0; }
 
 .filebar { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); margin-bottom: 7px; box-shadow: var(--shadow); }
 .filebar .nm { flex: 1; font-size: 13px; }
@@ -226,6 +232,23 @@ input:disabled, select:disabled { background: var(--panel2); color: var(--muted)
   border-color: var(--accent);
 }
 .dash-card:active { transform: translateY(-1px); transition-duration: .08s; }
+
+/* The delete control on a project card.
+   Hidden until the card is hovered or something inside it has focus: it is a destructive
+   action on a card whose whole surface is a click target, so it should not sit there inviting
+   a mis-click. Always reachable by keyboard, though — :focus-within is why it appears on tab
+   as well as on hover. */
+.dash-card { position: relative; }
+.dash-card-del {
+  all: unset; position: absolute; top: 10px; right: 10px; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px; cursor: pointer;
+  color: var(--muted); background: var(--panel2);
+  opacity: 0; transition: opacity .15s, color .15s, background .15s;
+}
+.dash-card:hover .dash-card-del, .dash-card:focus-within .dash-card-del { opacity: 1; }
+.dash-card-del:hover { color: var(--crit); background: var(--crit-soft); }
+.dash-card-del:focus-visible { opacity: 1; outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .dash-card-inner { padding: 22px 24px; display: flex; flex-direction: column; gap: 6px; width: 100%; }
 

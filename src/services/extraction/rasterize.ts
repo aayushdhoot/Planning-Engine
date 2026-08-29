@@ -23,6 +23,20 @@ export const PDF_PAGE_MAX_EDGE = 1600;
  * folder put together, so the tail is reported rather than silently read or silently dropped. */
 export const PDF_MAX_PAGES = 12;
 
+/**
+ * A priced BOQ is the exception to both figures above.
+ *
+ * The 12-page cap is right for a drawing set, where page 13 is one more sheet of the same kind
+ * and the first twelve already say what the document is. It is wrong for a BOQ, where page 13
+ * is HVAC and dropping it does not make the plan slightly less detailed — it makes the plan
+ * cost wrong. There is exactly one such document per project, so it is read whole.
+ *
+ * The larger edge is for the same reason: a BOQ's figures are small print in a dense table, and
+ * a 1600px render of an A4 sheet is where a 4 and a 1 start to look alike.
+ */
+export const BOQ_PDF_MAX_PAGES = 40;
+export const BOQ_PAGE_MAX_EDGE = 2000;
+
 const JPEG_QUALITY = 0.72;
 
 export interface PageImage {

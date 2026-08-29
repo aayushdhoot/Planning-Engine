@@ -55,7 +55,11 @@ function apiDevMiddleware(): Plugin {
           fetchRes.headers.forEach((value, key) => {
             if (key.toLowerCase() !== 'content-length') res.setHeader(key, value);
           });
-          res.end(await fetchRes.text());
+          // Buffer, not text: /api/drive/download returns file BYTES. Decoding those as UTF-8
+          // and writing the string back replaces every byte that is not valid UTF-8 with U+FFFD,
+          // which silently corrupts a PDF or an xlsx into something no parser can open. JSON
+          // routes are unaffected — a Buffer of their UTF-8 bytes is the same response.
+          res.end(Buffer.from(await fetchRes.arrayBuffer()));
         } catch (err) {
           res.statusCode = 500;
           res.setHeader('Content-Type', 'application/json');

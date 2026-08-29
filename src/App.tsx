@@ -39,13 +39,14 @@ import {
   TRACKING_ENGINE_URL, buildBridgeModules, dnbosProjectId, pushPlan, pullState, pushEdits, type EditOverlay,
 } from './services/dnbos-bridge';
 import { ProjectDashboard } from './ui/ProjectDashboard';
+import { loadWorkspace, saveWorkspace } from './services/workspace-store';
 
 const BASE_PROJECTS: ProjectInputs[] = [skf, skfPhase2, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
 const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material Registry', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant'] as const;
 type Tab = (typeof PROJECT_TABS)[number];
-type Screen = 'dashboard' | 'project' | 'admin' | 'settings' | 'new-project';
+type Screen = 'dashboard' | 'project' | 'admin' | 'settings' | 'new-project' | 'project-settings';
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 const P = ({ t }: { t: Traced<number> | null }) =>
@@ -54,9 +55,32 @@ const P = ({ t }: { t: Traced<number> | null }) =>
 const statusClass = (s: TrackStatus): string =>
   s === 'Completed' ? 'ok' : s === 'Delayed' ? 'crit' : s === 'WIP' ? 'info' : s === 'Hold' ? 'warn' : '';
 
+const BUFFER_LABEL: Record<string, string> = {
+  ok: 'invariant holds',
+  tight: 'TIGHT — below the policy minimum',
+  breach: 'BREACH — internal finish is past the client date',
+  // Not good news. This is the shape a programme takes when its durations came off the floor
+  // rather than out of the BOQ, and calling it "holds" is what let a six-day plan pass for a
+  // ninety-day one.
+  implausible: 'NOT CREDIBLE — see the schedule assumptions',
+};
+const BUFFER_COLOUR: Record<string, string | undefined> = {
+  ok: undefined, tight: 'var(--warn)', breach: 'var(--crit)', implausible: 'var(--warn)',
+};
+
 export default function App() {
   const [extraProjects, setExtraProjects] = useState<ProjectInputs[]>([]);
   const [overrides, setOverrides] = useState<Record<string, ProjectInputs>>({});
+  /**
+   * Whether the workspace on disk has been read yet, and what went wrong if it could not be.
+   *
+   * The gate matters as much as the load. Saving is driven by a change to `extraProjects`, so
+   * writing before the first read would fire once with the empty initial state and truncate the
+   * file the read was about to bring back — losing every saved project on any reload where the
+   * server was momentarily slow.
+   */
+  const [workspaceLoaded, setWorkspaceLoaded] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
   const [ingestResult, setIngestResult] = useState<{ boq: IngestedBoq; file: string } | null>(null);
   const [projectId, setProjectId] = useState(BASE_PROJECTS[0].id);
   const [view, setView] = useState<'internal' | 'external'>('internal');
@@ -92,6 +116,37 @@ export default function App() {
   // switching tabs away and back, and correctly starts fresh / resumes when the project changes.
   const [chatByProject, setChatByProject] = useState<Record<string, ChatState>>({});
   const today = new Date().toISOString().slice(0, 10);
+
+  // Read the workspace once, on mount. A failure is kept and shown rather than swallowed: an
+  // empty dashboard because the store was unreachable looks exactly like an empty dashboard
+  // because nothing has been made yet, and the second is the reading a person will take.
+  useEffect(() => {
+    let live = true;
+    void loadWorkspace().then(({ workspace, error }) => {
+      if (!live) return;
+      if (workspace) {
+        setExtraProjects(workspace.projects);
+        setOverrides(workspace.overrides);
+      }
+      setWorkspaceError(error);
+      // Only a SUCCESSFUL read opens the gate. If the store could not be reached, the app is
+      // sitting on empty state that is not the truth, and letting the save effect fire on it
+      // would overwrite a perfectly good file with nothing — losing every saved project because
+      // the server happened to be restarting. A failed load means read-only until a reload.
+      if (workspace) setWorkspaceLoaded(true);
+    });
+    return () => { live = false; };
+  }, []);
+
+  // Write it back whenever a project is added, edited or deleted — but never before the first
+  // read has landed, or the empty initial state would overwrite the file it is about to replace.
+  useEffect(() => {
+    if (!workspaceLoaded) return;
+    void saveWorkspace({ normsVersion: normsData.version, projects: extraProjects, overrides }).then((err) => {
+      if (err) setWorkspaceError(err);
+    });
+  }, [workspaceLoaded, extraProjects, overrides]);
+
   const ALL_PROJECTS = [...BASE_PROJECTS.map((p) => overrides[p.id] ?? p), ...extraProjects];
   const PROJECTS = ALL_PROJECTS.filter((p) => !org.archived.includes(p.id));
   const project = PROJECTS.find((p) => p.id === projectId) ?? PROJECTS[0] ?? ALL_PROJECTS[0];
@@ -402,6 +457,25 @@ export default function App() {
 
   const openNewProject = () => setScreen('new-project');
 
+  // Site details, schedule dates and the project team used to be reachable ONLY through the New
+  // Project screen, where they silently edited whichever project was selected at the time. They
+  // need a project to belong to, so they live here instead — on the project itself.
+  const openProjectSettings = () => setScreen('project-settings');
+
+  /**
+   * Remove a project made in this app. One implementation, used by both the dashboard card and
+   * the Admin table, because two would eventually disagree about what deleting means.
+   *
+   * Dropping it from  is the whole of it: the save effect writes the shorter list
+   * to the workspace file, and any org metadata keyed by the id goes with it. There is nowhere
+   * to undo from, which is why both callers ask first.
+   */
+  const deleteProject = (id: string) => {
+    setExtraProjects((prev) => prev.filter((x) => x.id !== id));
+    setOverrides((prev) => { const next = { ...prev }; delete next[id]; return next; });
+    if (projectId === id) setProjectId(BASE_PROJECTS[0].id);
+  };
+
   if (screen === 'dashboard') {
     return (
       <div className="app">
@@ -416,11 +490,22 @@ export default function App() {
             Settings
           </button>
         </header>
+        {workspaceError && (
+          // Said out loud, on the screen the projects are missing from. A store that cannot be
+          // reached is why the dashboard looks empty, and the person looking at it has no other
+          // way to tell that apart from having made nothing yet.
+          <div className="banner" style={{ margin: '16px 22px 0', borderColor: 'var(--warn)', background: 'var(--warn-soft)' }}>
+            <strong>Projects are not being saved.</strong> {workspaceError} Anything created now will disappear when this page reloads.
+          </div>
+        )}
         <ProjectDashboard
           projects={PROJECTS}
           org={org}
           onSelect={openProject}
           onNewProject={openNewProject}
+          builtInIds={BASE_PROJECTS.map((bp) => bp.id)}
+          onDelete={deleteProject}
+          onArchive={(id) => setOrg({ ...org, archived: [...org.archived, id] })}
         />
       </div>
     );
@@ -441,10 +526,7 @@ export default function App() {
             setOrg={setOrg}
             projects={ALL_PROJECTS.map((p) => ({ id: p.id, name: p.name, client: p.client }))}
             builtInIds={BASE_PROJECTS.map((p) => p.id)}
-            onDeleteProject={(id) => {
-              setExtraProjects((prev) => prev.filter((p) => p.id !== id));
-              if (projectId === id) setProjectId(BASE_PROJECTS[0].id);
-            }}
+            onDeleteProject={deleteProject}
           />
         </main>
       </div>
@@ -491,6 +573,35 @@ export default function App() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </button>
           <div className="brand">New Project<small>Link a Drive folder and set up inputs</small></div>
+        </header>
+        <main className="fade-in">
+          <ProjectSettings
+            creating
+            project={project}
+            org={org}
+            setOrg={setOrg}
+            clientId={clientId}
+            existingIds={PROJECTS.map((p) => p.id)}
+            onCreate={(p) => {
+              setExtraProjects((prev) => [...prev, p]);
+              setProjectId(p.id);
+              setTab('Cockpit');
+              setScreen('project');
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  if (screen === 'project-settings') {
+    return (
+      <div className="app">
+        <header className="top standalone-header">
+          <button className="ghost home-btn" onClick={() => setScreen('project')} title="Back to the project">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </button>
+          <div className="brand">Project settings<small>{project.name}</small></div>
         </header>
         <main className="fade-in">
           <ProjectSettings
@@ -547,6 +658,15 @@ export default function App() {
         ) : bridgeAt ? (
           <span className="tag ok" title={`programme pushed to the tracking engine at ${bridgeAt}`}>tracking synced</span>
         ) : null}
+<<<<<<< HEAD
+=======
+        {/* The way in to site details, schedule dates and the project team. They were only ever
+            reachable from the New Project screen, where they edited whichever project happened
+            to be selected — so they now hang off the project they actually belong to. */}
+        <button className="ghost" title="Site details, schedule dates and project team" onClick={openProjectSettings}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-2px' }}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+>>>>>>> 462d1062f85feee5b5de72ebfe40ca7fd2503aab
         {/* Opens the DnB-OS tracking engine on this same project. The push above has
             already run, so what opens is this programme and not a stale copy. The old
             button pointed at /tracking/index.html — a build of the retired shell bundled
@@ -784,7 +904,7 @@ function Overview({ plan, view }: { plan: Plan; view: string }) {
         <div className="card"><div className="k">Area</div><div className="v">{plan.project.areaSft ? plan.project.areaSft.value.toLocaleString('en-IN') + ' sft' : '—'}</div><P t={plan.project.areaSft} /></div>
         <div className="card"><div className="k">Contract value</div><div className="v">{plan.project.contractValue ? inr(plan.project.contractValue.value) : '—'}</div><P t={plan.project.contractValue} /></div>
         <div className="card"><div className="k">{view === 'external' ? 'Contract finish' : 'Internal finish'}</div><div className="v">{view === 'external' ? plan.external?.end ?? '—' : plan.internal?.end ?? '—'}</div><div className="s">{view === 'external' ? 'contract baseline' : `${plan.internal?.durationWorkingDays ?? 0} working days (CPM)`}</div></div>
-        {view === 'internal' && <div className="card"><div className="k">Buffer</div><div className="v">{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div><div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH'}</div></div>}
+        {view === 'internal' && <div className="card"><div className="k">Buffer</div><div className="v" style={{ color: BUFFER_COLOUR[plan.ieInvariant.state] }}>{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div><div className="s" style={{ color: BUFFER_COLOUR[plan.ieInvariant.state] }}>{BUFFER_LABEL[plan.ieInvariant.state]}</div></div>}
         <div className="card"><div className="k">Critical activities</div><div className="v">{m.timeline.criticalPath.length} / {m.timeline.activities.length}</div><div className="s">zero total float</div></div>
         {view === 'internal' && <div className="card"><div className="k">Peak manpower</div><div className="v">{m.manpower.peak}</div><div className="s">avg {m.manpower.averageDaily} · smoothness {m.manpower.smoothness}</div></div>}
         <div className="card"><div className="k">Design approved</div><div className="v">{m.design.summary.percentComplete}%</div><div className="s">{m.design.summary.approved} of {m.design.summary.drawings} drawings</div></div>
@@ -982,8 +1102,8 @@ function ScheduleSummary({ plan, view, today }: { plan: Plan; view: string; toda
       {!client && (
         <div className="card">
           <div className="k">Buffer to client date</div>
-          <div className="v">{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div>
-          <div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH — internal finish is past the client date'}</div>
+          <div className="v" style={{ color: BUFFER_COLOUR[plan.ieInvariant.state] }}>{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div>
+          <div className="s" style={{ color: BUFFER_COLOUR[plan.ieInvariant.state] }}>{BUFFER_LABEL[plan.ieInvariant.state]}</div>
         </div>
       )}
       {!client && plan.internal?.target && (

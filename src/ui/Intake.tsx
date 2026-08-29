@@ -4,10 +4,15 @@ import type { DriveFile, DriveScan, DriveService, PickedFile } from '../services
 import { DriveFolderNotPublic, GoogleDriveService, LocalFolderDriveService, ManifestDriveService, PublicLinkDriveService } from '../services/drive';
 import { BoqIngestionService } from '../services/ingestion';
 import { ScheduleIngestionService } from '../services/schedule-ingestion';
-import { buildInventory, buildQueries, unansweredBlocking, type IntakeQuery } from '../engine/intake';
+import { applyPrefill, awaitingConfirmation, buildInventory, buildQueries, unansweredBlocking, type FoundAnswer, type IntakeQuery } from '../engine/intake';
 import { extractorFor, noExtractorReason, type DocStates } from '../engine/coverage';
+<<<<<<< HEAD
 import { applyExtractionPatch } from '../services/extraction/extraction-service';
 import { dailyLimitHit, extractFileViaApi, firstFailure, ExtractionClientError } from '../services/extraction/browser-client';
+=======
+import { applyExtractionPatch, type ExtractionPatch } from '../services/extraction/extraction-service';
+import { dailyLimitHit, extractBoqRowsViaApi, extractFileViaApi, extractFilesViaApi, firstFailure, ExtractionClientError, type BatchFile } from '../services/extraction/browser-client';
+>>>>>>> 462d1062f85feee5b5de72ebfe40ca7fd2503aab
 import { mapPool, type PoolProgress } from '../services/extraction/pool';
 import { RateGate, DEFAULT_RPM, rateLimitWait } from '../services/extraction/rate-gate';
 import { DriveCoverage } from './DriveCoverage';
@@ -31,6 +36,19 @@ const READ_CONCURRENCY = 4;
 /** Attempts per file before a rate-limited read is given up on. */
 const MAX_READ_ATTEMPTS = 6;
 
+<<<<<<< HEAD
+=======
+/**
+ * Photographs sent in one request.
+ *
+ * Matches DEFAULT_BATCH on the server, which is where the figure was measured: six real 1024px
+ * site photos returned in 3.8s against 5.0s for a single one. The number that matters here is
+ * not the model latency though — it is the rate gate. Twelve requests a minute across 144
+ * photographs is twelve minutes of queueing; in sixes it is two.
+ */
+const PHOTOS_PER_CALL = 6;
+
+>>>>>>> 462d1062f85feee5b5de72ebfe40ca7fd2503aab
 const DAILY_LIMIT_MESSAGE =
   "Not read — the vision model's daily token allowance is spent. It resets on the provider's schedule; " +
   'the plan can be built without these, and they can be re-read afterwards.';
@@ -171,14 +189,69 @@ export function Intake({
     materialItems: MaterialListItem[];
     scopeNotes: ScopeNote[];
     designRefs: DesignReference[];
+    /** proposed intake answers the documents offered, each carrying its file and clause */
+    planningAnswers: FoundAnswer[];
   }
   const [extraction, setExtraction] = useState<ExtractionAccumulator>({
     contractStart: null, contractDurationCalDays: null, contractValue: null, bcsValue: null,
-    milestones: [], siteConditions: [], materialItems: [], scopeNotes: [], designRefs: [],
+    milestones: [], siteConditions: [], materialItems: [], scopeNotes: [], designRefs: [], planningAnswers: [],
   });
 
   const mark = (id: string, state: DocStates[string]['state'], detail?: string) =>
     setDocStates((prev) => ({ ...prev, [id]: { state, detail } }));
+
+  /**
+   * Turn one document's vision patch into its row and its log line.
+   *
+   * Lifted out of the single-file read when photographs began travelling six to a request: both
+   * paths must reach the identical verdict about a document, and "read but nothing usable" and
+   * "never actually read" are the distinction this whole screen exists to keep. Two copies of
+   * that judgement would eventually disagree, and the disagreement would be invisible.
+   */
+  const recordVisionOutcome = (
+    name: string,
+    id: string,
+    patch: ExtractionPatch,
+    notes: string[],
+    pagesRead: number,
+    suffix: string,
+  ): string => {
+    if (dailyLimitHit(patch)) dailyLimit.current = true;
+    const trailer = (notes.length ? ' ' + notes.join(' ') : '') + suffix;
+    const wroteSomething =
+      patch.siteConditions.length > 0 || patch.materialItems.length > 0 || patch.scopeNotes.length > 0 ||
+      patch.designRefs.length > 0 || !!patch.contractStart || !!patch.contractDurationCalDays ||
+      !!patch.contractValue || !!patch.bcsValue || patch.milestones.length > 0;
+    if (!wroteSomething) {
+      // A refusal is not an empty document. Saying "nothing usable was found" about a file
+      // the model never actually saw is the false assurance this screen exists to prevent,
+      // so a failed read stays pending — i.e. still on the to-do list — and says why.
+      const failure = firstFailure(patch);
+      if (failure) {
+        mark(id, 'pending', `${dailyLimit.current ? DAILY_LIMIT_MESSAGE : `Not read — ${failure}`}${trailer}`);
+        return `✗ ${name} — ${dailyLimit.current ? 'daily token allowance spent' : failure}`;
+      }
+      mark(id, 'logged', `Read by the vision model, but nothing usable was found${trailer}`);
+      return `• ${name} — vision extraction found nothing usable`;
+    }
+    setExtraction((prev) => ({
+      ...applyExtractionPatch(prev, patch),
+      // applyExtractionPatch only knows the ProjectInputs fields; the proposals ride alongside
+      // them, additively, because two documents answering the same question is information.
+      planningAnswers: [...prev.planningAnswers, ...(patch.planningAnswers ?? [])],
+    }));
+    const bits = [
+      pagesRead > 1 ? `${pagesRead} pages read` : null,
+      patch.siteConditions.length ? `${patch.siteConditions.length} site condition(s)` : null,
+      patch.materialItems.length ? `${patch.materialItems.length} material item(s)` : null,
+      patch.scopeNotes.length ? `${patch.scopeNotes.length} scope note(s)` : null,
+      patch.designRefs.length ? `${patch.designRefs.length} design ref(s)` : null,
+      patch.contractStart ? `contract start ${patch.contractStart}` : null,
+      patch.milestones.length ? `${patch.milestones.length} milestone(s)` : null,
+    ].filter(Boolean);
+    mark(id, 'extracted', bits.join(' · ') + trailer);
+    return `✓ ${name} — ${bits.join(' · ')} (vision)`;
+  };
 
   /**
    * Apply the right structural parser to one document's bytes. Anything without an extractor
@@ -193,26 +266,87 @@ export function Intake({
     filePath: string,
   ): Promise<string> => {
     const suffix = viaHand ? ' (supplied by hand)' : '';
-    if (extractor === 'boq') {
-      const parsed = ingestion.parseBoq({ name, data });
-      if (!parsed.packages.length) {
-        mark(id, 'logged', `Opened, but no priced package rows were recognised${suffix}. Check it is the summary sheet.`);
-        return `✗ ${name} — no packages recognised`;
+
+    /**
+     * The generic vision read — page images to an ExtractionPatch. Named rather than inlined in
+     * its branch because a document that looked like a priced BOQ and turned out not to hold one
+     * falls back to it: the make list beside the Keppel BOQ carries the same "BOQ" in its name,
+     * and reading it as neither would lose the document entirely.
+     */
+    const readViaVision = async (kind: 'image' | 'pdf', bytes: ArrayBuffer, extraNotes: string[] = []): Promise<string> => {
+      const what = kind === 'pdf' ? 'PDF' : 'image';
+      try {
+        const { patch, notes, pagesRead } = await extractFileViaApi(name, filePath, bytes, kind);
+        return recordVisionOutcome(name, id, patch, [...extraNotes, ...notes], pagesRead, suffix);
+      } catch (e) {
+        const msg = e instanceof ExtractionClientError ? e.message : e instanceof Error ? e.message : String(e);
+        mark(id, 'pending', `Not read${suffix}: ${msg}`);
+        return `✗ ${name} — ${what} extraction failed`;
       }
-      setDraftInputs({
-        boqPackages: parsed.packages,
-        areaSft: parsed.areaSft,
-        contractValue: parsed.contractValue,
-        bcsValue: parsed.bcsValue,
-      });
+    };
+
+    /** Record one parsed BOQ, whether its rows came from a workbook or off a PDF's pages.
+     * Returns null when the document held no priced rows, for the caller to decide about. */
+    const acceptBoq = (parsed: ReturnType<typeof ingestion.parseBoq>, trailer: string): string | null => {
+      if (!parsed.packages.length) return null;
+      // A folder can hold more than one document the BOQ rules match — the priced BOQ itself and
+      // a make list derived from it, as in Keppel (Pune). Replacing wholesale meant whichever
+      // was read last decided the project's cost, so the fuller reading is the one that stands.
+      setDraftInputs((prev) =>
+        (prev.boqPackages?.length ?? 0) > parsed.packages.length
+          ? prev
+          : {
+              ...prev,
+              boqPackages: parsed.packages,
+              areaSft: parsed.areaSft,
+              contractValue: parsed.contractValue,
+              bcsValue: parsed.bcsValue,
+            },
+      );
       const bits = [
         `${parsed.packages.length} packages`,
         parsed.areaSft ? `${parsed.areaSft.value.toLocaleString('en-IN')} sft` : null,
         parsed.contractValue ? inr(parsed.contractValue.value) : null,
         parsed.bcsValue ? 'BCS present' : 'no BCS column',
       ].filter(Boolean);
-      mark(id, 'extracted', bits.join(' · ') + suffix);
+      mark(id, 'extracted', bits.join(' · ') + trailer);
       return `✓ ${name} — ${bits.join(' · ')}`;
+    };
+
+    if (extractor === 'boq') {
+      const done = acceptBoq(ingestion.parseBoq({ name, data }), suffix);
+      if (done) return done;
+      mark(id, 'logged', `Opened, but no priced package rows were recognised${suffix}. Check it is the summary sheet.`);
+      return `✗ ${name} — no packages recognised`;
+    }
+
+    // A priced BOQ that only exists as a PDF: every page transcribed to rows by the vision
+    // reader, then handed to the same parser the workbook goes through.
+    if (extractor === 'boq-pdf') {
+      if (typeof data === 'string') {
+        mark(id, 'logged', `Could not read as a PDF${suffix}.`);
+        return `✗ ${name} — not readable as a PDF`;
+      }
+      try {
+        const { rows, pageStarts, notes, pagesRead } = await extractBoqRowsViaApi(name, filePath, data);
+        // parseBoq traces every package to a row number. Across a stitched-together PDF that
+        // number is only checkable against the document if the page it fell on is named too.
+        const where = pageStarts.map((p) => `${p.pageLabel} starts at row ${p.row}`).join('; ');
+        const parsed = ingestion.parseBoq({ name: `${name} (transcribed from PDF)`, data: rows });
+        const trailer = ` · ${pagesRead} page(s) transcribed, ${rows.length} rows${where ? ` (${where})` : ''}${notes.length ? ` ${notes.join(' ')}` : ''}${suffix}`;
+        const done = acceptBoq(parsed, trailer);
+        if (done) return done;
+        // Named like a BOQ, but no priced rows on any page — a make list, a rate card, a scope
+        // annexure. Reading it as the photographs are read still gets its material items and
+        // scope notes into the plan, which is strictly better than filing it as evidence.
+        return readViaVision('pdf', data, [
+          `Transcribed ${pagesRead} page(s) looking for a priced BOQ table and found no package rows, so it was read as a document instead.`,
+        ]);
+      } catch (e) {
+        const msg = e instanceof ExtractionClientError ? e.message : e instanceof Error ? e.message : String(e);
+        mark(id, 'pending', `Not read${suffix}: ${msg}`);
+        return `✗ ${name} — BOQ transcription failed`;
+      }
     }
     if (extractor === 'schedule') {
       const parsed = scheduleIngestion.parse({ name, data });
@@ -239,43 +373,7 @@ export function Intake({
         mark(id, 'logged', `Could not read as an ${what}${suffix}.`);
         return `✗ ${name} — not readable as an ${what}`;
       }
-      try {
-        const { patch, notes, pagesRead } = await extractFileViaApi(name, filePath, data, extractor === 'pdf' ? 'pdf' : 'image');
-        if (dailyLimitHit(patch)) dailyLimit.current = true;
-        const trailer = (notes.length ? ' ' + notes.join(' ') : '') + suffix;
-        const wroteSomething =
-          patch.siteConditions.length > 0 || patch.materialItems.length > 0 || patch.scopeNotes.length > 0 ||
-          patch.designRefs.length > 0 || !!patch.contractStart || !!patch.contractDurationCalDays ||
-          !!patch.contractValue || !!patch.bcsValue || patch.milestones.length > 0;
-        if (!wroteSomething) {
-          // A refusal is not an empty document. Saying "nothing usable was found" about a file
-          // the model never actually saw is the false assurance this screen exists to prevent,
-          // so a failed read stays pending — i.e. still on the to-do list — and says why.
-          const failure = firstFailure(patch);
-          if (failure) {
-            mark(id, 'pending', `${dailyLimit.current ? DAILY_LIMIT_MESSAGE : `Not read — ${failure}`}${trailer}`);
-            return `✗ ${name} — ${dailyLimit.current ? 'daily token allowance spent' : failure}`;
-          }
-          mark(id, 'logged', `Read by the vision model, but nothing usable was found${trailer}`);
-          return `• ${name} — vision extraction found nothing usable`;
-        }
-        setExtraction((prev) => applyExtractionPatch(prev, patch));
-        const bits = [
-          pagesRead > 1 ? `${pagesRead} pages read` : null,
-          patch.siteConditions.length ? `${patch.siteConditions.length} site condition(s)` : null,
-          patch.materialItems.length ? `${patch.materialItems.length} material item(s)` : null,
-          patch.scopeNotes.length ? `${patch.scopeNotes.length} scope note(s)` : null,
-          patch.designRefs.length ? `${patch.designRefs.length} design ref(s)` : null,
-          patch.contractStart ? `contract start ${patch.contractStart}` : null,
-          patch.milestones.length ? `${patch.milestones.length} milestone(s)` : null,
-        ].filter(Boolean);
-        mark(id, 'extracted', bits.join(' · ') + trailer);
-        return `✓ ${name} — ${bits.join(' · ')} (vision)`;
-      } catch (e) {
-        const msg = e instanceof ExtractionClientError ? e.message : e instanceof Error ? e.message : String(e);
-        mark(id, 'pending', `Not read${suffix}: ${msg}`);
-        return `✗ ${name} — ${what} extraction failed`;
-      }
+      return readViaVision(extractor === 'pdf' ? 'pdf' : 'image', data);
     }
     const size = typeof data === 'string' ? data.length : data.byteLength;
     mark(id, 'logged', `Opened (${kb(size)}). ${noExtractorReason({ name, mimeType: '' } as DriveFile)}`);
@@ -300,9 +398,18 @@ export function Intake({
     cancelRead.current = false;
     dailyLimit.current = false;
 
+    // Photographs go several to a request; everything else keeps its own. A folder is mostly
+    // photographs — 144 of the 178 in Keppel (Pune) — and they are the files whose whole cost
+    // was the round trip, so this is where batching is worth the coupling. A PDF is already
+    // several pages in one request, and a spreadsheet is not read by the model at all.
+    const isPhoto = (f: DriveFile) => extractorFor(f) === 'vision';
     const isVisual = (f: DriveFile) => { const e = extractorFor(f); return e === 'vision' || e === 'pdf'; };
-    const visual = files.filter(isVisual);
+    const photos = files.filter(isPhoto);
+    const visual = files.filter((f) => isVisual(f) && !isPhoto(f));
     const sequential = files.filter((f) => !isVisual(f));
+
+    const photoGroups: DriveFile[][] = [];
+    for (let i = 0; i < photos.length; i += PHOTOS_PER_CALL) photoGroups.push(photos.slice(i, i + PHOTOS_PER_CALL));
 
     const total = files.length;
     let done = 0;
@@ -342,12 +449,98 @@ export function Intake({
       }
     };
 
+    /**
+     * One gate slot, several photographs.
+     *
+     * The gate paces the whole run at twelve requests a minute, so this is where the time
+     * actually went: 144 photographs was twelve minutes of queueing before the model had been
+     * asked anything. Six per call is six times fewer slots. The downloads inside a group still
+     * run in parallel — those are Drive, not the model, and are not what the gate is for.
+     */
+    const readGroup = async (group: DriveFile[]): Promise<string[]> => {
+      await gate.acquire();
+      const loaded: BatchFile[] = [];
+      const lines: string[] = [];
+      const settled = await Promise.all(
+        group.map(async (f) => {
+          try {
+            return { f, bytes: await service().readFile(f) };
+          } catch (e) {
+            return { f, err: e instanceof Error ? e.message : String(e) };
+          }
+        }),
+      );
+      for (const s of settled) {
+        if ('err' in s && s.err) {
+          mark(s.f.id, 'pending', `Could not read: ${s.err}`);
+          lines.push(`✗ ${s.f.name} — ${s.err}`);
+          continue;
+        }
+        loaded.push({ fileName: s.f.name, filePath: s.f.path, bytes: s.bytes!, kind: 'image' });
+      }
+      if (!loaded.length) return lines;
+
+      try {
+        const byName = await extractFilesViaApi(loaded);
+        gate.onSuccess();
+        for (const f of group) {
+          const got = byName.get(f.name);
+          if (!got) continue; // its download failed; already recorded above
+          lines.push(recordVisionOutcome(f.name, f.id, got.patch, got.notes, got.pagesRead, ''));
+        }
+        return lines;
+      } catch (e) {
+        // The whole group shares one request, so it shares its refusal — each row says so on
+        // its own, and a rate limit is re-thrown so the pool can put the group back on the queue.
+        const msg = e instanceof ExtractionClientError ? e.message : e instanceof Error ? e.message : String(e);
+        const rl = rateLimitWait(msg);
+        if (rl.daily) {
+          dailyLimit.current = true;
+          for (const f of group) mark(f.id, 'pending', DAILY_LIMIT_MESSAGE);
+          throw new Error(msg);
+        }
+        if (rl.retry) {
+          gate.penalise(rl.waitMs);
+          for (const f of group) mark(f.id, 'pending', `Rate limited — waiting ${Math.round(rl.waitMs / 1000)}s and trying again.`);
+          throw new Refused(msg);
+        }
+        for (const f of group) mark(f.id, 'pending', `Not read: ${msg}`);
+        return group.map((f) => `✗ ${f.name} — ${msg}`);
+      }
+    };
+
     const log: string[] = [];
     for (const f of sequential) {
       if (cancelRead.current) break;
       log.push(await readOne(f).catch((e) => `✗ ${f.name} — ${e instanceof Error ? e.message : String(e)}`));
       bump();
     }
+
+    const photoResults = await mapPool(photoGroups, readGroup, {
+      concurrency: READ_CONCURRENCY,
+      onSettled: () => { done += 0; },
+      onProgress: (p) => setPoolProgress({ ...p, gate: gate.state() }),
+      shouldStop: () => cancelRead.current || dailyLimit.current,
+      maxAttempts: MAX_READ_ATTEMPTS,
+      retryAfter: (err) => (err instanceof Refused ? Math.max(500, gate.state().pausedFor) : null),
+    });
+
+    photoResults.forEach((r, i) => {
+      const group = photoGroups[i];
+      if (r.status === 'done') {
+        log.push(...r.value);
+        done += group.length;
+        setProgress({ done, total });
+        return;
+      }
+      const why = dailyLimit.current ? DAILY_LIMIT_MESSAGE : 'Not read — reading was stopped before this file was reached.';
+      for (const f of group) {
+        mark(f.id, 'pending', why);
+        log.push(`• ${f.name} — ${dailyLimit.current ? 'daily token allowance spent' : 'stopped before this file'}`);
+      }
+      done += group.length;
+      setProgress({ done, total });
+    });
 
     const results = await mapPool(visual, readOne, {
       concurrency: READ_CONCURRENCY,
@@ -412,24 +605,57 @@ export function Intake({
     }
   };
 
+  /**
+   * Everything the folder proposed for the twelve questions, best source first.
+   *
+   * Order is the whole of the precedence rule: applyPrefill takes the first usable proposal and
+   * files the rest as conflicts, so a figure parsed structurally out of a spreadsheet must come
+   * ahead of the same figure read off a page by the vision model. A BOQ's area cell is not a
+   * better-worded version of a model's guess at the area — it is the number itself.
+   */
+  const proposedAnswers = (): FoundAnswer[] => {
+    const found: FoundAnswer[] = [];
+
+    if (scheduleStart) found.push({ key: 'start', value: scheduleStart, source: 'the ingested programme' });
+    else if (extraction.contractStart) found.push({ key: 'start', value: extraction.contractStart, source: 'the contract, vision extraction' });
+
+    if (draftInputs.areaSft) found.push({ key: 'area', value: String(draftInputs.areaSft.value), source: draftInputs.areaSft.source });
+    if (extraction.contractDurationCalDays)
+      found.push({ key: 'duration', value: String(extraction.contractDurationCalDays.value), source: extraction.contractDurationCalDays.source });
+
+    // Milestones are structured by the time they get here; rendering them back to a sentence is
+    // what the question actually asks for, and keeps the person confirming one thing, not twelve.
+    if (extraction.milestones.length)
+      found.push({
+        key: 'milestones',
+        value: extraction.milestones.map((m) => `${m.code}: ${m.percent}% at day ${m.dayOffset}${m.description ? ` (${m.description})` : ''}`).join('; '),
+        source: 'the payment terms, vision extraction',
+      });
+
+    // The model's own reads come last, and keep the file and clause they were read from.
+    found.push(...extraction.planningAnswers);
+    return found;
+  };
+
   const goToQueries = () => {
     if (!scan) return;
-    setQueries((qs) => {
-      if (qs.length) return qs;
-      // Prefill what the documents actually established, so the project head confirms a figure
-      // rather than retyping it. Anything not extracted stays blank and still blocks.
-      const prefill: Record<string, string> = {};
-      if (scheduleStart) prefill.q_start = scheduleStart;
-      if (draftInputs.areaSft) prefill.q_area = String(draftInputs.areaSft.value);
-      return buildQueries(buildInventory(scan)).map((q) =>
-        prefill[q.id] ? { ...q, answer: prefill[q.id], foundHint: q.foundHint ?? 'read from the documents' } : q,
-      );
-    });
+    setQueries((qs) => (qs.length ? qs : applyPrefill(buildQueries(buildInventory(scan)), proposedAnswers())));
     setStep('queries');
   };
 
-  const answer = (id: string, v: string) => setQueries((qs) => qs.map((q) => (q.id === id ? { ...q, answer: v } : q)));
+  /** Re-read the folder's proposals into the existing question list, keeping anything already
+   * confirmed or typed. Used after reading more documents without starting over. */
+  const refreshPrefill = () =>
+    setQueries((qs) => applyPrefill(qs.map((q) => (q.prefill && !q.confirmed ? { ...q, answer: '', prefill: undefined } : q)), proposedAnswers()));
+
+  const confirm = (id: string, on: boolean) => setQueries((qs) => qs.map((q) => (q.id === id ? { ...q, confirmed: on } : q)));
+  const confirmAll = () => setQueries((qs) => qs.map((q) => (q.prefill && q.answer.trim() ? { ...q, confirmed: true } : q)));
+
+  // Editing a proposed value confirms it. Someone who retypes a figure has taken ownership of
+  // it just as surely as someone who ticked the box, and making them do both would be a toll.
+  const answer = (id: string, v: string) => setQueries((qs) => qs.map((q) => (q.id === id ? { ...q, answer: v, confirmed: q.prefill ? true : q.confirmed } : q)));
   const blocking = unansweredBlocking(queries);
+  const toConfirm = awaitingConfirmation(queries).filter((q) => q.answer.trim());
 
   const create = () => {
     const get = (id: string) => queries.find((q) => q.id === id)?.answer.trim() ?? '';
@@ -610,8 +836,10 @@ export function Intake({
         <>
           <h2>Questions for the project head</h2>
           <p className="muted" style={{ marginTop: -4, maxWidth: 780 }}>
-            These are the things the engine refuses to assume. Blocking questions must be answered before a plan
-            is generated — that is deliberate: a confident plan built on guessed dates is worse than no plan.
+            These are the things the engine refuses to assume. Anything the folder actually states is filled in
+            already, with the document and clause it came from — check those and tick to confirm. Blocking questions
+            must be answered before a plan is generated, and a proposal is not an answer until someone accepts it:
+            a confident plan built on guessed dates is worse than no plan.
           </p>
 
           {readLog.length > 0 && (
@@ -627,14 +855,39 @@ export function Intake({
               <input value={projectName} onChange={(e) => setProjectName(e.target.value)} />
             </div>
             <span className={`tag ${blocking.length ? 'crit' : 'ok'}`}>{blocking.length ? `${blocking.length} blocking question(s) unanswered` : 'all blocking questions answered'}</span>
+            {toConfirm.length > 0 && (
+              <>
+                <span className="tag warn">{toConfirm.length} read from the documents, awaiting confirmation</span>
+                <button onClick={confirmAll}>Confirm all {toConfirm.length} →</button>
+              </>
+            )}
+            <button onClick={refreshPrefill} title="Re-read the answers the documents proposed, keeping anything already confirmed or typed">
+              Re-read from documents
+            </button>
           </div>
 
           {queries.map((q) => (
-            <div key={q.id} className={`qcard ${q.answer.trim() ? 'answered' : ''}`}>
+            <div key={q.id} className={`qcard ${q.prefill && !q.confirmed ? 'proposed' : q.answer.trim() ? 'answered' : ''}`}>
               <div className="q">
                 {q.question} {q.blocking ? <span className="tag crit" style={{ marginLeft: 6 }}>blocking</span> : <span className="tag" style={{ marginLeft: 6 }}>optional</span>}
+                {q.prefill && (
+                  <span className={`tag ${q.confirmed ? 'ok' : 'warn'}`} style={{ marginLeft: 6 }}>
+                    {q.confirmed ? 'confirmed' : 'read from documents — confirm'}
+                  </span>
+                )}
               </div>
               <div className="why">{q.why}{q.foundHint && <> · <em>found in folder: {q.foundHint}</em></>}</div>
+              {q.prefill && (
+                <div className="read-from">
+                  Read from <em>{q.prefill.sources.join('; ')}</em>.
+                  {q.prefill.rawOnly && (
+                    <> The folder says {q.prefill.rawOnly}, which could not be turned into a {q.kind === 'choice' ? 'choice from the list' : q.kind}. Set it below.</>
+                  )}
+                  {q.prefill.conflicts?.length && (
+                    <> <strong>Another document says {q.prefill.conflicts.join('; ')}</strong> — check which is current before confirming.</>
+                  )}
+                </div>
+              )}
               {q.kind === 'choice' ? (
                 <select value={q.answer} onChange={(e) => answer(q.id, e.target.value)} style={{ minWidth: 320 }}>
                   <option value="">— select —</option>
@@ -646,6 +899,12 @@ export function Intake({
                 <input type="number" value={q.answer} onChange={(e) => answer(q.id, e.target.value)} style={{ width: 200 }} />
               ) : (
                 <textarea value={q.answer} onChange={(e) => answer(q.id, e.target.value)} rows={2} style={{ width: '100%', maxWidth: 780 }} />
+              )}
+              {q.prefill && q.answer.trim() && (
+                <label className="confirm">
+                  <input type="checkbox" checked={!!q.confirmed} onChange={(e) => confirm(q.id, e.target.checked)} />
+                  {q.confirmed ? 'Confirmed — this is the value the plan will use.' : 'Tick to confirm this is right, or edit it above.'}
+                </label>
               )}
             </div>
           ))}

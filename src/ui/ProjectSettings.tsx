@@ -36,6 +36,19 @@ export function ProjectSettings({
   clientId,
   existingIds,
   onCreate,
+  /**
+   * True on the New Project screen, where there is no project yet.
+   *
+   * Everything below keys off `project`, and on that screen `project` is whichever project
+   * happened to be selected last. So the header bar announced a different project's name, code,
+   * carpet area and team above a blank intake form — and the other three panes were worse than
+   * cosmetic: typing site details, schedule dates or team members while setting up a new project
+   * silently edited the OLD one's record, because `org` is keyed by project id.
+   *
+   * While creating, this screen is the intake and nothing else. The rest needs a project to
+   * exist before it can belong to one.
+   */
+  creating = false,
 }: {
   project: ProjectInputs;
   org: OrgState;
@@ -43,6 +56,7 @@ export function ProjectSettings({
   clientId: string;
   existingIds: string[];
   onCreate: (p: ProjectInputs) => void;
+  creating?: boolean;
 }) {
   const [pane, setPane] = useState<Pane>('drive');
   const site = siteFor(org, project.id);
@@ -51,7 +65,9 @@ export function ProjectSettings({
 
   return (
     <>
-      {/* project header bar, mirroring the operations tool */}
+      {/* project header bar, mirroring the operations tool. Never while creating: there is no
+          project to head, and the one it would describe is the last one that was open. */}
+      {!creating && (
       <div
         className="card"
         style={{ marginBottom: 14, display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap', background: 'var(--panel2)' }}
@@ -75,21 +91,32 @@ export function ProjectSettings({
           <div style={{ fontWeight: 600 }}>{teamFor(org, project.id).filter((m) => m.employeeCode).length} people</div>
         </div>
       </div>
-
-      <div className="row" style={{ marginBottom: 16 }}>
-        <div className="seg">
-          {PANES.map((p) => (
-            <button key={p.key} className={pane === p.key ? 'on' : ''} onClick={() => setPane(p.key)}>{p.label}</button>
-          ))}
-        </div>
-      </div>
-
-      {pane === 'drive' && (
-        <Intake clientId={clientId} existingIds={existingIds} onCreate={onCreate} initialUrl={site.driveUrl} onUrlChange={(driveUrl) => setSite({ driveUrl })} />
       )}
-      {pane === 'site' && <SiteDetails site={site} setSite={setSite} project={project} />}
-      {pane === 'dates' && <ScheduleDates org={org} setOrg={setOrg} projectId={project.id} />}
-      {pane === 'team' && <ProjectTeam org={org} setOrg={setOrg} projectId={project.id} />}
+
+      {!creating && (
+        <div className="row" style={{ marginBottom: 16 }}>
+          <div className="seg">
+            {PANES.map((p) => (
+              <button key={p.key} className={pane === p.key ? 'on' : ''} onClick={() => setPane(p.key)}>{p.label}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(creating || pane === 'drive') && (
+        <Intake
+          clientId={clientId}
+          existingIds={existingIds}
+          onCreate={onCreate}
+          // While creating there is no project to remember a folder against, so the field starts
+          // empty rather than pre-filled with the last project's Drive link.
+          initialUrl={creating ? '' : site.driveUrl}
+          onUrlChange={creating ? undefined : (driveUrl) => setSite({ driveUrl })}
+        />
+      )}
+      {!creating && pane === 'site' && <SiteDetails site={site} setSite={setSite} project={project} />}
+      {!creating && pane === 'dates' && <ScheduleDates org={org} setOrg={setOrg} projectId={project.id} />}
+      {!creating && pane === 'team' && <ProjectTeam org={org} setOrg={setOrg} projectId={project.id} />}
     </>
   );
 }
