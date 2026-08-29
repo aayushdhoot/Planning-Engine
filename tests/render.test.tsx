@@ -27,8 +27,16 @@ const TODAY = '2025-11-15';
 describe('UI renders without throwing', () => {
   it('the whole app mounts', () => {
     const html = renderToString(<App />);
-    expect(html).toContain('DnB Planning Engine');
+    // The app opens on the project dashboard now, not straight into a project —
+    // see "Add project dashboard landing page with card-based project selection".
+    // This asserted the in-project header text ("DnB Planning Engine"), which the
+    // landing screen does not carry, so it had been failing since that commit.
+    // It now checks what the landing screen is actually for: the brand, and a
+    // card for every project there is to open.
+    expect(html).toContain('Planning Engine');
+    expect(html).toContain('dash-grid');
     expect(html).toContain('SKF, Pune');
+    expect(html).toContain('New Project');
   });
 
   it('the PERT view renders an issued programme with collapsible rows', () => {

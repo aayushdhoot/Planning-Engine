@@ -17,11 +17,50 @@ describe('mapPool', () => {
       await new Promise((r) => setTimeout(r, ms / 10));
       return ms;
     }, { concurrency: 3 });
+    // `attempts` rides on every settled result now — a file that only came back on its third
+    // try is worth knowing about when a scan is explained afterwards.
     expect(out).toEqual([
-      { status: 'done', value: 30 },
-      { status: 'done', value: 10 },
-      { status: 'done', value: 20 },
+      { status: 'done', value: 30, attempts: 1 },
+      { status: 'done', value: 10, attempts: 1 },
+      { status: 'done', value: 20, attempts: 1 },
     ]);
+  });
+
+  it('puts a retryable failure back on the queue instead of abandoning it', async () => {
+    // The behaviour a folder scan needs: a file refused on a rate limit has not failed, it has
+    // been told to come back. It used to be recorded as failed and never tried again, which is
+    // how a scan finished with most of the folder still unread.
+    let tries = 0;
+    const out = await mapPool([1], async () => {
+      tries++;
+      if (tries < 3) throw new Error('429 rate limit');
+      return 'read';
+    }, {
+      concurrency: 1,
+      retryAfter: (err) => (String((err as Error).message).includes('429') ? 0 : null),
+    });
+    expect(tries).toBe(3);
+    expect(out[0]).toEqual({ status: 'done', value: 'read', attempts: 3 });
+  });
+
+  it('stops retrying at maxAttempts rather than looping for ever', async () => {
+    let tries = 0;
+    const out = await mapPool([1], async () => { tries++; throw new Error('429 rate limit'); }, {
+      concurrency: 1, maxAttempts: 3, retryAfter: () => 0,
+    });
+    expect(tries).toBe(3);
+    expect(out[0].status).toBe('failed');
+  });
+
+  it('accepts a non-retryable failure first time, without burning attempts on it', async () => {
+    // an unreadable file fails identically however many times it is tried
+    let tries = 0;
+    const out = await mapPool([1], async () => { tries++; throw new Error('corrupt file'); }, {
+      concurrency: 1,
+      retryAfter: (err) => (String((err as Error).message).includes('429') ? 0 : null),
+    });
+    expect(tries).toBe(1);
+    expect(out[0].status).toBe('failed');
   });
 
   it('never exceeds its concurrency', async () => {
@@ -53,7 +92,7 @@ describe('mapPool', () => {
       return n;
     }, { concurrency: 2 });
     expect(out[0].status).toBe('failed');
-    expect(out[1]).toEqual({ status: 'done', value: 2 });
+    expect(out[1]).toEqual({ status: 'done', value: 2, attempts: 1 });
   });
 });
 

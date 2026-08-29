@@ -136,6 +136,25 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
   vertical-align: middle; line-height: 1;
 }
 .twist:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---- the schedule toolbar ----
+   Grouped rather than one long row of eleven controls. The gap BETWEEN groups is
+   wider than the gap inside one, which is what makes the grouping read without
+   having to draw a line. The editing tools sit on their own tinted row, so
+   turning editing on does not reflow the controls above it. */
+.pert-bar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+.pert-group { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.pert-count { font-size: 11.5px; line-height: 1.45; text-align: right; }
+.pert-editbar {
+  background: var(--accent-soft); border: 1px solid #b6d4ff; border-radius: 10px;
+  padding: 9px 12px; margin: -4px 0 12px; gap: 10px;
+}
+.pert-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+.pert-sep { width: 1px; align-self: stretch; background: #b6d4ff; margin: 0 2px; }
+/* a disabled control must still be readable — it says what is off, not nothing */
+button:disabled { opacity: 1; color: var(--faint); border-style: dashed; cursor: not-allowed; box-shadow: none; }
+input:disabled, select:disabled { background: var(--panel2); color: var(--muted); cursor: not-allowed; }
+
 .pert tr.lvl1 > td { background: var(--accent-soft); font-weight: 700; }
 .pert tr.lvl2 > td { background: var(--panel2); font-weight: 600; }
 .pert tr.lvl3 > td { font-weight: 500; }

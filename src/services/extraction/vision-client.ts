@@ -39,7 +39,16 @@ const DEFAULT_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/model
 // rate limit into an automatic short pause instead of a failure the person has to manually retry.
 const MAX_RATE_LIMIT_RETRIES = 3;
 const DEFAULT_RETRY_WAIT_MS = 5000;
-const MAX_RETRY_WAIT_MS = 20000;
+/**
+ * The longest wait this client sits through before handing the refusal back.
+ *
+ * It was 20s. Gemini routinely names 25-60s once a minute-window is genuinely spent, so the
+ * client gave up on precisely the waits it should have honoured and the file came back as a hard
+ * failure. Outlasting a long pause is not this client's job in any case — the caller's rate gate
+ * holds the whole run behind one shared timer and puts the file back on the queue. This ceiling
+ * only decides how long to hold a socket open rather than hand the refusal up.
+ */
+const MAX_RETRY_WAIT_MS = 45000;
 
 /**
  * Which limit was hit. Gemini's per-day quota (free tier) does not clear by waiting; a

@@ -8,10 +8,20 @@ import { extractWithVision, VisionExtractionError, type RateLimitScope, type Vis
 import { mapPool } from './pool';
 import type { ExtractionResult } from './types';
 
-/** How many vision calls this service keeps in flight. Four is empirically under Groq's
- * per-minute ceiling for this model while being roughly four times faster than one at a time;
- * the caller can override it per request. */
-export const DEFAULT_CONCURRENCY = 4;
+/**
+ * How many vision calls this service keeps in flight, across the PAGES of one document.
+ *
+ * It was four, and it multiplied. The browser reads four files at once, and each of those became
+ * its own server call fanning out to four more — sixteen concurrent requests against an
+ * allowance of roughly fifteen a MINUTE. The scan tripped the limit within seconds; every
+ * in-flight call then retried on its own schedule, tripped it again, and after three rounds each
+ * gave up and marked its file unread. That is why a folder scan finished with most of it
+ * "readable but never read", and why running it again collected a few more each time.
+ *
+ * The browser now holds one shared pace for the whole run (services/extraction/rate-gate.ts).
+ * This stays low so that a single long PDF cannot burst past that pace on its own.
+ */
+export const DEFAULT_CONCURRENCY = 2;
 
 const VALID_TRADES = new Set([
   'general', 'civil', 'plumbing', 'partition', 'electrical', 'hvac',

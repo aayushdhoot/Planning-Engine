@@ -8,15 +8,28 @@ import { buildInventory, buildQueries, unansweredBlocking, type IntakeQuery } fr
 import { extractorFor, noExtractorReason, type DocStates } from '../engine/coverage';
 import { applyExtractionPatch } from '../services/extraction/extraction-service';
 import { dailyLimitHit, extractFileViaApi, firstFailure, ExtractionClientError } from '../services/extraction/browser-client';
-import { mapPool } from '../services/extraction/pool';
+import { mapPool, type PoolProgress } from '../services/extraction/pool';
+import { RateGate, DEFAULT_RPM, rateLimitWait } from '../services/extraction/rate-gate';
 import { DriveCoverage } from './DriveCoverage';
 
 type Step = 'link' | 'drive' | 'queries' | 'done';
 
-/** Vision reads that may be in flight at once. Each one is a network round trip that the
- * others do not depend on, so reading 130 site photos one at a time was pure wall-clock waste;
- * the ceiling is the provider's per-minute rate limit, not this machine. */
+/**
+ * Vision reads that may be in flight at once.
+ *
+ * The ceiling is the provider's per-minute rate limit, not this machine — and the pace is now
+ * held by a shared RateGate rather than by this number, which only decides how many can be
+ * WAITING on that gate at once. Four still fills the pipe without queueing so deeply that a
+ * Stop takes ages to take effect.
+ *
+ * It was four before too, but each of those four fanned out to up to four page-reads inside its
+ * own server call: sixteen concurrent requests against a fifteen-a-minute allowance. The server
+ * side now runs pages two at a time and this side paces the whole thing.
+ */
 const READ_CONCURRENCY = 4;
+
+/** Attempts per file before a rate-limited read is given up on. */
+const MAX_READ_ATTEMPTS = 6;
 
 const DAILY_LIMIT_MESSAGE =
   "Not read — the vision model's daily token allowance is spent. It resets on the provider's schedule; " +
@@ -50,6 +63,10 @@ export function Intake({
   const [busy, setBusy] = useState(false);
   const [reading, setReading] = useState<string | null>(null);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  /** the richer picture: what is in flight, what is waiting to retry, and how long is left */
+  const [poolProgress, setPoolProgress] = useState<
+    (PoolProgress & { gate: { rpm: number; pausedFor: number; refusals: number; waiting: number } }) | null
+  >(null);
   // Refs, not state: both are read from inside an in-flight pool, where a re-rendered closure
   // would still be looking at the value the run started with.
   const cancelRead = useRef(false);
@@ -293,12 +310,33 @@ export function Intake({
     setProgress({ done: 0, total });
     setReading(total === 1 ? files[0].id : 'all');
 
+    // One pace for the whole run. Created per run so a scan does not inherit the slowed-down
+    // rate a previous one ended on — the limit may well have cleared since.
+    const gate = new RateGate(DEFAULT_RPM);
+
+    /**
+     * A rate-limited read THROWS here rather than being swallowed, so the pool can put it back
+     * on the queue. Anything else — an unreadable file, a render failure — is recorded and
+     * accepted, because retrying it would fail identically six more times.
+     */
+    class Refused extends Error {}
+
     const readOne = async (f: DriveFile): Promise<string> => {
+      await gate.acquire();
       try {
         const data = await service().readFile(f);
-        return await applyBytes(f.name, data, f.id, extractorFor(f), false, f.path);
+        const line = await applyBytes(f.name, data, f.id, extractorFor(f), false, f.path);
+        gate.onSuccess();
+        return line;
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
+        const rl = rateLimitWait(msg);
+        if (rl.daily) { dailyLimit.current = true; mark(f.id, 'pending', DAILY_LIMIT_MESSAGE); throw new Error(msg); }
+        if (rl.retry) {
+          gate.penalise(rl.waitMs);
+          mark(f.id, 'pending', `Rate limited — waiting ${Math.round(rl.waitMs / 1000)}s and trying again.`);
+          throw new Refused(msg);
+        }
         mark(f.id, 'pending', `Could not read: ${msg}`);
         return `✗ ${f.name} — ${msg}`;
       }
@@ -307,14 +345,18 @@ export function Intake({
     const log: string[] = [];
     for (const f of sequential) {
       if (cancelRead.current) break;
-      log.push(await readOne(f));
+      log.push(await readOne(f).catch((e) => `✗ ${f.name} — ${e instanceof Error ? e.message : String(e)}`));
       bump();
     }
 
     const results = await mapPool(visual, readOne, {
       concurrency: READ_CONCURRENCY,
       onSettled: bump,
+      onProgress: (p) => setPoolProgress({ ...p, gate: gate.state() }),
       shouldStop: () => cancelRead.current || dailyLimit.current,
+      maxAttempts: MAX_READ_ATTEMPTS,
+      // Only a refusal comes back. Everything else has already been recorded on its row.
+      retryAfter: (err) => (err instanceof Refused ? Math.max(500, gate.state().pausedFor) : null),
     });
 
     results.forEach((r, i) => {
@@ -330,6 +372,7 @@ export function Intake({
 
     setReading(null);
     setProgress(null);
+    setPoolProgress(null);
     setReadLog((prev) => [...prev, ...log]);
     if (dailyLimit.current)
       setError(
@@ -550,7 +593,7 @@ export function Intake({
             scan={scan}
             states={docStates}
             busy={reading}
-            progress={progress}
+            progress={poolProgress ?? progress}
             onStop={stopReading}
             onRead={(files) => void readFiles(files)}
             onPrepareByHand={prepareByHand}
