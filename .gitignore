@@ -35,4 +35,8 @@ tracking/projects/
 # the intake screen, with its BOQ package values and contract figures in it. Our
 # own cost sits beside the client price in those, and THIS REPOSITORY IS PUBLIC
 # — same reason the org master and the tracking sync store are excluded above.
-workspace/
+# Anchored with a leading slash. Unanchored, `workspace/` matches a directory of
+# that name at ANY depth — which also swallowed api/workspace/, the source folder
+# holding the routes that do the saving. projects.ts was never committed once in
+# the repo’s life because of it, so a fresh clone got an app whose save 404s.
+/workspace/

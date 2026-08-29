@@ -4,6 +4,7 @@ import type { CpmResult, EngineConfig, ProjectInputs, ScheduledActivity, Traced 
 import { computeCpm } from './cpm';
 import { addCalendarDays, parseIso } from './calendar';
 import { deriveWbs, applyDesignTradeHints } from './wbs';
+import { applyEditsToActivities, type ScheduleEdits } from './schedule-edits';
 import { levelManpower, type ManpowerPlan } from './manpower';
 import { buildDependencyTracker, buildDesignTracker, buildProcurementTracker, buildRaTracker, buildTodoTracker } from './trackers';
 import { buildMaterialTracker } from './materials';
@@ -94,7 +95,17 @@ export interface ExternalDelay {
   reason: string;
 }
 
-export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, externalDelays: ExternalDelay[] = []): Plan {
+export function buildPlan(
+  p: ProjectInputs,
+  cfg: EngineConfig,
+  today: string,
+  externalDelays: ExternalDelay[] = [],
+  /**
+   * Hand edits to the programme. Optional, and empty for every caller that has
+   * none, so this stays the same function the tests and the report scripts call.
+   */
+  edits: ScheduleEdits = {},
+): Plan {
   const missing: string[] = [];
   const prov = p.provided;
   if (!prov.boq) missing.push('Project BOQ (priced)');
@@ -127,11 +138,63 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, ex
   // and this question is only ever about the ones the engine derived from a BOQ.
   let wbsValueDriven: boolean | null = null;
   if (!sourceActivities.length && prov.boq && p.boqPackages.length && p.contractStart) {
-    const wbs = deriveWbs(p.boqPackages, p.contractDurationCalDays?.value ?? null, p.siteConditions);
+    /**
+     * A TRADE CANNOT BE COMPLETE BEFORE THE JOB HAS STARTED.
+     *
+     * Site-condition readings delete work from the programme: a trade read as
+     * complete is skipped outright, and one read as part-done is shrunk. That is
+     * right on a live site and nonsense on one that has not opened, and the
+     * difference was not being checked.
+     *
+     * Two new projects showed what that costs. Both started on the day they were
+     * planned, so nothing on either site could have been built yet — and both had
+     * hundreds of "already complete" readings taken by the vision reader from
+     * photographs in their Drive folders. A model cannot tell a 3D render, a
+     * reference interior or a photograph of somebody else's finished office from
+     * a photograph of this job finished; nor should it have to. Eight of sixteen
+     * trades were struck off each programme. A 56,000 sft fit-out came out with 31
+     * activities and a peak of 41 workers where a comparable 26,000 sft job with
+     * its trades intact needs 124, and the schedule was quietly costed and
+     * resourced for half a job.
+     *
+     * The readings are still kept and still shown — they are what the folder
+     * contains, and on a running project they are exactly what should shape the
+     * plan. They simply cannot subtract work from a programme that has not begun.
+     */
+    // STRICTLY before: on the first day of a job, no day of work has been done
+    // yet. Both projects that exposed this start on the very day they were being
+    // planned, so `<=` would have called them under way and changed nothing.
+    const started = p.contractStart < today;
+    const shaping = started ? p.siteConditions : [];
+    const dropped = p.siteConditions.filter((s) => s.status === 'complete' || s.status === 'in_progress').length;
+    if (!started && dropped) {
+      const trades = [...new Set(p.siteConditions.filter((s) => s.status !== 'not_started').map((s) => s.trade))];
+      assumptions.push({
+        area: 'wbs',
+        internalOnly: false,
+        text: `${dropped} site reading(s) across ${trades.length} trade(s) (${trades.join(', ')}) report work already done, but the project does not start until ${p.contractStart} and today is ${today}. They have NOT been allowed to remove work from the programme — nothing can be built before the job opens. If these photographs are of this site and the work is genuinely done, move the contract start back and re-plan.`,
+      });
+    }
+    const wbs = deriveWbs(p.boqPackages, p.contractDurationCalDays?.value ?? null, shaping);
     sourceActivities = wbs.activities;
     wbsValueDriven = wbs.valueDriven;
     for (const n of wbs.notes) assumptions.push({ area: 'wbs', text: n, internalOnly: false });
   }
+
+  /**
+   * Hand edits go on here — AFTER the derivation above and BEFORE the fit below.
+   *
+   * After, because until the WBS has run there may be no activities to edit, and
+   * an overlay applied to an empty list is where every edit to a derived
+   * programme used to disappear. It also matters that an activity ADDED by hand
+   * cannot be what makes `sourceActivities` non-empty: that would read as "this
+   * project came with a schedule" and skip the derivation of the other sixty-odd
+   * rows entirely.
+   *
+   * Before, because a hand-set duration has to be visible to the fit — which
+   * leaves it alone, and has to reach the contract date using the rest.
+   */
+  if (Object.keys(edits).length) sourceActivities = applyEditsToActivities(sourceActivities, edits);
   /**
    * Does the BOQ describe the contract it is filed against?
    *
@@ -349,7 +412,13 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, ex
           return whole;
         };
         fitted = sourceActivities.map((a) =>
-          a.isMilestone || a.duration.value === 0
+          // A hand-set duration is exempt for the same reason a milestone is: there
+          // is nothing here to estimate. The fit tunes durations it derived itself,
+          // because against a norm the contract is the better evidence — but a
+          // number somebody typed is not a norm, and scaling it back is how a
+          // duration edited in the PERT editor used to revert on the next
+          // recompute, silently, with the editor reporting the edit as accepted.
+          a.isMilestone || a.duration.value === 0 || a.durationLocked
             ? a
             : {
                 ...a,

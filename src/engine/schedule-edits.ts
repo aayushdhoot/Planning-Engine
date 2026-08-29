@@ -17,7 +17,7 @@
 //            what a drawing or a client letter says, without claiming the
 //            network agrees. The row is marked, because a date the network does
 //            not stand behind must not look like one it does.
-import type { Activity, Dependency, ProjectInputs } from '../domain/types';
+import type { Activity, ActivityStatus, Dependency, ProjectInputs } from '../domain/types';
 import type { ExternalDelay, Plan } from './planner';
 import { workingDaysBetween } from './calendar';
 
@@ -31,6 +31,24 @@ export interface ActivityEdit {
   /** typed start date and how it should behave */
   start?: string | null;
   startMode?: DateMode;
+  /**
+   * Typed finish date, display mode only.
+   *
+   * A PINNED finish never reaches here: it is expressed as a duration, because
+   * that is the only thing a finish can honestly mean to a network solved
+   * forwards from its start. The editor converts start→finish into working days
+   * and writes `durationDays`, so successors move and the critical path
+   * re-routes exactly as they would for a duration typed directly. Storing a
+   * pinned finish as well would leave two facts about the same row that a later
+   * recompute could put out of step.
+   */
+  finish?: string | null;
+  finishMode?: DateMode;
+  /** what the site recorded actually happening — a fact, not a plan */
+  actualStart?: string | null;
+  actualFinish?: string | null;
+  /** a status set by hand; null clears it and hands the row back to the derivation */
+  status?: ActivityStatus | null;
   /** replacement predecessor list; undefined means "unchanged" */
   deps?: Dependency[];
   deleted?: boolean;
@@ -63,6 +81,25 @@ export function wouldCycle(acts: Activity[], id: string, predId: string): boolea
 }
 
 /**
+ * Fold the overlay into a list of activities.
+ *
+ * THIS, AND NOT THE PROJECT INPUTS, IS WHERE THE OVERLAY BELONGS. A programme
+ * only sometimes arrives with the project: where there is a BOQ and no supplied
+ * schedule the activities are DERIVED, inside buildPlan, from the WBS template —
+ * which is the usual case, and every project here but Emirates. Folding the
+ * overlay into `project.scheduleActivities` therefore folded it into an empty
+ * list: the editor counted the edit, the push counted the edit, and the
+ * programme never changed, for every project whose schedule the engine wrote.
+ *
+ * Taking activities rather than inputs lets buildPlan apply it at the one moment
+ * both kinds exist — after the derivation, before the fit.
+ */
+export function applyEditsToActivities(activities: Activity[], edits: ScheduleEdits): Activity[] {
+  const project = { scheduleActivities: activities } as ProjectInputs;
+  return applyScheduleEdits(project, edits).scheduleActivities;
+}
+
+/**
  * Fold the overlay into the project inputs. The result is a ProjectInputs that
  * buildPlan can be run over exactly as if the schedule had arrived this way.
  */
@@ -78,6 +115,7 @@ export function applyScheduleEdits(project: ProjectInputs, edits: ScheduleEdits)
       phase: e.added!.phase || 'Execution',
       trade: e.added!.trade || 'general',
       duration: { value: Math.max(1, e.durationDays ?? 1), provenance: 'input' as const, source: 'added by hand in the schedule editor' },
+      durationLocked: true,   // typed, like every other hand-set duration
       deps: e.deps ?? [],
       crew: { value: 1, provenance: 'norm' as const, source: 'added by hand — crew not stated' },
       isMilestone: false,
@@ -90,11 +128,29 @@ export function applyScheduleEdits(project: ProjectInputs, edits: ScheduleEdits)
       if (!e) return a;
       const next: Activity = { ...a };
       if (e.name) next.name = e.name;
-      if (e.durationDays != null && e.durationDays > 0)
+      if (e.durationDays != null && e.durationDays > 0) {
         next.duration = { value: e.durationDays, provenance: 'input', source: 'set by hand in the schedule editor' };
+        // ...and held there. Without the lock the schedule fit rescales it on the
+        // next recompute and the typed number is gone before it is read once.
+        next.durationLocked = true;
+      }
       if (e.percentComplete != null)
         next.percentComplete = { value: Math.max(0, Math.min(100, e.percentComplete)), provenance: 'input', source: 'recorded by hand in the schedule editor' };
       if (e.deps) next.deps = e.deps;
+      // Recorded and display values. Each is folded in only when it holds a date —
+      // a null is the person CLEARING the field, and the row goes back to what the
+      // engine computes, so the absence has to be preserved rather than written as
+      // an empty string that every later reader would have to guess at.
+      if (e.start && e.startMode === 'display')
+        next.displayStart = { value: e.start, provenance: 'input', source: 'typed in the schedule editor — display only' };
+      if (e.finish && e.finishMode === 'display')
+        next.displayFinish = { value: e.finish, provenance: 'input', source: 'typed in the schedule editor — display only' };
+      if (e.actualStart)
+        next.actualStart = { value: e.actualStart, provenance: 'input', source: 'actual start recorded in the schedule editor' };
+      if (e.actualFinish)
+        next.actualFinish = { value: e.actualFinish, provenance: 'input', source: 'actual finish recorded in the schedule editor' };
+      if (e.status)
+        next.statusOverride = { value: e.status, provenance: 'input', source: 'status set by hand in the schedule editor' };
       return next;
     });
 
@@ -129,6 +185,10 @@ export function countEdits(edits: ScheduleEdits): number {
     if (e.durationDays != null) n++;
     if (e.percentComplete != null) n++;
     if (e.start != null) n++;
+    if (e.finish != null) n++;
+    if (e.actualStart != null) n++;
+    if (e.actualFinish != null) n++;
+    if (e.status != null) n++;
     if (e.deps) n++;
     if (e.added) n++;
   }

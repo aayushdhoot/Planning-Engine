@@ -208,7 +208,29 @@ input:disabled, select:disabled { background: var(--panel2); color: var(--muted)
 
 .dash-header { text-align: center; margin-bottom: 48px; }
 
-.dash-logo { height: 42px; width: auto; }
+/* The lockup: mark, then the name. Laid out here rather than drawn into the SVG,
+   so the two keep their relationship without either being pinned to font metrics. */
+.dash-brand { display: inline-flex; align-items: center; gap: 16px; }
+
+.dash-mark { height: 64px; width: auto; }
+
+/* Sized off the mark, not chosen loose: the original lockup set the name at ~0.8×
+   the height of the triangles, and holding that ratio is what keeps this reading
+   as the same logo rather than as a mark with a caption next to it. */
+.dash-wordmark {
+  font-family: 'Arial Black', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: 900; font-size: 40px; letter-spacing: 2px; line-height: 1;
+  text-transform: uppercase; color: #1a1a1a; white-space: nowrap;
+}
+/* Superscript, and deliberately small — the ® is a legal mark, not part of the
+   name, and at full weight beside a black wordmark it reads as an eleventh letter. */
+.dash-wordmark sup { font-size: .3em; font-weight: 700; vertical-align: super; margin-left: 2px; letter-spacing: 0; }
+
+@media (max-width: 560px) {
+  .dash-brand { gap: 11px; }
+  .dash-mark { height: 44px; }
+  .dash-wordmark { font-size: 27px; letter-spacing: 1px; }
+}
 
 .dash-subtitle {
   font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--faint);
@@ -308,4 +330,59 @@ nav.tabs button { transition: color .15s ease, border-color .15s ease; }
   header.top, nav.tabs { display: none; }
   body { background: #fff; }
   .tblwrap, .gantt, .pert { max-height: none; box-shadow: none; }
+}
+
+/* ---- Dashboard search --------------------------------------------------- */
+.dash-search { position: relative; display: flex; align-items: center; max-width: 560px; margin: 0 auto 22px; width: 100%; }
+.dash-search-icon { position: absolute; left: 13px; color: var(--faint); pointer-events: none; }
+.dash-search input {
+  width: 100%; padding: 10px 14px 10px 36px; font-size: 13.5px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--panel); color: var(--text); box-shadow: var(--shadow);
+}
+.dash-search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+/* the browser's own clear affordance would sit under our count chip */
+.dash-search input::-webkit-search-cancel-button { display: none; }
+.dash-search-count {
+  position: absolute; right: 10px; display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--muted); white-space: nowrap;
+}
+.dash-search-count button {
+  border: 0; background: transparent; color: var(--accent); font-size: 11px; font-weight: 600;
+  cursor: pointer; padding: 2px 4px;
+}
+.dash-empty { text-align: center; margin-top: 26px; font-size: 13px; }
+
+/* ---- AI Assistant: history beside the thread ---------------------------- */
+.chat-layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 18px; align-items: stretch; max-width: 1180px; }
+.chat-main { display: flex; flex-direction: column; height: calc(100vh - 220px); min-height: 420px; min-width: 0; }
+.chat-side {
+  display: flex; flex-direction: column; gap: 10px; height: calc(100vh - 220px); min-height: 420px;
+  border-right: 1px solid var(--line); padding-right: 16px;
+}
+.chat-new { width: 100%; }
+.chat-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.chat-side-empty { font-size: 12px; margin: 6px 2px; }
+.chat-side-err { font-size: 11px; color: var(--warn); margin: 0; }
+.chat-item { display: flex; align-items: center; border-radius: 8px; }
+.chat-item:hover { background: var(--panel2); }
+.chat-item.on { background: var(--accent-soft); }
+.chat-item-open {
+  flex: 1; min-width: 0; text-align: left; border: 0; background: transparent; cursor: pointer;
+  padding: 7px 8px; display: flex; flex-direction: column; gap: 2px; border-radius: 8px; color: var(--text);
+}
+.chat-item-title { font-size: 12.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-item-meta { font-size: 10.5px; color: var(--muted); }
+.chat-item.on .chat-item-title { color: var(--accent); }
+/* Tools stay hidden until the row is wanted — a delete control on every row of a
+   list is an invitation to lose a thread by mis-clicking down the side of it. */
+.chat-item-tools { display: none; gap: 2px; padding-right: 5px; }
+.chat-item:hover .chat-item-tools, .chat-item.on .chat-item-tools, .chat-item:focus-within .chat-item-tools { display: inline-flex; }
+.chat-item-tools button {
+  border: 0; background: transparent; cursor: pointer; color: var(--muted); font-size: 11px;
+  padding: 3px 4px; border-radius: 5px; line-height: 1;
+}
+.chat-item-tools button:hover { background: var(--panel); color: var(--text); }
+@media (max-width: 900px) {
+  .chat-layout { grid-template-columns: 1fr; }
+  .chat-side { height: auto; min-height: 0; max-height: 220px; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
 }

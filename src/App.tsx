@@ -8,8 +8,9 @@ import { buildPlan, clientView, type ExternalDelay, type Plan } from './engine/p
 import { auditTrace, canonicalJson, validatePlan } from './engine/schema';
 import { buildPertFromPlan } from './engine/pert-build';
 import { readVerdict, slidePending, workingDaysIn } from './engine/progress-replan';
+import { workingDaysBetween } from './engine/calendar';
 import {
-  applyScheduleEdits, countEdits, pinsToDelays, newActivityId, wouldCycle,
+  countEdits, pinsToDelays, newActivityId, wouldCycle,
   type ScheduleEdits, type ActivityEdit,
 } from './engine/schedule-edits';
 import { skf } from './data/skf';
@@ -27,6 +28,7 @@ import { Pert, type PertEditing } from './ui/Pert';
 import type { PertTree } from './domain/pert';
 import { ProjectSettings } from './ui/ProjectSettings';
 import { Assistant, EMPTY_CHAT_STATE, type ChatState } from './ui/Assistant';
+import { loadChats, saveChats, titleFrom, type Conversation } from './services/chat-store';
 import { BoqIngestionService, type IngestedBoq } from './services/ingestion';
 import { FilePersistence } from './services/persistence';
 import { readDriveClientId, writeDriveClientId, readOrg, writeOrg } from './services/settings-store';
@@ -36,7 +38,7 @@ import { renderReport } from './reports/render';
 import { buildDeck } from './reports/deck';
 import { syncPlanToTrackingEngine } from './services/dnbos-sync';
 import {
-  TRACKING_ENGINE_URL, buildBridgeModules, dnbosProjectId, pushPlan, pullState, pushEdits, type EditOverlay,
+  TRACKING_ENGINE_URL, buildBridgeModules, dnbosProjectId, planningProjectId, pushPlan, pullState, pushEdits, type EditOverlay,
 } from './services/dnbos-bridge';
 import { ProjectDashboard } from './ui/ProjectDashboard';
 import { loadWorkspace, saveWorkspace } from './services/workspace-store';
@@ -68,6 +70,9 @@ const BUFFER_COLOUR: Record<string, string | undefined> = {
   ok: undefined, tight: 'var(--warn)', breach: 'var(--crit)', implausible: 'var(--warn)',
 };
 
+/** Distinguishes chat ids created within a single load; the timestamp handles across loads. */
+let chatCounter = 0;
+
 export default function App() {
   const [extraProjects, setExtraProjects] = useState<ProjectInputs[]>([]);
   const [overrides, setOverrides] = useState<Record<string, ProjectInputs>>({});
@@ -83,6 +88,22 @@ export default function App() {
   const [workspaceError, setWorkspaceError] = useState<string | null>(null);
   const [ingestResult, setIngestResult] = useState<{ boq: IngestedBoq; file: string } | null>(null);
   const [projectId, setProjectId] = useState(BASE_PROJECTS[0].id);
+  /**
+   * A project asked for on the URL — `?project=<id>`, which is how the tracking
+   * engine's "← Planning" button hands over the project somebody is already
+   * reading rather than dropping them on the portfolio to find it again.
+   *
+   * It is STATE and not just a value read at mount, because the project it names
+   * may not exist yet: projects made in this app arrive from the workspace file
+   * one round trip later. Held until it can be honoured, then cleared — see the
+   * effect below.
+   */
+  const [wantedProject, setWantedProject] = useState<string | null>(
+    // Guarded because this component is also rendered to a string with no DOM
+    // around it — the render test mounts the whole app that way. There is no URL
+    // to read there, and no deep link to honour.
+    () => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('project')),
+  );
   const [view, setView] = useState<'internal' | 'external'>('internal');
   const [tab, setTab] = useState<Tab>('Cockpit');
   const [screen, setScreen] = useState<Screen>('dashboard');
@@ -111,10 +132,21 @@ export default function App() {
   // aren't wired into this component yet.
   const [appliedDelays, setAppliedDelays] = useState<Record<string, ExternalDelay[]>>({});
   const [lastAppliedSummary, setLastAppliedSummary] = useState<Record<string, string>>({});
-  // AI Assistant chat history, keyed by project — same session-only, per-project pattern as
-  // appliedDelays above. Lifted up here (rather than living inside Assistant.tsx) so it survives
-  // switching tabs away and back, and correctly starts fresh / resumes when the project changes.
-  const [chatByProject, setChatByProject] = useState<Record<string, ChatState>>({});
+  /**
+   * The AI Assistant's conversations — every thread, for every project, in one list.
+   *
+   * They were a `Record<projectId, ChatState>` held in memory: one thread per project, gone on
+   * reload. Both halves of that were wrong. A person asks about a project more than once and
+   * about different things, so a single thread per project overwrites the last conversation
+   * with the next; and a thread can end in an APPROVED REPLAN, which moves real dates — losing
+   * the reasoning behind a date change on a page refresh is the part that actually costs
+   * something. They now live in a file, through services/chat-store.ts.
+   */
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  /** which thread is open, per project — a UI position, so it is session-only by design */
+  const [openChatId, setOpenChatId] = useState<Record<string, string>>({});
+  const [chatsLoaded, setChatsLoaded] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const today = new Date().toISOString().slice(0, 10);
 
   // Read the workspace once, on mount. A failure is kept and shown rather than swallowed: an
@@ -146,6 +178,30 @@ export default function App() {
       if (err) setWorkspaceError(err);
     });
   }, [workspaceLoaded, extraProjects, overrides]);
+
+  // Read the saved conversations once, on mount. Same gate as the workspace above and for the
+  // same reason: only a SUCCESSFUL read may open the save gate, or the empty initial state
+  // would be written straight over a perfectly good file and take every past thread with it.
+  useEffect(() => {
+    let live = true;
+    void loadChats().then(({ chats, error }) => {
+      if (!live) return;
+      if (chats) { setConversations(chats.conversations); setChatsLoaded(true); }
+      setChatError(error);
+    });
+    return () => { live = false; };
+  }, []);
+
+  // Written back on a short delay rather than on every keystroke of a reply: a thread changes
+  // twice per exchange (the question, then the answer), and each turn can carry a whole revised
+  // programme. Coalescing them keeps one conversation from being a dozen whole-file writes.
+  useEffect(() => {
+    if (!chatsLoaded) return;
+    const t = setTimeout(() => {
+      void saveChats(conversations).then((err) => { if (err) setChatError(err); });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [chatsLoaded, conversations]);
 
   const ALL_PROJECTS = [...BASE_PROJECTS.map((p) => overrides[p.id] ?? p), ...extraProjects];
   const PROJECTS = ALL_PROJECTS.filter((p) => !org.archived.includes(p.id));
@@ -186,19 +242,23 @@ export default function App() {
   const [overlayDirty, setOverlayDirty] = useState<Record<string, EditOverlay>>({});
   const myOverlayDirty = overlayDirty[project.id] ?? {};
 
-  const edited = useMemo(() => applyScheduleEdits(sited, myEdits), [sited, myEdits]);
-
-  // Two passes. A pinned start is expressed as a working-day index, and the
-  // index depends on the project start, which is only known once a plan exists —
-  // so the plan is built once to learn the calendar and the start, then rebuilt
-  // with the pins turned into constraints. The first pass is thrown away.
+  // The overlay is handed to buildPlan rather than pre-applied to the inputs.
+  // Most projects here have no supplied schedule — theirs is derived from the BOQ
+  // inside buildPlan — so an overlay folded into `sited.scheduleActivities` was
+  // folded into an empty list and every hand edit was dropped on the floor while
+  // the editor went on reporting it as made. buildPlan applies it at the one
+  // point a derived programme and a supplied one look the same.
   const full = useMemo(() => {
-    const base = buildPlan(edited, cfg, today, appliedDelays[project.id] ?? []);
+    // Two passes. A pinned start is expressed as a working-day index, and the
+    // index depends on the project start, which is only known once a plan exists —
+    // so the plan is built once to learn the calendar and the start, then rebuilt
+    // with the pins turned into constraints. The first pass is thrown away.
+    const base = buildPlan(sited, cfg, today, appliedDelays[project.id] ?? [], myEdits);
     const start = base.internal?.start;
     const pins = start ? pinsToDelays(base, myEdits, start) : [];
     if (!pins.length) return base;
-    return buildPlan(edited, cfg, today, [...(appliedDelays[project.id] ?? []), ...pins]);
-  }, [edited, cfg, today, appliedDelays, project.id, myEdits]);
+    return buildPlan(sited, cfg, today, [...(appliedDelays[project.id] ?? []), ...pins], myEdits);
+  }, [sited, cfg, today, appliedDelays, project.id, myEdits]);
   const plan: Plan = view === 'external' ? clientView(full) : full;
   const validation = validatePlan(plan);
   const trace = auditTrace(plan);
@@ -209,9 +269,36 @@ export default function App() {
   }, [project.id, sited, full]);
 
   // Emirates ships with an issued MS-Project programme; everything else derives one.
+  // The tracker overlay goes INTO the tree, so a drawing's date corrected on the
+  // Design tab and the same date corrected in the schedule editor are one value
+  // shown on both screens — see engine/pert-build.ts.
+  /**
+   * Every cell correction in force right now: what site has pushed, with what
+   * this person has typed and not yet pushed laid over the top.
+   *
+   * BOTH halves are needed and it is not a nicety. `edits` is the REMOTE overlay
+   * and `applyRemote` overwrites it wholesale on every poll — so a correction
+   * typed here survives in `overlayDirty` but is wiped out of `edits` a second
+   * later, and anything reading only `edits` watches the value it was just given
+   * disappear on its own. Local wins, because it is the newer statement and the
+   * one its author is looking at.
+   *
+   * Memoised on the two stored values rather than written inline: `x ?? {}` is a
+   * NEW empty object every render, which would miss the memo and rebuild the
+   * whole PERT tree each time for every project that has no corrections at all.
+   */
+  const myCellEdits = useMemo(() => {
+    const remote = edits[project.id] ?? {};
+    const local = overlayDirty[project.id] ?? {};
+    const rows = Object.keys(local);
+    if (!rows.length) return remote;
+    const merged: Record<string, Record<string, string>> = { ...remote };
+    for (const rowId of rows) merged[rowId] = { ...(merged[rowId] ?? {}), ...local[rowId] };
+    return merged;
+  }, [edits, overlayDirty, project.id]);
   const pert = useMemo(
-    () => (project.id === 'emirates' ? buildEmiratesPert(today) : buildPertFromPlan(plan, today)),
-    [project.id, plan, today],
+    () => (project.id === 'emirates' ? buildEmiratesPert(today) : buildPertFromPlan(plan, today, myCellEdits)),
+    [project.id, plan, today, myCellEdits],
   );
 
   // ---- the tracking engine, kept in step -------------------------------------
@@ -423,6 +510,15 @@ export default function App() {
     clear: clearSchedEdits,
     count: schedEditCount,
     activities: full.modules.timeline.activities as unknown as PertEditing['activities'],
+    // The editor turns a typed finish into a duration, and only the plan's own
+    // calendar knows which of the days in between are worked. Handed down rather
+    // than reimplemented there, so a row edited by hand is measured on exactly
+    // the calendar every other duration in the programme was measured on.
+    workingDays: (from, to) => workingDaysBetween(from, to, full.calendar),
+    // Rows with no CPM network under them — drawings, packages, milestones — go
+    // to the same per-project cell overlay the Design and Procurement tabs write,
+    // and travel to the tracking engine on the same push.
+    setModule: (rowId, field, value) => edit(rowId, field, value),
   };
 
   /**
@@ -444,13 +540,116 @@ export default function App() {
       [project.id]: { ...(p[project.id] ?? {}), [rowId]: { ...(p[project.id]?.[rowId] ?? {}), [field]: value } },
     }));
   };
+  // Reads the MERGED overlay, not the remote one. Reading `edits` alone meant a
+  // correction typed on a tracker showed until the next poll replied and then
+  // silently reverted to the old value, while still sitting in the push count.
   const val = <T,>(rowId: string, field: string, fallback: T): T | string =>
-    edits[project.id]?.[rowId]?.[field] ?? fallback;
+    myCellEdits[rowId]?.[field] ?? fallback;
 
   const openProject = (id: string) => {
     setProjectId(id);
     setTab('Cockpit');
     setScreen('project');
+  };
+
+  /**
+   * Honour `?project=` once the project it names actually exists.
+   *
+   * The wait is the point. The tracking engine knows a project by ITS id, so the
+   * name is mapped back through the alias table; and a project made in this app
+   * only appears after the workspace read lands, so a link to one would find
+   * nothing if this ran only at mount and gave up. It retries as the project list
+   * grows, and stops asking once the workspace is in — at which point a name that
+   * still matches nothing is a name this app genuinely does not have, and the
+   * dashboard is the honest place to be.
+   *
+   * The parameter is stripped afterwards so a later reload is not silently
+   * dragged back to a project the person has since navigated away from.
+   */
+  const projectKey = PROJECTS.map((p) => p.id).join('|');
+  useEffect(() => {
+    if (!wantedProject) return;
+    const wanted = planningProjectId(wantedProject);
+    const hit = PROJECTS.find((p) => p.id === wanted || dnbosProjectId(p.id) === wantedProject);
+    if (hit) {
+      setProjectId(hit.id);
+      setTab('Cockpit');
+      setScreen('project');
+    } else if (!workspaceLoaded) {
+      return; // the workspace may still be carrying it — ask again when it lands
+    }
+    setWantedProject(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('project');
+    window.history.replaceState(null, '', url.toString());
+    // PROJECTS is rebuilt every render, so the list is depended on by its ids
+    // rather than its identity — the array itself would re-run this forever.
+  }, [wantedProject, workspaceLoaded, projectKey]);
+
+  // ---- the assistant's threads ------------------------------------------
+  const projectChats = useMemo(
+    () => conversations
+      .filter((c) => c.projectId === project.id)
+      .sort((a, b) => (b.updatedAt || b.createdAt).localeCompare(a.updatedAt || a.createdAt)),
+    [conversations, project.id],
+  );
+  const chatHistory = projectChats.map((c) => ({ id: c.id, title: c.title, updatedAt: c.updatedAt, turnCount: c.state.turns.length }));
+  /**
+   * Which thread is open. `undefined` means nothing has been picked, so the newest is shown —
+   * coming back to a project should land where it was left. The empty string is "a new chat",
+   * which is a real state and NOT the same as no choice: without it, opening a blank thread
+   * would immediately fall back to the newest one and there would be no way to start a second.
+   */
+  const openId = openChatId[project.id];
+  const activeChat = openId === '' ? null : projectChats.find((c) => c.id === openId) ?? projectChats[0] ?? null;
+
+  /**
+   * The id the next update belongs to, tracked outside React state.
+   *
+   * Assistant fires TWO updates for one exchange — the question, then the reply — from the same
+   * async call. If the first created a thread, the second would still be holding the render's
+   * `activeChat` (null) and would create a SECOND thread containing only the answer. The ref is
+   * what makes both halves of an exchange land in the same conversation.
+   */
+  const activeChatRef = useRef<string | null>(null);
+  activeChatRef.current = activeChat?.id ?? null;
+
+  const firstAsk = (s: ChatState) => s.turns.find((t) => t.role === 'user')?.text ?? '';
+
+  const updateActiveChat = (updater: (prev: ChatState) => ChatState) => {
+    const now = new Date().toISOString();
+    let id = activeChatRef.current;
+    if (!id) {
+      // A counter, not randomness: eslint bans Math.random repo-wide so nothing
+      // non-deterministic can reach a plan, and a thread can end in an approved
+      // replan. The timestamp separates ids made across reloads, the counter
+      // separates ids made within one.
+      id = `chat-${Date.now().toString(36)}-${++chatCounter}`;
+      activeChatRef.current = id;
+      setOpenChatId((prev) => ({ ...prev, [project.id]: id! }));
+    }
+    setConversations((prev) => {
+      const existing = prev.find((c) => c.id === id);
+      if (!existing) {
+        const state = updater(EMPTY_CHAT_STATE);
+        return [...prev, { id: id!, projectId: project.id, title: titleFrom(firstAsk(state)), createdAt: now, updatedAt: now, state }];
+      }
+      const state = updater(existing.state);
+      // A thread named by hand keeps its name; one still carrying the placeholder takes its
+      // title from the first thing asked, which is only known once that has been asked.
+      const title = existing.title && existing.title !== 'New chat' ? existing.title : titleFrom(firstAsk(state));
+      return prev.map((c) => (c.id === id ? { ...c, state, title, updatedAt: now } : c));
+    });
+  };
+
+  const startChat = () => setOpenChatId((prev) => ({ ...prev, [project.id]: '' }));
+  const renameChat = (id: string, title: string) =>
+    setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
+  const deleteChat = (id: string) => {
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+    // Deleting the open one leaves a blank thread rather than silently dropping the reader into
+    // whichever conversation happens to be next in the list.
+    setOpenChatId((prev) => (prev[project.id] === id ? { ...prev, [project.id]: '' } : prev));
   };
 
   const goHome = () => setScreen('dashboard');
@@ -805,10 +1004,15 @@ export default function App() {
             cfg={cfg}
             today={today}
             appliedDelays={appliedDelays[project.id] ?? []}
-            chat={chatByProject[project.id] ?? EMPTY_CHAT_STATE}
-            onChatChange={(updater) =>
-              setChatByProject((prev) => ({ ...prev, [project.id]: updater(prev[project.id] ?? EMPTY_CHAT_STATE) }))
-            }
+            chat={activeChat?.state ?? EMPTY_CHAT_STATE}
+            history={chatHistory}
+            activeId={activeChat?.id ?? null}
+            storeError={chatError}
+            onSelectChat={(id) => setOpenChatId((prev) => ({ ...prev, [project.id]: id }))}
+            onNewChat={startChat}
+            onDeleteChat={deleteChat}
+            onRenameChat={renameChat}
+            onChatChange={updateActiveChat}
             onApprove={(delays, summary) => {
               setAppliedDelays((prev) => ({ ...prev, [project.id]: [...(prev[project.id] ?? []), ...delays] }));
               setLastAppliedSummary((prev) => ({ ...prev, [project.id]: summary }));
@@ -1311,9 +1515,9 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
               </td>
               <td><span className={`tag ${r.criticality === 'Very Critical' ? 'crit' : r.criticality === 'High' ? 'warn' : ''}`}>{r.criticality}</span></td>
               <TextCell id={r.id} field="revision" current={r.revision} edit={edit} val={val} />
-              <td className="mono" title={r.basis}>{r.readyBy ?? '—'}</td>
+              <td className="mono" title={r.basis}>{(val(r.id, 'readyBy', r.readyBy) as string | null) ?? '—'}</td>
               <StatusCell id={r.id} field="statusInt" current={r.statusInt} edit={edit} val={val} />
-              <td className="mono" title={r.basis}>{r.approvalBy ?? '—'}</td>
+              <td className="mono" title={r.basis}>{(val(r.id, 'approvalBy', r.approvalBy) as string | null) ?? '—'}</td>
               <StatusCell id={r.id} field="statusClient" current={r.statusClient} edit={edit} val={val} />
               <td className="faint" style={{ maxWidth: 220 }}>{r.releases.slice(0, 2).join(', ') || '—'}</td>
             </tr>
@@ -1391,11 +1595,16 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
               <td><span className={`tag ${i.criticality === 'Very Critical' ? 'crit' : i.criticality === 'High' ? 'warn' : ''}`}>{i.criticality}</span></td>
               <td className="mono">
                 {(() => {
-                  const d = daysTo(i.orderBy);
+                  // The corrected date, where there is one — and the countdown is
+                  // measured from THAT, not from the computed date it replaced.
+                  // Reading the override for the label and the original for
+                  // "8d overdue" is how a row ends up arguing with itself.
+                  const orderBy = (val(i.id, 'orderBy', i.orderBy) as string | null) ?? null;
+                  const d = daysTo(orderBy);
                   const late = d !== null && d < 0;
                   return (
                     <>
-                      <strong style={late ? { color: 'var(--crit)' } : i.longLead ? { color: 'var(--ext)' } : undefined}>{i.orderBy ?? '—'}</strong>
+                      <strong style={late ? { color: 'var(--crit)' } : i.longLead ? { color: 'var(--ext)' } : undefined}>{orderBy ?? '—'}</strong>
                       {d !== null && (
                         <div className="faint" style={{ fontSize: 11, color: late ? 'var(--crit)' : undefined }}>
                           {late ? `${Math.abs(d)}d overdue` : `in ${d}d`}
@@ -1405,7 +1614,7 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
                   );
                 })()}
               </td>
-              <td className="mono">{i.deliveryRequired ?? '—'}</td>
+              <td className="mono">{(val(i.id, 'deliveryRequired', i.deliveryRequired) as string | null) ?? '—'}</td>
               <DateCell id={i.id} field="revised" current={i.revisedDate} edit={edit} val={val} />
               {view === 'internal' && <TextCell id={i.id} field="vendor" current={i.vendor} edit={edit} val={val} placeholder="vendor" />}
               <td className="edit">

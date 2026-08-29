@@ -37,8 +37,8 @@ const BASE = '/dnbos';
 /**
  * The same project is called different things by the two apps: this one has
  * `skf-pune`, the tracking engine's folder and pin pack are keyed `skf-pune-7f`.
- * Renaming either side would orphan data already stored under the old key â€” the
- * tracking engine's fact store, pin index and event log are all keyed by its id â€”
+ * Renaming either side would orphan data already stored under the old key — the
+ * tracking engine's fact store, pin index and event log are all keyed by its id —
  * so the two names are reconciled here instead, in one table, rather than by
  * making one app lie about what it calls its own project.
  *
@@ -51,6 +51,20 @@ const PROJECT_ALIAS: Record<string, string> = {
 
 export function dnbosProjectId(planningId: string): string {
   return PROJECT_ALIAS[planningId] ?? planningId;
+}
+
+/**
+ * The same table, read the other way, for a link arriving FROM the tracking
+ * engine — it knows the project by its own id and this app has to find the one
+ * it means.
+ *
+ * Derived from PROJECT_ALIAS rather than written out a second time. Two hand-kept
+ * tables would eventually disagree about a single project, and the direction that
+ * went stale would send someone to the wrong programme without ever failing.
+ */
+export function planningProjectId(dnbosId: string): string {
+  const hit = Object.entries(PROJECT_ALIAS).find(([, tracking]) => tracking === dnbosId);
+  return hit ? hit[0] : dnbosId;
 }
 
 /** rowId -> field -> value. The one shape both apps agree on. */
@@ -146,7 +160,7 @@ async function call<T>(path: string, init?: RequestInit): Promise<T | null> {
   }
 }
 
-/** Push the computed modules. Never touches the edit overlay â€” the server keeps it. */
+/** Push the computed modules. Never touches the edit overlay — the server keeps it. */
 export async function pushPlan(
   projectId: string,
   project: ProjectInputs,
