@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { PertCategory, PertNode, PertTree } from '../domain/pert';
 import { PERT_CATEGORIES, descendantIds, flattenPert } from '../domain/pert';
+import {
+  PERT_ACTUAL_FINISH, PERT_ACTUAL_START, PERT_NAME, PERT_PERCENT, PERT_STATUS,
+} from '../engine/pert-build';
 
 const DAY = 86400000;
 const iso = (s: string) => Date.parse(s + 'T00:00:00Z');
@@ -13,6 +16,30 @@ const DEPTHS: { key: Depth; label: string; hint: string }[] = [
   { key: 'summary', label: 'Summary level', hint: 'summary rows — each stream broken into its sections' },
   { key: 'activity', label: 'Activity level', hint: 'every activity, collapsible by hand' },
 ];
+
+/**
+ * The row's own date columns, per stream — the same names the Design and
+ * Procurement tabs read, so a date typed here and a date typed there are one
+ * value. A milestone is a single point in time, so both its ends write `date`.
+ */
+const MOD_FIELDS: Record<string, { start: string; finish: string }> = {
+  design: { start: 'readyBy', finish: 'approvalBy' },
+  procurement: { start: 'orderBy', finish: 'deliveryRequired' },
+  schedule: { start: 'date', finish: 'date' },
+  execution: { start: 'startDate', finish: 'endDate' },
+};
+
+const MOD_DATE_HINT: Record<string, { start: string; finish: string }> = {
+  design: { start: 'ready-by date — the same cell the Design tab shows', finish: 'client approval-by date — the same cell the Design tab shows' },
+  procurement: { start: 'order-by date — the same cell the Procurement tab shows', finish: 'delivery-required date — the same cell the Procurement tab shows' },
+  schedule: { start: 'the milestone date — a milestone is one day, so both ends move together', finish: 'the milestone date — a milestone is one day, so both ends move together' },
+};
+
+const MOD_HINT: Record<string, string> = {
+  design: 'a drawing from the design register — edits here and on the Design tab are the same value',
+  procurement: 'a purchase package — edits here and on the Procurement tab are the same value',
+  schedule: 'a contract milestone',
+};
 
 const STATUS_TAG: Record<PertNode['status'], { cls: string; label: string }> = {
   complete: { cls: 'ok', label: 'Complete' },
@@ -38,9 +65,23 @@ function collapseForDepth(tree: PertTree, depth: Depth): Set<number> {
 export interface PertEditing {
   /** activity id -> the current edit overlay for it */
   edits: Record<string, { name?: string; durationDays?: number; percentComplete?: number;
-    start?: string | null; startMode?: 'pin' | 'display'; deps?: { pred: string; type: string; lag: number }[];
+    start?: string | null; startMode?: 'pin' | 'display';
+    finish?: string | null; finishMode?: 'pin' | 'display';
+    actualStart?: string | null; actualFinish?: string | null;
+    status?: PertNode['status'] | null;
+    deps?: { pred: string; type: string; lag: number }[];
     deleted?: boolean; added?: unknown }>;
   set: (id: string, patch: Record<string, unknown>) => void;
+  /**
+   * Working days between two dates, on the project's own calendar.
+   *
+   * A typed FINISH has to become a duration, and only the calendar knows how
+   * many working days lie between two dates once Sundays and the holiday list
+   * are taken out. Counting them here off the raw dates would put a row's
+   * duration out of step with every other duration in the programme, which are
+   * all working days — a fortnight spanning two Sundays would come back as 14.
+   */
+  workingDays: (fromIso: string, toIso: string) => number;
   add: () => string;
   link: (id: string, predId: string) => string | null;
   unlink: (id: string, predId: string) => void;
@@ -49,6 +90,14 @@ export interface PertEditing {
   /** the real activities, so the editor can offer predecessors and read live values */
   activities: { id: string; name: string; startDate: string; endDate: string;
     duration: { value: number }; deps: { pred: string }[]; percentComplete?: { value: number } }[];
+  /**
+   * Edit a row that is NOT a CPM activity — a drawing, a purchase package, a
+   * contract milestone. It goes to the shared tracker overlay rather than to the
+   * schedule inputs, because there is no network under it to re-solve; see
+   * engine/pert-build.ts. Written straight through, so the value shown is the
+   * value stored.
+   */
+  setModule: (rowId: string, field: string, value: string) => void;
 }
 
 export function Pert({ tree, today, editing }: { tree: PertTree; today: string; editing?: PertEditing }) {
@@ -74,11 +123,19 @@ export function Pert({ tree, today, editing }: { tree: PertTree; today: string; 
   const [linkErr, setLinkErr] = useState<string | null>(null);
   const canEdit = !!editing;
   const on = canEdit && editMode;
-  const byName = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const a of editing?.activities ?? []) m.set(a.name, a.id);
-    return m;
-  }, [editing]);
+  /**
+   * Which ids are real CPM activities. A row whose id is in here is edited
+   * through the schedule inputs and re-solves the network; every other row is a
+   * tracker row and is written straight to the overlay.
+   *
+   * This replaced a name lookup. Matching a row to its activity by NAME held only
+   * until somebody renamed one — the first hand-edited name broke the link and
+   * the row quietly stopped being editable, with nothing on screen to say why.
+   */
+  const activityIds = useMemo(
+    () => new Set((editing?.activities ?? []).map((a) => a.id)),
+    [editing],
+  );
 
   /**
    * Choosing a level RESETS the collapse state to that level. It used to layer the level on top
@@ -118,6 +175,58 @@ export function Pert({ tree, today, editing }: { tree: PertTree; today: string; 
 
   const expandAll = () => setCollapsed(new Set());
   const collapseAll = () => setCollapsed(new Set(descendantIds(roots)));
+
+  /**
+   * A typed finish, in whichever way the person meant it.
+   *
+   * PINNED it is a commitment about when the row ends, and the only honest way
+   * to hold one in a network solved forwards from its start is as a DURATION:
+   * start → typed finish, counted in working days on the project calendar. CPM
+   * then re-solves and successors move, which is what pinning promises. Writing
+   * the date straight onto the row instead would leave a finish that its own
+   * start and duration contradict, and the next recompute would overwrite it.
+   *
+   * DISPLAY it is recorded as typed and nothing reflows.
+   *
+   * A finish before its start is refused rather than clamped: it is a typo often
+   * enough that silently turning it into a one-day activity would bury it.
+   */
+  const setFinish = (actId: string, n: PertNode, typed: string) => {
+    if (!typed) {
+      editing!.set(actId, { finish: null, finishMode: dateMode });
+      setLinkErr(null);
+      return;
+    }
+    if (dateMode === 'display') {
+      editing!.set(actId, { finish: typed, finishMode: 'display' });
+      setLinkErr(null);
+      return;
+    }
+    const start = n.start;
+    if (!start) { setLinkErr('that row has no start to measure a finish from'); return; }
+    if (typed < start) { setLinkErr(`a finish of ${typed} is before that row's start of ${start}`); return; }
+    const days = editing!.workingDays(start, typed);
+    if (days < 1) { setLinkErr(`${typed} is not a working day on this calendar`); return; }
+    setLinkErr(null);
+    // The duration IS the edit. Recording the typed finish alongside it would
+    // store the same fact twice — and count as two edits on the push badge for
+    // one thing the person did.
+    editing!.set(actId, { durationDays: days });
+  };
+
+  /**
+   * A tracker row's duration, typed as a number of days.
+   *
+   * Held as a MOVED FINISH rather than as a duration of its own, because a
+   * drawing has two dates and no third field to keep in step with them. Counted
+   * in calendar days, which is what the gap between a ready-by and an
+   * approval-by is — these rows are not on the CPM's working-day calendar.
+   */
+  const setModuleDuration = (n: PertNode, days: number) => {
+    if (!n.sourceId || !n.start || !Number.isFinite(days) || days < 1) return;
+    const finish = new Date(iso(n.start) + (days - 1) * DAY).toISOString().slice(0, 10);
+    editing!.setModule(n.sourceId, MOD_FIELDS[n.category].finish, finish);
+  };
 
   if (!tree.root) return <p className="muted">No PERT programme available for this project.</p>;
 
@@ -173,8 +282,20 @@ export function Pert({ tree, today, editing }: { tree: PertTree; today: string; 
 
         {canEdit && (
           <div className="pert-group" role="group" aria-label="Edit the programme">
-            <button className={on ? 'primary' : ''} onClick={() => { setEditMode((v) => !v); setLinkErr(null); }}
-              title="edit durations, dates, percent, links, and add or remove activities">
+            {/* Turning editing on DROPS TO ACTIVITY LEVEL, and that is not a
+                convenience. Only activity rows can be edited, and the table opens
+                at Summary level — where there are none. Pressing "Edit schedule"
+                there changed the toolbar and nothing else: no field on any visible
+                row became editable, which reads exactly like a button that does
+                not work. The editor now shows the rows it can actually edit. */}
+            <button className={on ? 'primary' : ''}
+              onClick={() => {
+                const next = !on;
+                setEditMode(next);
+                setLinkErr(null);
+                if (next && depth !== 'activity') chooseDepth('activity');
+              }}
+              title="edit durations, dates, actuals, percent, status and links, and add or remove activities">
               {on ? 'Done editing' : 'Edit schedule'}
             </button>
           </div>
@@ -189,8 +310,12 @@ export function Pert({ tree, today, editing }: { tree: PertTree; today: string; 
 
       {on && (
         <div className="pert-bar pert-editbar">
-          <span className="pert-label">Typed dates</span>
-          <div className="seg" title="what happens when you type a date">
+          {/* The mode governs the PLANNED dates only. Start and Finish are the
+              programme's claim about the future and can be argued with; Actual
+              Start and Actual Finish are a record of the past, and there is
+              nothing for a network to reflow around a fact. */}
+          <span className="pert-label">Typed start &amp; finish</span>
+          <div className="seg" title="what happens when you type a planned date — the actuals are always recorded as typed">
             <button className={dateMode === 'pin' ? 'on' : ''} onClick={() => setDateMode('pin')}
               title="the date becomes a constraint — CPM re-solves and successors move">Pin &amp; reflow</button>
             <button className={dateMode === 'display' ? 'on' : ''} onClick={() => setDateMode('display')}
@@ -212,11 +337,14 @@ export function Pert({ tree, today, editing }: { tree: PertTree; today: string; 
       {on && (
         <div className="banner info" style={{ marginBottom: 10 }}>
           <strong>Editing the programme.</strong> Duration, links, added and removed activities
-          re-run the CPM, so successors move and the critical path can change. Typed dates are
-          currently <strong>{dateMode === 'pin' ? 'pinned' : 'display only'}</strong>
+          re-run the CPM, so successors move and the critical path can change. Typed start and
+          finish dates are currently <strong>{dateMode === 'pin' ? 'pinned' : 'display only'}</strong>
           {dateMode === 'pin'
-            ? ' — the network re-solves around them.'
+            ? ' — the network re-solves around them. A typed finish is held as the duration that reaches it, so the row keeps that length even if its start later moves.'
             : ' — recorded as typed, with nothing reflowing around them.'}
+          {' '}<strong>Actual start</strong>, <strong>actual finish</strong> and <strong>status</strong> are
+          records rather than plans: they are always kept exactly as entered, and a status left on
+          “derived” goes on following progress against today.
           {' '}Only activity rows are editable; a summary row is the sum of its children.
           {linkErr && <div style={{ color: 'var(--crit)', marginTop: 5 }}>{linkErr}</div>}
         </div>
@@ -248,14 +376,22 @@ export function Pert({ tree, today, editing }: { tree: PertTree; today: string; 
           <tbody>
             {visible.map((n) => {
               const tag = STATUS_TAG[n.status];
-              // Only leaf rows map to a real activity. A summary row is a rollup
-              // of its children and has no duration of its own to edit — editing
-              // it would have to guess how to spread the change across them,
-              // which is a decision the person should make on the rows.
-              const actId = n.children.length === 0 ? byName.get(n.name) ?? null : null;
+              // A summary row is still not editable, and that has not changed: it
+              // is the sum of its children and has no dates of its own, so an edit
+              // would have to guess how to spread itself across them — a decision
+              // that belongs on the rows.
+              const leaf = n.children.length === 0 ? n.sourceId ?? null : null;
+              // Two kinds of leaf, edited two different ways. An activity folds
+              // back into the schedule inputs and re-solves the network; a
+              // drawing, a package or a milestone is written straight to the
+              // shared tracker overlay, because nothing computes it.
+              const actId = leaf && activityIds.has(leaf) ? leaf : null;
+              const modId = leaf && !actId ? leaf : null;
               const rowEdit = on && actId ? editing!.edits[actId] : undefined;
               const act = actId ? editing?.activities.find((a) => a.id === actId) : undefined;
               const cell = (v: React.ReactNode) => <td className="mono">{v}</td>;
+              /** A tracker-row cell: what is on screen is what is stored. */
+              const mod = (field: string, value: string) => editing!.setModule(modId!, field, value);
               return (
                 <tr key={n.id} className={`lvl${Math.min(n.level, 3)} ${n.status === 'complete' ? 'done' : ''} ${n.status === 'delayed' ? 'late' : ''}`}
                     style={rowEdit?.deleted ? { opacity: 0.45, textDecoration: 'line-through' } : undefined}>
@@ -271,6 +407,10 @@ export function Pert({ tree, today, editing }: { tree: PertTree; today: string; 
                     {on && actId ? (
                       <input defaultValue={n.name} style={{ width: 300, padding: '3px 6px', fontSize: 12.5 }}
                         onBlur={(e) => { if (e.target.value !== n.name) editing!.set(actId, { name: e.target.value }); }} />
+                    ) : on && modId ? (
+                      <input defaultValue={n.name} style={{ width: 300, padding: '3px 6px', fontSize: 12.5 }}
+                        title={MOD_HINT[n.category]}
+                        onBlur={(e) => { if (e.target.value !== n.name) mod(PERT_NAME, e.target.value); }} />
                     ) : n.name}
                     {on && actId && (
                       <span style={{ marginLeft: 8, display: 'inline-flex', gap: 4, alignItems: 'center' }}>
@@ -301,20 +441,94 @@ export function Pert({ tree, today, editing }: { tree: PertTree; today: string; 
                   {on && actId ? (
                     <td className="edit"><input type="number" min={1} defaultValue={n.durationDays} style={{ width: 62 }}
                       onBlur={(e) => { const v = Number(e.target.value); if (v > 0 && v !== n.durationDays) editing!.set(actId, { durationDays: v }); }} /></td>
+                  ) : on && modId ? (
+                    // A tracker row's duration is the gap between its two dates, so
+                    // it is edited BY MOVING THE FINISH. Storing a duration of its
+                    // own would leave a third number that its own dates contradict.
+                    <td className="edit"><input type="number" min={1} defaultValue={n.durationDays} style={{ width: 62 }}
+                      title="days from this row’s start — moves its finish"
+                      onBlur={(e) => setModuleDuration(n, Number(e.target.value))} /></td>
                   ) : cell(`${n.durationDays} d`)}
                   {on && actId ? (
                     <td className="edit"><input type="date" defaultValue={n.start ?? ''} style={{ width: 128 }}
                       title={dateMode === 'pin' ? 'pinned: CPM re-solves around this' : 'display only: nothing reflows'}
                       onChange={(e) => editing!.set(actId, { start: e.target.value || null, startMode: dateMode })} /></td>
+                  ) : on && modId ? (
+                    <td className="edit"><input type="date" defaultValue={n.start ?? ''} style={{ width: 128 }}
+                      title={MOD_DATE_HINT[n.category]?.start ?? 'recorded as typed'}
+                      onChange={(e) => mod(MOD_FIELDS[n.category].start, e.target.value)} /></td>
                   ) : cell(fmt(n.start))}
-                  {cell(fmt(n.finish))}
-                  <td className="mono faint">{fmt(n.actualStart)}</td>
-                  <td className="mono faint">{fmt(n.actualFinish)}</td>
+                  {/* FINISH. Pinned, it is a duration — see the handler. On display
+                      it is recorded as typed and the network is left alone. */}
+                  {on && actId ? (
+                    <td className="edit"><input type="date" defaultValue={n.finish ?? ''} style={{ width: 128 }}
+                      title={dateMode === 'pin'
+                        ? 'pinned: sets the duration that reaches this date from the row’s start today — if the network later moves that start, the finish moves with it'
+                        : 'display only: recorded as typed, nothing reflows'}
+                      onChange={(e) => setFinish(actId, n, e.target.value)} /></td>
+                  ) : on && modId ? (
+                    <td className="edit"><input type="date" defaultValue={n.finish ?? ''} style={{ width: 128 }}
+                      title={MOD_DATE_HINT[n.category]?.finish ?? 'recorded as typed'}
+                      onChange={(e) => mod(MOD_FIELDS[n.category].finish, e.target.value)} /></td>
+                  ) : cell(fmt(n.finish))}
+                  {/* THE ACTUALS. Recorded, never computed: these say what happened,
+                      so nothing reflows around them however they are typed. */}
+                  {on && actId ? (
+                    <td className="edit"><input type="date" defaultValue={n.actualStart ?? ''} style={{ width: 128 }}
+                      title="the date work actually started on site"
+                      onChange={(e) => editing!.set(actId, { actualStart: e.target.value || null })} /></td>
+                  ) : on && modId ? (
+                    <td className="edit"><input type="date" defaultValue={n.actualStart ?? ''} style={{ width: 128 }}
+                      title="the date this actually started"
+                      onChange={(e) => mod(PERT_ACTUAL_START, e.target.value)} /></td>
+                  ) : <td className="mono faint">{fmt(n.actualStart)}</td>}
+                  {on && actId ? (
+                    <td className="edit"><input type="date" defaultValue={n.actualFinish ?? ''} style={{ width: 128 }}
+                      title="the date work actually finished — a row with one reads as complete"
+                      onChange={(e) => editing!.set(actId, { actualFinish: e.target.value || null })} /></td>
+                  ) : on && modId ? (
+                    <td className="edit"><input type="date" defaultValue={n.actualFinish ?? ''} style={{ width: 128 }}
+                      title="the date this actually finished — a row with one reads as complete"
+                      onChange={(e) => mod(PERT_ACTUAL_FINISH, e.target.value)} /></td>
+                  ) : <td className="mono faint">{fmt(n.actualFinish)}</td>}
                   {on && actId ? (
                     <td className="edit"><input type="number" min={0} max={100} defaultValue={n.percentComplete} style={{ width: 54 }}
                       onBlur={(e) => editing!.set(actId, { percentComplete: Number(e.target.value) })} /></td>
+                  ) : on && modId ? (
+                    <td className="edit"><input type="number" min={0} max={100} defaultValue={n.percentComplete} style={{ width: 54 }}
+                      onBlur={(e) => mod(PERT_PERCENT, e.target.value)} /></td>
                   ) : cell(`${n.percentComplete}%`)}
-                  <td>{tag.label === 'Not started' ? <span className="faint">{tag.label}</span> : <span className={`tag ${tag.cls}`}>{tag.label}</span>}</td>
+                  {/* STATUS. Normally worked out from progress against today, which is
+                      right nearly always — "" hands the row back to that derivation
+                      rather than freezing whatever it happened to say when picked. */}
+                  {on && actId ? (
+                    <td className="edit">
+                      <select value={rowEdit?.status ?? ''} style={{ padding: '2px 4px', fontSize: 11.5, width: 92 }}
+                        title="set the status by hand, or leave it to follow progress"
+                        onChange={(e) => editing!.set(actId, { status: (e.target.value || null) as PertNode['status'] | null })}>
+                        <option value="">— derived —</option>
+                        {(Object.keys(STATUS_TAG) as PertNode['status'][]).map((s) => (
+                          <option key={s} value={s}>{STATUS_TAG[s].label}</option>
+                        ))}
+                      </select>
+                    </td>
+                  ) : on && modId ? (
+                    <td className="edit">
+                      <select value={n.statusIsManual ? n.status : ''} style={{ padding: '2px 4px', fontSize: 11.5, width: 92 }}
+                        title="set the status by hand, or leave it to follow progress"
+                        onChange={(e) => mod(PERT_STATUS, e.target.value)}>
+                        <option value="">— derived —</option>
+                        {(Object.keys(STATUS_TAG) as PertNode['status'][]).map((s) => (
+                          <option key={s} value={s}>{STATUS_TAG[s].label}</option>
+                        ))}
+                      </select>
+                    </td>
+                  ) : (
+                    <td>
+                      {tag.label === 'Not started' ? <span className="faint">{tag.label}</span> : <span className={`tag ${tag.cls}`}>{tag.label}</span>}
+                      {n.statusIsManual && <span className="faint" title="set by hand, not derived from progress"> ✎</span>}
+                    </td>
+                  )}
                   {showBars && <td>{barFor(n)}</td>}
                 </tr>
               );

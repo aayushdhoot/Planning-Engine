@@ -4,7 +4,7 @@ import type { DriveFile, DriveScan, DriveService, PickedFile } from '../services
 import { DriveFolderNotPublic, GoogleDriveService, LocalFolderDriveService, ManifestDriveService, PublicLinkDriveService } from '../services/drive';
 import { BoqIngestionService } from '../services/ingestion';
 import { ScheduleIngestionService } from '../services/schedule-ingestion';
-import { applyPrefill, awaitingConfirmation, buildInventory, buildQueries, unansweredBlocking, type FoundAnswer, type IntakeQuery } from '../engine/intake';
+import { applyPrefill, awaitingConfirmation, buildInventory, buildQueries, parseMilestones, unansweredBlocking, type FoundAnswer, type IntakeQuery } from '../engine/intake';
 import { extractorFor, noExtractorReason, type DocStates } from '../engine/coverage';
 import { applyExtractionPatch, type ExtractionPatch } from '../services/extraction/extraction-service';
 import { dailyLimitHit, extractBoqRowsViaApi, extractFileViaApi, extractFilesViaApi, firstFailure, ExtractionClientError, type BatchFile } from '../services/extraction/browser-client';
@@ -658,6 +658,12 @@ export function Intake({
     const src = `intake: answered by project head on ${new Date().toISOString().slice(0, 10)}`;
     const area = num('q_area');
     const dur = num('q_duration');
+    // The typed billing schedule, on the same footing as the typed area and
+    // duration: the answer is what the project head SAID, so it is preferred over
+    // what the reader guessed from the documents. It used to be read only for
+    // whether it was blank, which is how a fully answered question produced a
+    // project with no RA milestones on it.
+    const typedMilestones = parseMilestones(get('q_milestones'), dur ?? extraction.contractDurationCalDays?.value ?? null);
     let id = projectName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'new-project';
     while (existingIds.includes(id)) id = `${id}-2`;
 
@@ -672,7 +678,7 @@ export function Intake({
       contractDurationCalDays: dur ? { value: dur, provenance: 'input', source: src } : extraction.contractDurationCalDays,
       contractValue: draftInputs.contractValue ?? extraction.contractValue,
       bcsValue: draftInputs.bcsValue ?? extraction.bcsValue,
-      milestones: extraction.milestones,
+      milestones: typedMilestones.milestones.length ? typedMilestones.milestones : extraction.milestones,
       boqPackages: draftInputs.boqPackages ?? [],
       scheduleActivities: draftActivities,
       provided: {

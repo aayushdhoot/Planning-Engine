@@ -4,6 +4,7 @@
 // The engine deliberately asks rather than assumes. Anything it cannot establish from the
 // documents becomes a query; unanswered mandatory queries block plan generation.
 import type { DriveFile, DriveScan } from '../services/drive';
+import type { ContractMilestone } from '../domain/types';
 
 /** The input checklist from the Planning-Engine-Structure sheet. */
 export interface InputSlot {
@@ -358,4 +359,95 @@ export function applyPrefill(queries: IntakeQuery[], found: FoundAnswer[]): Inta
 
     return { ...q, answer: prefill.value, prefill, confirmed: false };
   });
+}
+
+/**
+ * Turn the answer to `q_milestones` into real RA billing milestones.
+ *
+ * WHY THIS EXISTS. Every other answer on the intake form reaches the plan:
+ * `q_area` becomes the area, `q_duration` the contract duration, `q_start` the
+ * commencement date. `q_milestones` did not. It was read for one thing only —
+ * whether it was blank, to set `provided.paymentTerms` — and the text itself was
+ * dropped on the floor. So a project head could type the whole billing schedule,
+ * watch the question go green, and get a project with no RA milestones at all:
+ * an empty billing tab, an empty inflow curve, and nothing anywhere saying the
+ * answer had been discarded rather than disbelieved.
+ *
+ * WHAT IT ACCEPTS. The form is free text and people write these several ways, so
+ * the parse is deliberately tolerant. All of these read the same:
+ *
+ *     RA1: 20% at day 0 (on mobilisation); RA2: 30% at day 30 (civil complete)
+ *     RA1 20% on mobilisation, RA2 30% on completion of civil works
+ *     20% advance
+ *     30% on flooring
+ *     50% on handover
+ *
+ * A chunk with no percentage in it is not a milestone and is ignored — that is
+ * how a trailing note or a stray line survives contact with this.
+ *
+ * DATES. `day N` is used when it is stated. When it is not — and "on handover"
+ * is the far commoner way to write one — the date is placed at the milestone's
+ * CUMULATIVE percentage of the contract window, and the description says so in
+ * words. Billing follows progress, so that is the honest reading of "50% on
+ * handover"; what would not be honest is printing a computed date with nothing
+ * to say it was inferred rather than agreed.
+ */
+export function parseMilestones(
+  text: string,
+  contractDurationCalDays: number | null,
+): { milestones: ContractMilestone[]; notes: string[] } {
+  const notes: string[] = [];
+  const raw = (text ?? '').trim();
+  if (!raw) return { milestones: [], notes };
+
+  // Newlines and semicolons always separate. A comma only does when the text has
+  // no other separator, because "30% on completion of civil works, including
+  // screed" is one milestone and splitting it would invent a second.
+  let chunks = raw.split(/[\n;]+/).map((s) => s.trim()).filter(Boolean);
+  if (chunks.length === 1 && (raw.match(/%/g) ?? []).length > 1)
+    chunks = raw.split(',').map((s) => s.trim()).filter(Boolean);
+
+  const parsed: { code: string | null; percent: number; day: number | null; desc: string }[] = [];
+  for (const chunk of chunks) {
+    const pct = chunk.match(/(\d+(?:\.\d+)?)\s*%/);
+    if (!pct) continue;                       // no percentage: not a milestone
+    const percent = Number(pct[1]);
+    if (!Number.isFinite(percent) || percent <= 0) continue;
+    const codeM = chunk.match(/\bRA\s*-?\s*0*(\d+)\b/i);
+    const dayM = chunk.match(/\bday\s*0*(\d+)\b/i);
+    const desc = chunk
+      .replace(/\bRA\s*-?\s*0*\d+\b\s*[:.\-—]?/i, '')
+      .replace(/(\d+(?:\.\d+)?)\s*%/, '')
+      .replace(/\bat\s+day\s*0*\d+\b/i, '')
+      .replace(/\bday\s*0*\d+\b/i, '')
+      .replace(/^[\s:,.\-—]+|[\s:,.\-—]+$/g, '')
+      .replace(/^\((.*)\)$/, '$1')
+      .trim();
+    parsed.push({ code: codeM ? `RA${Number(codeM[1])}` : null, percent, day: dayM ? Number(dayM[1]) : null, desc });
+  }
+  if (!parsed.length) {
+    notes.push(`The billing milestones answer had no percentages in it, so no RA milestones were created from it: "${raw.slice(0, 120)}".`);
+    return { milestones: [], notes };
+  }
+
+  const total = parsed.reduce((s, m) => s + m.percent, 0);
+  const window = contractDurationCalDays && contractDurationCalDays > 0 ? contractDurationCalDays : null;
+  let cumulative = 0;
+  const milestones: ContractMilestone[] = parsed.map((m, i) => {
+    cumulative += m.percent;
+    let dayOffset = m.day;
+    let description = m.desc || `${m.percent}% billing milestone`;
+    if (dayOffset == null) {
+      // Placed by cumulative share of the window, and said out loud.
+      dayOffset = window ? Math.round((cumulative / Math.max(total, 100)) * window) : 0;
+      description += window
+        ? ` — date not stated; placed at ${Math.round((cumulative / Math.max(total, 100)) * 100)}% of the ${window}-day contract`
+        : ' — date not stated, and no contract duration to place it against';
+    }
+    return { code: m.code ?? `RA${i + 1}`, dayOffset, percent: m.percent, description };
+  });
+
+  if (Math.abs(total - 100) > 0.5)
+    notes.push(`The billing milestones add up to ${total}%, not 100% — the cashflow inflow curve will bill that much of the contract.`);
+  return { milestones, notes };
 }

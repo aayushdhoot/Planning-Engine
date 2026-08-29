@@ -30,8 +30,31 @@ export interface PertNode {
   children: PertNode[];
   /** 0..100, rolled up from children by duration weight */
   percentComplete: number;
+  /**
+   * The id of the thing this row was built FROM — an activity, a drawing, a
+   * purchase package, a milestone. Null on summaries, which are built from their
+   * children and are nothing on their own.
+   *
+   * The editor used to find a row's activity by matching its NAME, which worked
+   * only because nothing had been renamed yet: the first hand-edited name broke
+   * the link and the row silently stopped being editable. It also left the three
+   * non-execution streams uneditable, because a drawing's name matches no
+   * activity at all. Carrying the id is what lets every row be edited.
+   */
+  sourceId?: string;
   /** derived: is this row behind its planned finish, given today */
   status: 'not_started' | 'in_progress' | 'complete' | 'delayed';
+  /**
+   * The status was SET, not worked out, so the roll-up must leave it alone.
+   *
+   * Without the flag there is no way to tell a hand-set "complete" from a
+   * derived one, and rollUp — which runs after the tree is built — would
+   * recompute it straight back to whatever the percentages imply. The override
+   * would appear to be accepted and then quietly vanish on the next render.
+   */
+  statusIsManual?: boolean;
+  /** same again for a percentage typed by hand — see the leaf rule in rollUp */
+  percentIsManual?: boolean;
 }
 
 export interface PertTree {
@@ -88,17 +111,24 @@ export function rollUp(nodes: PertNode[], today: string): PertNode[] {
       // which reads the same source directly, then disagreed with the PERT about
       // the same activity on the same screen. A number somebody recorded beats a
       // placeholder for one.
+      // A figure TYPED by hand is not one of the two cases below. It is the
+      // answer, including the awkward ones the rule cannot express — 100% on a
+      // row with no actual finish recorded, or 0% on one that has started.
       const recorded = n.percentComplete;
-      n.percentComplete = n.actualFinish
-        ? 100
-        : recorded > 0 && recorded < 100
-          ? recorded
-          : n.actualStart ? 50 : 0;
+      if (!n.percentIsManual)
+        n.percentComplete = n.actualFinish
+          ? 100
+          : recorded > 0 && recorded < 100
+            ? recorded
+            : n.actualStart ? 50 : 0;
     }
-    if (n.percentComplete >= 100) n.status = 'complete';
-    else if (n.finish && n.finish < today && n.percentComplete < 100) n.status = 'delayed';
-    else if (n.percentComplete > 0) n.status = 'in_progress';
-    else n.status = 'not_started';
+    // A status somebody set by hand is not a conclusion to be re-derived.
+    if (!n.statusIsManual) {
+      if (n.percentComplete >= 100) n.status = 'complete';
+      else if (n.finish && n.finish < today && n.percentComplete < 100) n.status = 'delayed';
+      else if (n.percentComplete > 0) n.status = 'in_progress';
+      else n.status = 'not_started';
+    }
     return n;
   };
   nodes.forEach(visit);

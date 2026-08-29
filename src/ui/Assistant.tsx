@@ -4,11 +4,53 @@ import type { ExternalDelay } from '../engine/planner';
 import { fetchReplanPreview, ReplanClientError } from '../services/replan/browser-client';
 import type { ReplanPreview } from '../services/replan/apply';
 
+/**
+ * What a reply keeps once the thread is stored.
+ *
+ * A `ReplanPreview` carries two WHOLE PLANS — `baseline`, and `revised` when the query was a
+ * delay. Nothing outside apply.ts ever reads them: `baseline` is the intermediate the diff was
+ * computed against, and the screen only ever asks `revised` whether it exists. Keeping them made
+ * a single two-message thread 507 KB on disk, and the store holds every thread for every
+ * project — a few days of use would have produced a file too big to open and slow to load, to
+ * carry two plans nobody looks at.
+ *
+ * So a stored reply keeps exactly what the thread draws and what approving it needs: the
+ * summary, the prose, the two end dates, the activities that actually moved, and the resolved
+ * delays that get applied. That is ~1 KB instead of ~233 KB, and it is also the honest list of
+ * what a saved conversation IS.
+ */
+export interface ChatPreview {
+  kind: ReplanPreview['kind'];
+  summary: string;
+  answer?: string;
+  clarifyingQuestion?: string;
+  /** whether a revised plan was produced — the full plan itself is not kept */
+  hasRevised: boolean;
+  changedActivities: ReplanPreview['changedActivities'];
+  resolvedDelays: ReplanPreview['resolvedDelays'];
+  internalEndBefore: string | null;
+  internalEndAfter: string | null;
+  ieInvariantHoldsAfter: boolean | null;
+}
+
+export const toChatPreview = (p: ReplanPreview): ChatPreview => ({
+  kind: p.kind,
+  summary: p.summary,
+  answer: p.answer,
+  clarifyingQuestion: p.clarifyingQuestion,
+  hasRevised: !!p.revised,
+  changedActivities: p.changedActivities,
+  resolvedDelays: p.resolvedDelays,
+  internalEndBefore: p.internalEndBefore,
+  internalEndAfter: p.internalEndAfter,
+  ieInvariantHoldsAfter: p.ieInvariantHoldsAfter,
+});
+
 export interface ChatTurn {
   id: string;
   role: 'user' | 'assistant';
   text?: string; // user message, or an assistant-side error
-  preview?: ReplanPreview;
+  preview?: ChatPreview;
   approved?: boolean;
   discarded?: boolean;
 }
@@ -23,8 +65,17 @@ export const EMPTY_CHAT_STATE: ChatState = { turns: [], pendingOriginal: null };
 
 let turnCounter = 0;
 const uid = () => `turn-${++turnCounter}`;
+/** One row in the history list. The thread itself stays in the store. */
+export interface ChatSummary {
+  id: string;
+  title: string;
+  updatedAt: string;
+  turnCount: number;
+}
+
 export function Assistant({
   p, cfg, today, appliedDelays, chat, onChatChange, onApprove,
+  history = [], activeId = null, onSelectChat, onNewChat, onDeleteChat, onRenameChat, storeError,
 }: {
   p: ProjectInputs;
   cfg: EngineConfig;
@@ -42,6 +93,15 @@ export function Assistant({
   /** lifts the resolved delays up to App.tsx, which folds them into buildPlan() for this
    * project going forward — session-only for now */
   onApprove: (delays: ExternalDelay[], summary: string) => void;
+  /** this project's saved threads, newest first */
+  history?: ChatSummary[];
+  activeId?: string | null;
+  onSelectChat?: (id: string) => void;
+  onNewChat?: () => void;
+  onDeleteChat?: (id: string) => void;
+  onRenameChat?: (id: string, title: string) => void;
+  /** why history could not be loaded or saved, when that is the case */
+  storeError?: string | null;
 }) {
   const { turns, pendingOriginal } = chat;
   const setTurns = (updater: (t: ChatTurn[]) => ChatTurn[]) => onChatChange((prev) => ({ ...prev, turns: updater(prev.turns) }));
@@ -67,7 +127,7 @@ export function Assistant({
       // only a delay-kind reply with an outstanding clarifying question continues the same
       // thread; a question/unclear reply (or a fully-resolved delay) closes it out
       setPendingOriginal(result.kind === 'delay' && result.clarifyingQuestion ? effectiveQuery : null);
-      setTurns((t) => [...t, { id: uid(), role: 'assistant', preview: result }]);
+      setTurns((t) => [...t, { id: uid(), role: 'assistant', preview: toChatPreview(result) }]);
     } catch (e) {
       setPendingOriginal(null);
       const msg = e instanceof ReplanClientError ? e.message : e instanceof Error ? e.message : String(e);
@@ -77,7 +137,7 @@ export function Assistant({
     }
   };
 
-  const approve = (turnId: string, preview: ReplanPreview) => {
+  const approve = (turnId: string, preview: ChatPreview) => {
     if (!preview.resolvedDelays.length) return;
     onApprove(preview.resolvedDelays, preview.summary);
     setTurns((t) => t.map((x) => (x.id === turnId ? { ...x, approved: true } : x)));
@@ -88,7 +148,43 @@ export function Assistant({
   };
 
   return (
-    <div style={{ maxWidth: 900, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 220px)', minHeight: 420 }}>
+    <div className="chat-layout">
+      {/* THE HISTORY COLUMN. Threads are per project, because a question about
+          one job's flooring means nothing filed under another's. */}
+      <aside className="chat-side">
+        <button className="primary chat-new" onClick={() => onNewChat?.()}>+ New chat</button>
+        <div className="chat-list">
+          {history.length === 0 && <p className="muted chat-side-empty">No past chats for this project.</p>}
+          {history.map((h) => (
+            <div key={h.id} className={`chat-item ${h.id === activeId ? 'on' : ''}`}>
+              <button className="chat-item-open" onClick={() => onSelectChat?.(h.id)} title={h.title}>
+                <span className="chat-item-title">{h.title}</span>
+                <span className="chat-item-meta">
+                  {h.turnCount} message{h.turnCount === 1 ? '' : 's'}
+                  {h.updatedAt ? ` · ${h.updatedAt.slice(0, 10)}` : ''}
+                </span>
+              </button>
+              <span className="chat-item-tools">
+                <button title="Rename this chat" aria-label={`Rename ${h.title}`}
+                  onClick={() => {
+                    const next = prompt('Name this chat', h.title);
+                    if (next && next.trim()) onRenameChat?.(h.id, next.trim());
+                  }}>✎</button>
+                <button title="Delete this chat" aria-label={`Delete ${h.title}`}
+                  onClick={() => {
+                    // Asked, because a thread can carry an approved replan and the
+                    // reasoning behind it, and there is nowhere to get it back from.
+                    if (confirm(`Delete “${h.title}”?\n\nThe whole thread goes, including any revised plans reviewed in it. This cannot be undone.`))
+                      onDeleteChat?.(h.id);
+                  }}>🗑</button>
+              </span>
+            </div>
+          ))}
+        </div>
+        {storeError && <p className="chat-side-err" title={storeError}>History is not being saved — {storeError}</p>}
+      </aside>
+
+      <div className="chat-main">
       <h2>AI Assistant</h2>
       <p className="muted" style={{ marginTop: -4, maxWidth: 780 }}>
         Ask a question about this project — status, dates, what's outstanding — or describe a delay or change,
@@ -133,7 +229,7 @@ export function Assistant({
                       <p style={{ marginTop: 8, marginBottom: 0 }}>{preview.clarifyingQuestion}</p>
                     )}
 
-                    {preview.kind === 'delay' && !preview.clarifyingQuestion && preview.revised && (
+                    {preview.kind === 'delay' && !preview.clarifyingQuestion && preview.hasRevised && (
                       <>
                         <p style={{ marginTop: 8, marginBottom: 0 }}>
                           Internal finish: <strong>{preview.internalEndBefore}</strong> → <strong>{preview.internalEndAfter}</strong>
@@ -209,6 +305,7 @@ export function Assistant({
         <button className="primary" disabled={loading || !input.trim()} onClick={() => void send()}>
           {loading ? 'Thinking…' : 'Send'}
         </button>
+      </div>
       </div>
     </div>
   );

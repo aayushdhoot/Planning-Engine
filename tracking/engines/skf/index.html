@@ -1676,6 +1676,18 @@ function peProject(){
 // Where the planning engine is, for the switch back. Overridable on the URL so
 // a different port or host does not need a code change.
 const PE_URL=(new URLSearchParams(location.search).get("pe")||"http://localhost:5173/");
+// The switch back carries the project WITH it. Opening the planning engine bare
+// landed on its portfolio dashboard, so whoever was reading Ascendion here had
+// to find Ascendion again there — and on a list of eight near-identical fit-outs
+// that is a real chance to open the wrong one and not notice. The id travels as
+// a query parameter; the planning engine maps it back through the same alias
+// table that reconciles the two names (services/dnbos-bridge.ts).
+function peLink(){
+  const u=new URL(PE_URL, location.href);
+  const id=peProject();
+  if(id) u.searchParams.set("project", id);
+  return u.toString();
+}
 const state={level:"portfolio",view:"intake",F:null,err:null,drive:null,driveErr:null,
              busy:null,proj:null,ch:null,walk:null,
              // the pin pack's pictures, and which pin and day the pair is showing
@@ -6673,7 +6685,7 @@ function render(){
  document.querySelectorAll("[data-lb]").forEach(el=>el.onclick=()=>{
    openFrame(el.dataset.lb, el.dataset.lbcap||"");
  });
- { const g=$("goPlan"); if(g) g.onclick=()=>window.open(PE_URL,"_blank"); }
+ { const g=$("goPlan"); if(g) g.onclick=()=>window.open(peLink(),"_blank"); }
  // The tab strip sticks under the header. The header wraps its chips on a narrow
  // window and grows, so the offset is measured rather than assumed — a hard-coded
  // one leaves a gap the page shows through, or hides the first row of the table.

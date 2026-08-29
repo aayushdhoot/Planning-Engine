@@ -36,7 +36,40 @@ export interface Activity {
   percentComplete?: Traced<number>;
   /** planned start from the source schedule, when one was supplied (used to derive dep lags) */
   plannedStartFromInput?: string;
+  /**
+   * This duration was STATED by a person, so the schedule fit must leave it alone.
+   *
+   * The fit scales every duration by one factor until the CPM finish lands on the
+   * contract. That is right for durations it derived itself — they are estimates,
+   * and the contract is better evidence than a norm. It is wrong for one somebody
+   * typed: scaling it back means a duration set by hand reverts on the very next
+   * recompute, which is what made editing a duration in the PERT editor look like
+   * it had done nothing at all. A declared fact is not an estimate to be tuned.
+   *
+   * The fit still has to reach the contract; it now does so with fewer activities
+   * to move, and says so through the residual gap when its bound binds.
+   */
+  durationLocked?: boolean;
+  /**
+   * RECORDED, not computed. Everything above is an input the CPM plans from;
+   * these four are statements about what has actually happened, or about what a
+   * date is to be shown as regardless of what the network makes of it.
+   *
+   * They live on the activity — rather than as a display layer over the built
+   * programme — for one reason: the schedule is recomputed on every change, and
+   * anything not folded back into the inputs is wiped by the next recompute. A
+   * date somebody stood behind must survive a re-plan.
+   */
+  displayStart?: Traced<string>;
+  displayFinish?: Traced<string>;
+  actualStart?: Traced<string>;
+  actualFinish?: Traced<string>;
+  /** a status set by hand, which wins over the one derived from progress */
+  statusOverride?: Traced<ActivityStatus>;
 }
+
+/** What a row can be said to be. Derived from progress unless somebody overrides it. */
+export type ActivityStatus = 'not_started' | 'in_progress' | 'complete' | 'delayed';
 
 export interface CalendarConfig {
   /** 0=Sun..6=Sat; days of week that are OFF */
