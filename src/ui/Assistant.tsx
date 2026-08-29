@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { EngineConfig, ProjectInputs } from '../domain/types';
 import type { ExternalDelay } from '../engine/planner';
 import { fetchReplanPreview, ReplanClientError } from '../services/replan/browser-client';
@@ -65,6 +65,53 @@ export const EMPTY_CHAT_STATE: ChatState = { turns: [], pendingOriginal: null };
 
 let turnCounter = 0;
 const uid = () => `turn-${++turnCounter}`;
+
+/* ---- Asking out loud ------------------------------------------------------
+ *
+ * The browser's own speech recognition, not a transcription service. Site work
+ * is where these questions come from and a phone on a noisy floor is a bad place
+ * to type "gypsum board delivery is delayed by five days" — but recording audio
+ * and posting it somewhere to be transcribed would mean another key to hold,
+ * another allowance to spend, and site conversation leaving the machine. The
+ * browser already does this, so it costs nothing and adds no dependency.
+ *
+ * Typed by hand because the API is not in TypeScript's DOM library: it is still
+ * a draft, and Chrome and Edge ship it under a `webkit` prefix. Only the handful
+ * of members actually used are declared, rather than casting the lot to `any`
+ * and losing the checking everywhere it is touched.
+ */
+interface SpeechAlternative { readonly transcript: string }
+interface SpeechResult { readonly isFinal: boolean; readonly length: number; readonly [i: number]: SpeechAlternative }
+interface SpeechResultList { readonly length: number; readonly [i: number]: SpeechResult }
+interface SpeechEvent { readonly resultIndex: number; readonly results: SpeechResultList }
+interface SpeechRecogniser {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onresult: ((e: SpeechEvent) => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
+  onend: (() => void) | null;
+}
+type SpeechRecogniserCtor = new () => SpeechRecogniser;
+
+/** The constructor, or null where the browser has none (Firefox, older Safari). */
+function speechRecogniser(): SpeechRecogniserCtor | null {
+  if (typeof window === 'undefined') return null;   // the app is also rendered to a string in tests
+  const w = window as unknown as { SpeechRecognition?: SpeechRecogniserCtor; webkitSpeechRecognition?: SpeechRecogniserCtor };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+/** What went wrong, said in terms of what to do about it. */
+const VOICE_ERROR: Record<string, string> = {
+  'not-allowed': 'The microphone is blocked for this site. Allow it in the browser’s address bar, then try again.',
+  'service-not-allowed': 'The microphone is blocked for this site. Allow it in the browser’s address bar, then try again.',
+  'no-speech': 'Nothing was heard. Try again, closer to the microphone.',
+  'audio-capture': 'No microphone was found on this machine.',
+  network: 'Speech recognition could not reach the network. Type the question instead.',
+};
 /** One row in the history list. The thread itself stays in the store. */
 export interface ChatSummary {
   id: string;
@@ -109,6 +156,60 @@ export function Assistant({
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const endRef = useRef<HTMLDivElement | null>(null);
+
+  // ---- dictation --------------------------------------------------------
+  const [listening, setListening] = useState(false);
+  const [voiceErr, setVoiceErr] = useState<string | null>(null);
+  const recogniser = useRef<SpeechRecogniser | null>(null);
+  /**
+   * What was already in the box when dictation started.
+   *
+   * Speech arrives as a transcript that GROWS and is revised — the same phrase
+   * comes back several times as it is re-heard. Appending each event would stack
+   * up "flooring is flooring is delayed flooring is delayed by five days", so
+   * every event rewrites the field as {what was typed before} + {transcript so
+   * far}. That is also what lets someone type half the question and speak the
+   * rest.
+   */
+  const dictationBase = useRef('');
+  const voiceSupported = useMemo(() => speechRecogniser() !== null, []);
+
+  // Stop listening if the tab is left mid-sentence: the recogniser holds the
+  // microphone open, and an indicator that stays lit after the screen is gone is
+  // alarming in a way the feature does not warrant.
+  useEffect(() => () => recogniser.current?.abort(), []);
+
+  const toggleVoice = () => {
+    if (listening) { recogniser.current?.stop(); return; }
+    const Ctor = speechRecogniser();
+    if (!Ctor) return;
+    setVoiceErr(null);
+    dictationBase.current = input ? `${input.trimEnd()} ` : '';
+    const r = new Ctor();
+    // en-IN: every project in here is an Indian fit-out, and the trade words —
+    // gypsum, chajja, Vadodara — are recognised far better against that voice
+    // model than against the en-US default.
+    r.lang = 'en-IN';
+    r.continuous = false;      // one question, then stop; it ends on its own after a pause
+    r.interimResults = true;   // show the words as they are heard, so it is visibly working
+    r.onresult = (e) => {
+      let heard = '';
+      for (let i = 0; i < e.results.length; i++) heard += e.results[i][0].transcript;
+      setInput(dictationBase.current + heard.trimStart());
+    };
+    r.onerror = (e) => {
+      // "aborted" is what a deliberate stop reports; it is not a failure.
+      if (e.error !== 'aborted') setVoiceErr(VOICE_ERROR[e.error] ?? `Speech recognition failed (${e.error}).`);
+    };
+    r.onend = () => setListening(false);
+    recogniser.current = r;
+    try {
+      r.start();
+      setListening(true);
+    } catch {
+      setVoiceErr('Speech recognition could not start. Try again.');
+    }
+  };
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -293,6 +394,13 @@ export function Assistant({
         </p>
       )}
 
+      {listening && (
+        <p className="chat-listening" aria-live="polite">
+          <span className="chat-mic-dot" /> Listening — speak the question. It stops on its own when you finish.
+        </p>
+      )}
+      {voiceErr && <p className="chat-voice-err" aria-live="polite">{voiceErr}</p>}
+
       <div className="row" style={{ marginTop: 10 }}>
         <input
           value={input}
@@ -302,6 +410,28 @@ export function Assistant({
           style={{ flex: 1, minWidth: 420 }}
           autoFocus
         />
+        {/* Dictation fills the box; it does NOT send. A misheard "fifteen" for
+            "fifty" in a delay is a different programme, so the words get read
+            before they are acted on — the same reason a replan is previewed and
+            approved rather than applied. Hidden outright where the browser has no
+            recogniser: a permanently dead control invites clicking. */}
+        {voiceSupported && (
+          <button
+            type="button"
+            className={`chat-mic ${listening ? 'on' : ''}`}
+            onClick={toggleVoice}
+            disabled={loading}
+            aria-pressed={listening}
+            title={listening ? 'Stop listening' : 'Ask by voice'}
+            aria-label={listening ? 'Stop listening' : 'Ask by voice'}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="11" rx="3" />
+              <path d="M5 11a7 7 0 0 0 14 0" />
+              <path d="M12 18v3" />
+            </svg>
+          </button>
+        )}
         <button className="primary" disabled={loading || !input.trim()} onClick={() => void send()}>
           {loading ? 'Thinking…' : 'Send'}
         </button>
