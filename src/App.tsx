@@ -595,13 +595,20 @@ export default function App() {
   );
   const chatHistory = projectChats.map((c) => ({ id: c.id, title: c.title, updatedAt: c.updatedAt, turnCount: c.state.turns.length }));
   /**
-   * Which thread is open. `undefined` means nothing has been picked, so the newest is shown —
-   * coming back to a project should land where it was left. The empty string is "a new chat",
-   * which is a real state and NOT the same as no choice: without it, opening a blank thread
-   * would immediately fall back to the newest one and there would be no way to start a second.
+   * Which thread is open — and ONLY one that was actually asked for.
+   *
+   * Nothing picked means a blank chat, not the newest one. Resuming the last
+   * conversation made the assistant open onto somebody else's half-finished
+   * question about a delay that may already have been approved, and the first
+   * thing typed would land at the bottom of it. Opening the tab is the ordinary
+   * way in, so the ordinary way in should be a clean sheet; the previous threads
+   * are one click away in the list beside it.
+   *
+   * An id that no longer resolves — the thread was deleted — falls back the same
+   * way, rather than quietly substituting a different conversation.
    */
   const openId = openChatId[project.id];
-  const activeChat = openId === '' ? null : projectChats.find((c) => c.id === openId) ?? projectChats[0] ?? null;
+  const activeChat = openId ? projectChats.find((c) => c.id === openId) ?? null : null;
 
   /**
    * The id the next update belongs to, tracked outside React state.
@@ -643,6 +650,22 @@ export default function App() {
   };
 
   const startChat = () => setOpenChatId((prev) => ({ ...prev, [project.id]: '' }));
+
+  /**
+   * Arriving at the assistant clears whatever was open, so it always starts on a
+   * blank chat.
+   *
+   * Keyed on the tab and the project, NOT on every render, which is the whole
+   * subtlety: sending the first message opens the thread it creates, and if this
+   * ran any more often it would wipe that out from under the person mid-sentence.
+   * Stepping away to the PERT and coming back is a fresh arrival and does start
+   * over — that is the asked-for behaviour, and nothing is lost by it, since the
+   * thread is saved and sitting in the list.
+   */
+  useEffect(() => {
+    if (tab !== 'AI Assistant') return;
+    setOpenChatId((prev) => (prev[project.id] === '' ? prev : { ...prev, [project.id]: '' }));
+  }, [tab, project.id]);
   const renameChat = (id: string, title: string) =>
     setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
   const deleteChat = (id: string) => {
