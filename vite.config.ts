@@ -55,7 +55,11 @@ function apiDevMiddleware(): Plugin {
           fetchRes.headers.forEach((value, key) => {
             if (key.toLowerCase() !== 'content-length') res.setHeader(key, value);
           });
-          res.end(await fetchRes.text());
+          // Buffer, not text: /api/drive/download returns file BYTES. Decoding those as UTF-8
+          // and writing the string back replaces every byte that is not valid UTF-8 with U+FFFD,
+          // which silently corrupts a PDF or an xlsx into something no parser can open. JSON
+          // routes are unaffected — a Buffer of their UTF-8 bytes is the same response.
+          res.end(Buffer.from(await fetchRes.arrayBuffer()));
         } catch (err) {
           res.statusCode = 500;
           res.setHeader('Content-Type', 'application/json');
@@ -88,6 +92,17 @@ export default defineConfig({
         changeOrigin: true,
         followRedirects: true,
         rewrite: (p) => p.replace(/^\/gdocs/, ''),
+      },
+      // The DnB-OS tracking engine (tools/serve-engine.js) holds the sync store the
+      // two apps share. It runs on its own port, so calling it directly would be
+      // cross-origin: a preflight on every JSON POST, and a hard failure the moment
+      // this app is served from anywhere but localhost. Proxying keeps the browser
+      // on its own origin and takes CORS out of the picture entirely.
+      // Set VITE_DNBOS_ORIGIN if the engine is not on 8901.
+      '/dnbos': {
+        target: process.env.VITE_DNBOS_ORIGIN || 'http://localhost:8901',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/dnbos/, ''),
       },
     },
   },

@@ -158,7 +158,7 @@ export function buildCockpit(plan: Plan, today: string): Cockpit {
     const materialRag: Rag = short.length > 3 ? 'red' : short.length ? 'amber' : mat.summary.orderOverdue ? 'amber' : 'green';
     kpis.push({
       key: 'materials',
-      label: 'Material at site',
+      label: 'Material Registry',
       value: `${short.length}`,
       sub: `short on site, of ${mat.summary.items} tracked materials`,
       rag: materialRag,

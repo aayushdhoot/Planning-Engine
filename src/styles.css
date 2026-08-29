@@ -136,6 +136,25 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
   vertical-align: middle; line-height: 1;
 }
 .twist:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---- the schedule toolbar ----
+   Grouped rather than one long row of eleven controls. The gap BETWEEN groups is
+   wider than the gap inside one, which is what makes the grouping read without
+   having to draw a line. The editing tools sit on their own tinted row, so
+   turning editing on does not reflow the controls above it. */
+.pert-bar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+.pert-group { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.pert-count { font-size: 11.5px; line-height: 1.45; text-align: right; }
+.pert-editbar {
+  background: var(--accent-soft); border: 1px solid #b6d4ff; border-radius: 10px;
+  padding: 9px 12px; margin: -4px 0 12px; gap: 10px;
+}
+.pert-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+.pert-sep { width: 1px; align-self: stretch; background: #b6d4ff; margin: 0 2px; }
+/* a disabled control must still be readable — it says what is off, not nothing */
+button:disabled { opacity: 1; color: var(--faint); border-style: dashed; cursor: not-allowed; box-shadow: none; }
+input:disabled, select:disabled { background: var(--panel2); color: var(--muted); cursor: not-allowed; }
+
 .pert tr.lvl1 > td { background: var(--accent-soft); font-weight: 700; }
 .pert tr.lvl2 > td { background: var(--panel2); font-weight: 600; }
 .pert tr.lvl3 > td { font-weight: 500; }
@@ -150,9 +169,140 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
 .qcard .q { font-weight: 600; margin-bottom: 4px; }
 .qcard .why { color: var(--muted); font-size: 12px; margin-bottom: 9px; }
 .qcard.answered { border-left-color: var(--ok); }
+/* Read from the documents and waiting on a person: not yet an answer, so not green. */
+.qcard.proposed { border-left-color: var(--warn); }
+.qcard .read-from { color: var(--muted); font-size: 12px; margin: 8px 0 4px; }
+.qcard .read-from em { color: var(--ext); font-style: normal; }
+.qcard .confirm { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 12px; color: var(--muted); }
+.qcard .confirm input { width: auto; margin: 0; }
 
 .filebar { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); margin-bottom: 7px; box-shadow: var(--shadow); }
 .filebar .nm { flex: 1; font-size: 13px; }
+
+/* ------------------------------------------------------------------ animations */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes dashFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in { animation: fadeIn .3s ease-out both; }
+
+/* ------------------------------------------------------------------ dashboard */
+
+.dashboard {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: 60px 32px 48px; opacity: 0; transition: opacity .4s ease;
+}
+.dashboard.dash-in { opacity: 1; }
+
+.dash-header { text-align: center; margin-bottom: 48px; }
+
+.dash-logo { height: 42px; width: auto; }
+
+.dash-subtitle {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--faint);
+  margin-top: 8px; font-weight: 600;
+}
+
+.dash-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+  width: 100%; max-width: 1100px;
+}
+
+.dash-card {
+  all: unset; cursor: pointer; display: flex;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: var(--shadow); transition: all .25s cubic-bezier(.4, 0, .2, 1);
+  animation: cardSlideUp .45s ease-out both;
+  min-height: 170px;
+}
+.dash-card:hover {
+  transform: translateY(-4px); box-shadow: 0 8px 24px rgba(16, 24, 40, 0.1), 0 2px 6px rgba(16, 24, 40, 0.06);
+  border-color: var(--accent);
+}
+.dash-card:active { transform: translateY(-1px); transition-duration: .08s; }
+
+/* The delete control on a project card.
+   Hidden until the card is hovered or something inside it has focus: it is a destructive
+   action on a card whose whole surface is a click target, so it should not sit there inviting
+   a mis-click. Always reachable by keyboard, though — :focus-within is why it appears on tab
+   as well as on hover. */
+.dash-card { position: relative; }
+.dash-card-del {
+  all: unset; position: absolute; top: 10px; right: 10px; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px; cursor: pointer;
+  color: var(--muted); background: var(--panel2);
+  opacity: 0; transition: opacity .15s, color .15s, background .15s;
+}
+.dash-card:hover .dash-card-del, .dash-card:focus-within .dash-card-del { opacity: 1; }
+.dash-card-del:hover { color: var(--crit); background: var(--crit-soft); }
+.dash-card-del:focus-visible { opacity: 1; outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.dash-card-inner { padding: 22px 24px; display: flex; flex-direction: column; gap: 6px; width: 100%; }
+
+.dash-card-top { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.dash-card-name { font-size: 18px; font-weight: 700; letter-spacing: -.3px; margin-top: 4px; color: var(--text); }
+
+.dash-card-client { font-size: 13px; color: var(--muted); }
+
+.dash-card-meta {
+  display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 10px;
+  font-size: 12px; color: var(--faint); border-top: 1px solid var(--line2);
+}
+
+.dash-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--faint); flex-shrink: 0; }
+
+/* new project card */
+.dash-card-new {
+  border-style: dashed; border-color: var(--faint); background: var(--panel2);
+  align-items: center; justify-content: center; text-align: center;
+}
+.dash-card-new:hover { border-color: var(--accent); background: var(--accent-soft); }
+.dash-card-new .dash-card-inner { align-items: center; }
+
+.dash-new-icon {
+  width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 300; color: var(--accent);
+  background: var(--accent-soft); border: 1px solid var(--accent); transition: transform .2s ease;
+}
+.dash-card-new:hover .dash-new-icon { transform: scale(1.08); }
+
+/* top bar on dashboard */
+.dash-topbar { justify-content: flex-end; border-bottom: none; box-shadow: none; background: transparent; }
+
+/* standalone pages (admin, settings) */
+.standalone-header { border-bottom: 1px solid var(--line); }
+
+.dash-topbtn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;
+  font-size: 13px; font-weight: 500; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--muted); transition: all .15s ease;
+}
+.dash-topbtn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* home button in project header */
+.home-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; padding: 0; border-radius: 8px;
+  color: var(--muted); transition: all .15s ease;
+}
+.home-btn:hover { color: var(--accent); background: var(--accent-soft); }
+
+/* tab transitions */
+nav.tabs button { transition: color .15s ease, border-color .15s ease; }
 
 @media print {
   header.top, nav.tabs { display: none; }

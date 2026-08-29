@@ -11,3 +11,28 @@ node_modules/
 source-documents/org/
 
 .env
+
+# ---- DnB-OS tracking engine: what must never be committed ----------------
+# The append-only event log the tools fold into facts.json. 108 MB, which is
+# over GitHub's 100 MB hard limit — so committing it does not fail at review,
+# it fails at push. No browser reads it; tools/ingest.js rebuilds it.
+tracking/engines/skf/events.jsonl
+tracking/engines/skf/events.d/
+tracking/engines/skf/backups/
+
+# The shared plan/edit store, written at runtime by both apps. Committing it
+# would ship one machine's corrections into everybody else's checkout.
+tracking/engines/skf/sync/
+
+# The project document store — pin photographs, 3D renders, CAD and contract
+# files. ~1.6 GB, and it holds the signed client agreement, the client POs and
+# a BOQ carrying our own cost beside the client price. THIS REPOSITORY IS
+# PUBLIC, for the same reason the employee master above is excluded. Point
+# DNBOS_PROJECT_DIR at it locally instead — see README.
+tracking/projects/
+# ---- projects made in this app ----------------------------------------
+# The workspace store (api/workspace/projects.ts): every project created through
+# the intake screen, with its BOQ package values and contract figures in it. Our
+# own cost sits beside the client price in those, and THIS REPOSITORY IS PUBLIC
+# — same reason the org master and the tracking sync store are excluded above.
+workspace/

@@ -276,6 +276,9 @@ const CLIENT_FREE_ISSUE: MaterialHead = {
 /** Days a material must be on site ahead of the activity that consumes it — as procurement uses. */
 const ON_SITE_AHEAD_DAYS = 2;
 
+const ENABLING = /temporary|dilapidation|survey|demolition|debris|barricad|hoarding|mobilis|marking/i;
+const isEnabling = (a: ScheduledActivity) => a.phase === 'Site Prep' || ENABLING.test(a.name);
+
 const RESPONSIBILITY: Record<MaterialSupply, string> = {
   procured: 'Procurement',
   vendor: 'Site / contractor',
@@ -323,13 +326,27 @@ export function buildMaterialTracker(
    * The activity that consumes this material. Preferring the owning package's own activity over
    * any activity of the trade matters: gypsum board is needed when *the partition package*
    * starts, not when some other trade happens to touch a partition first.
+   *
+   * Enabling activities (temporary power, site marking, etc.) are filtered out so that
+   * materials are dated against the real work rather than site mobilisation.
+   *
+   * When a package has no activities of its own (e.g. C2 Light Fixtures or C3 UPS under
+   * Electrical), it is a sub-package whose material is installed late in the trade's sequence
+   * — so we pick the LAST non-enabling activity rather than the first.
    */
   const consumerOf = (spec: MaterialSpec, owner: BoqPackage | null): ScheduledActivity | null => {
     const byPackage = owner ? acts.filter((a) => a.packageCode === owner.code && a.trade === spec.trade) : [];
     const byTrade = acts.filter((a) => a.trade === spec.trade);
     const inPackage = owner ? acts.filter((a) => a.packageCode === owner.code) : [];
-    const pool = byPackage.length ? byPackage : byTrade.length ? byTrade : inPackage;
-    return [...pool].sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0] ?? null;
+
+    const earliest = (pool: ScheduledActivity[]) => [...pool].sort((a, b) => (a.startDate < b.startDate ? -1 : 1))[0] ?? null;
+    const latest = (pool: ScheduledActivity[]) => [...pool].sort((a, b) => (a.startDate < b.startDate ? 1 : -1))[0] ?? null;
+    const nonEnabling = (pool: ScheduledActivity[]) => { const r = pool.filter((a) => !isEnabling(a)); return r.length ? r : pool; };
+
+    if (byPackage.length) return earliest(byPackage);
+    if (byTrade.length) return latest(nonEnabling(byTrade));
+    if (inPackage.length) return earliest(inPackage);
+    return null;
   };
 
   /** The design deliverable whose client approval must land before this can be ordered. */

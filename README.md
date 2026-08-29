@@ -24,10 +24,48 @@ npm run dev                    # http://localhost:5173
 
 | Command | What it does |
 |---|---|
+| `npm run dev` | **Both engines.** Planning at http://localhost:5173, DnB-OS tracking at http://localhost:8901 |
+| `npm run dev:web` | Planning engine only |
+| `npm run dev:tracking` | Tracking engine only |
 | `npm start` | Builds and serves at http://localhost:4173 **with the Drive proxy**, so link scanning works outside dev |
 | `npm run gates` | The full bar: typecheck → lint → 278 tests → build → sample run |
 | `npm run sample` | Regenerates `sample-output/` for all projects (JSON, reports, decks) |
 | `npm run pdf` | Converts the HTML reports to PDF (needs LibreOffice on PATH) |
+
+## The tracking engine
+
+`tracking/` is the DnB-OS tracking engine: the same programme this app authors,
+watched from site. `npm run dev` starts both, and vite proxies `/dnbos` to it,
+so the browser stays same-origin and nothing is preflighted.
+
+The two share one programme. This app **owns** Schedule (PERT / Gantt / S-curve),
+Manpower, Procurement, Design and the To-do list, and pushes them whole. The
+tracking engine renders them and never recomputes them — before this, both
+derived the same four from different inputs and nobody could say which was the
+plan. Corrections travel back as a sparse `rowId → field → value` overlay that a
+re-plan does not flatten. Cross-links: **Track →** here, **← Planning** there.
+
+### Photographs, renders and source documents are NOT in this repository
+
+The pin walk, the 3D renders and the project document store are ~1.6 GB, and
+they include the signed client agreement, the client POs and a BOQ carrying our
+own cost beside the client price. **This repository is public** — the same
+reason `source-documents/org/` is excluded. The engine is told where to find
+them instead:
+
+```bash
+DNBOS_PROJECT_DIR="/path/to/projects/skf-pune-7f" npm run dev
+```
+
+It also finds them on its own from `facts.json`'s recorded folder, or from a
+`DnB_OS_PlanningEngine/projects/` checkout sitting beside this one. Without any
+of those the engine still serves every screen — the pin plate draws, and the
+pair boxes say there is no photograph, which is true, instead of showing a
+broken image and leaving you to guess why.
+
+`engines/skf/events.jsonl` is also excluded: 108 MB, over GitHub's 100 MB hard
+limit, and no browser reads it — `tools/ingest.js` rebuilds it from the folder
+above.
 
 ## What's in it
 

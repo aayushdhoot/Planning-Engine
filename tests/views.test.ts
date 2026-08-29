@@ -125,9 +125,15 @@ describe('actual dates override the contract (#16)', () => {
     const late = buildPlan(skf, { ...base, dates: { internalStart: '2026-06-15' } }, TODAY);
     expect(onContract.internal!.start).toBe('2026-06-08');
     expect(late.internal!.start).toBe('2026-06-15');
-    // every downstream date moves with it rather than the plan describing a project that is not happening
-    expect(late.internal!.end > onContract.internal!.end).toBe(true);
     expect(late.assumptions.some((a) => /re-anchored to the actual start/i.test(a.text))).toBe(true);
+
+    // The squeeze used to show as a later finish. It shows as compression now, and that is the
+    // truer model: the client date does not move because site started late, so the week has to
+    // come out of the programme. The plan says so, and says what it costs.
+    expect(late.internal!.durationWorkingDays).toBeLessThan(onContract.internal!.durationWorkingDays);
+    expect(late.assumptions.some((a) => /compressed by ×/.test(a.text))).toBe(true);
+    // and it is not free — the work content is held constant, so it lands on the gangs
+    expect(late.modules.manpower.warnings.length).toBeGreaterThanOrEqual(onContract.modules.manpower.warnings.length);
   });
 
   it('uses a client committed finish in place of contract start + duration', () => {

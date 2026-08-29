@@ -92,6 +92,17 @@ export function buildPertFromPlan(plan: Plan, today: string): PertTree {
       .map((a) => {
         const n = node(a.name, 3, 'execution', a.startDate, a.endDate);
         n.durationDays = a.duration.value;
+        // Recorded progress, where the site has reported any. rollUp() derives a
+        // leaf's percent from its actual dates, so a part-done activity needs an
+        // actual START and no actual finish; without it the roll-up reads the row
+        // as not started and every summary above loses progress the S-curve is
+        // already drawing from the very same numbers.
+        const pct = a.percentComplete?.value;
+        if (pct != null && pct > 0) {
+          n.actualStart = a.startDate;
+          if (pct >= 100) n.actualFinish = a.endDate;
+          n.percentComplete = pct;   // rollUp keeps a recorded figure over its placeholder
+        }
         return n;
       });
     return summarise(Object.assign(node(ph.name, 2, 'execution', null, null), { children: kids }));

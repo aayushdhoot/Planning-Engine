@@ -219,7 +219,7 @@ describe('the material register reaches the cockpit and the client view', () => 
   it('reaches both reports, at each audience\'s depth', () => {
     const internalHtml = renderReport(plan, 'internal');
     const clientHtml = renderReport(clientView(plan, TODAY), 'client');
-    expect(internalHtml).toContain('Material at site — delivery register');
+    expect(internalHtml).toContain('Material Registry — delivery register');
     expect(internalHtml).toContain('Gypsum board 12.5mm');
     // the client document names only what they owe us, never our own register
     expect(clientHtml).toContain('Material supplied by you (free issue)');

@@ -260,6 +260,74 @@ export interface MaterialSummary {
   nextRequired: MaterialRow | null;
 }
 
+export interface WeeklyMaterialBucket {
+  weekNumber: number;
+  label: string;
+  startDate: string;
+  endDate: string;
+  items: MaterialRow[];
+}
+
+export interface TradeWeeklySchedule {
+  trade: string;
+  weeks: WeeklyMaterialBucket[];
+}
+
+export function buildWeeklyMaterialSchedule(
+  rows: MaterialRow[],
+  projectStart: string,
+): TradeWeeklySchedule[] {
+  const dated = rows.filter((r) => r.requiredOnSite !== null);
+  if (!dated.length || !projectStart) return [];
+
+  const startMs = new Date(projectStart + 'T00:00:00Z').getTime();
+  const DAY = 86400000;
+
+  const weekOf = (iso: string): number => {
+    const ms = new Date(iso + 'T00:00:00Z').getTime();
+    return Math.max(1, Math.ceil((ms - startMs + 1) / (7 * DAY)));
+  };
+
+  const addDays = (iso: string, n: number): string => {
+    const d = new Date(new Date(iso + 'T00:00:00Z').getTime() + n * DAY);
+    return d.toISOString().slice(0, 10);
+  };
+
+  const maxWeek = Math.max(...dated.map((r) => weekOf(r.requiredOnSite!)));
+
+  const byTrade = new Map<string, MaterialRow[]>();
+  for (const r of dated) {
+    const trade = r.category;
+    if (!byTrade.has(trade)) byTrade.set(trade, []);
+    byTrade.get(trade)!.push(r);
+  }
+
+  const result: TradeWeeklySchedule[] = [];
+  for (const [trade, tradeRows] of byTrade) {
+    const weeks: WeeklyMaterialBucket[] = [];
+    for (let w = 1; w <= maxWeek; w++) {
+      const weekStart = addDays(projectStart, (w - 1) * 7);
+      const weekEnd = addDays(projectStart, w * 7 - 1);
+      const items = tradeRows.filter((r) => weekOf(r.requiredOnSite!) === w);
+      weeks.push({
+        weekNumber: w,
+        label: `Week ${w} (${weekStart} to ${weekEnd})`,
+        startDate: weekStart,
+        endDate: weekEnd,
+        items,
+      });
+    }
+    const hasItems = weeks.some((w) => w.items.length > 0);
+    if (hasItems) result.push({ trade, weeks });
+  }
+
+  return result.sort((a, b) => {
+    const aFirst = Math.min(...a.weeks.filter((w) => w.items.length).map((w) => w.weekNumber));
+    const bFirst = Math.min(...b.weeks.filter((w) => w.items.length).map((w) => w.weekNumber));
+    return aFirst - bFirst;
+  });
+}
+
 const DELIVERED: MaterialStatus[] = ['Delivered'];
 
 export function summariseMaterials(rows: MaterialRow[], today: string): MaterialSummary {

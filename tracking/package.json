@@ -1,0 +1,6 @@
+{
+  "name": "dnbos-tracking-engine",
+  "private": true,
+  "type": "commonjs",
+  "description": "The DnB-OS tracking engine. Node resolves module type from the NEAREST package.json, so this one file keeps the whole tree CommonJS while the repository above it is \"type\": \"module\". Without it every require() in here is read as ESM and the server dies on load. Renaming ~200 files to .cjs would have been the alternative, and would have broken the inlining tools and every internal require along with it."
+}

@@ -16,7 +16,7 @@ import { INPUT_SLOTS, type InputSlot } from './intake';
 export type ReadState = 'pending' | 'extracted' | 'logged' | 'dropped';
 
 /** Which structural parser, if any, can turn this file into engine inputs. */
-export type Extractor = 'boq' | 'schedule' | 'vision' | 'pdf' | null;
+export type Extractor = 'boq' | 'boq-pdf' | 'schedule' | 'vision' | 'pdf' | null;
 
 export type FileKind = 'spreadsheet' | 'document' | 'drawing' | 'image' | 'archive' | 'other';
 
@@ -99,7 +99,18 @@ export function extractorFor(file: DriveFile): Extractor {
   // still no *structural* PDF parser — a rendered page is read exactly as a photograph is —
   // but "held as evidence" was the wrong answer for the brand guideline and the drawing set,
   // which are the two documents a fit-out plan most often has only as a PDF.
-  if (kindOf(file) === 'document' && EXT(file.name) === 'pdf') return 'pdf';
+  if (kindOf(file) === 'document' && EXT(file.name) === 'pdf') {
+    // A priced BOQ issued as a PDF is not evidence, it is THE input the whole plan is costed
+    // from. Sent through the generic PDF path it comes back as scope notes and material items
+    // and never touches boqPackages, so the folder screen said read while the required-input
+    // checklist still said no priced BOQ was present. It gets the transcribing reader instead
+    // (services/extraction/boq-vision.ts), whose rows go through the same parseBoq the
+    // spreadsheet does. Schedule wins the tie for the same reason it does above: a programme
+    // filed in a BOQ folder is still a programme.
+    if (!SCHEDULE_NAME.test(file.name) && !SCHEDULE_NAME.test(file.path) && (BOQ_NAME.test(file.name) || BOQ_NAME.test(file.path)))
+      return 'boq-pdf';
+    return 'pdf';
+  }
   return null;
 }
 
@@ -133,6 +144,7 @@ export function noExtractorReason(file: DriveFile): string {
 /** What each extractor claims it will do, in the user's words rather than the code's. */
 const READ_AS: Record<NonNullable<Extractor>, string> = {
   boq: 'priced BOQ',
+  'boq-pdf': 'priced BOQ — every page transcribed, then read by the BOQ parser',
   schedule: 'programme',
   vision: 'site image (vision extraction)',
   pdf: 'PDF — every page rendered, then read by vision extraction',

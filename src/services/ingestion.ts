@@ -4,6 +4,13 @@ import * as XLSX from 'xlsx';
 import type { BoqPackage, ProjectInputs, Traced } from '../domain/types';
 import { canonicalUnit } from '../engine/wbs';
 
+/**
+ * Where a BOQ's cells came from: a workbook, a CSV/TSV, or a table already read off a PDF
+ * page by page. All three go through the same row loop below — the point of accepting rows
+ * directly is that a PDF BOQ and an Excel BOQ cannot end up disagreeing about what a package is.
+ */
+export type BoqSource = ArrayBuffer | string | unknown[][];
+
 export interface IngestedBoq {
   packages: BoqPackage[];
   areaSft: Traced<number> | null;
@@ -16,7 +23,7 @@ export interface IngestedBoq {
 
 export interface IngestionService {
   /** Parse a priced BOQ workbook or CSV into engine inputs. */
-  parseBoq(file: { name: string; data: ArrayBuffer | string }): IngestedBoq;
+  parseBoq(file: { name: string; data: BoqSource }): IngestedBoq;
   /** Merge ingested BOQ data into an existing project shell. */
   applyToProject(base: ProjectInputs, boq: IngestedBoq, sourceName: string): ProjectInputs;
 }
@@ -65,7 +72,7 @@ const isTotalRow = (s: string) => /grand\s*total|^total\b|sub\s*total|gst|bocw|t
 // ---------------------------------------------------------------- service
 
 export class BoqIngestionService implements IngestionService {
-  parseBoq(file: { name: string; data: ArrayBuffer | string }): IngestedBoq {
+  parseBoq(file: { name: string; data: BoqSource }): IngestedBoq {
     const rows = this.toRows(file);
     const warnings: string[] = [];
     const packages: BoqPackage[] = [];
@@ -146,10 +153,14 @@ export class BoqIngestionService implements IngestionService {
       const unitIdx = cells.findIndex((c) => c && canonicalUnit(c) !== null);
       if (unitIdx > codeIdx) {
         const canon = canonicalUnit(cells[unitIdx])!;
-        // the quantity is the first plausible number after the unit cell, or just before it
+        // the quantity is the first plausible number after the unit cell, or just before it.
+        // "UNIT, QTY" and "QTY, UNIT" are both ordinary BOQ layouts; in the second the cell
+        // after the unit is the AMOUNT column, and preferring it unconditionally meant the
+        // whole row lost its quantity rather than falling back to the cell on the other side.
         const after = parseAmount(cells[unitIdx + 1]);
         const before = parseAmount(cells[unitIdx - 1]);
-        const q = after != null && after > 0 ? after : before != null && before > 0 ? before : null;
+        const usable = (n: number | null) => n != null && n > 0 && n !== client;
+        const q = usable(after) ? after : usable(before) ? before : null;
         if (q != null && q !== client) {
           quantity = { value: q, provenance: 'input', source: `${file.name} · row ${i + 1} (${codeCell} QTY)` };
           unit = canon;
@@ -203,7 +214,11 @@ export class BoqIngestionService implements IngestionService {
     };
   }
 
-  private toRows(file: { name: string; data: ArrayBuffer | string }): unknown[][] {
+  private toRows(file: { name: string; data: BoqSource }): unknown[][] {
+    // Already a table. A BOQ that only exists as a PDF is transcribed page by page by the
+    // vision reader (services/extraction/boq-vision.ts) and arrives here as rows, so it goes
+    // through the identical parser the workbook does rather than a second, divergent one.
+    if (Array.isArray(file.data)) return file.data as unknown[][];
     if (typeof file.data === 'string') {
       // CSV/TSV
       const delim = file.data.includes('\t') && !file.data.includes(',') ? '\t' : ',';

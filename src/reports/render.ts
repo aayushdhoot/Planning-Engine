@@ -159,7 +159,7 @@ function internalReport(plan: Plan): string {
   ${plan.modules.procurement.map((i) => `<tr><td>${esc(i.category)}</td><td class="muted">${esc(i.subCategory)}</td><td>${i.criticality}</td><td>${i.orderBy ?? '—'}</td><td>${i.deliveryRequired ?? '—'}</td><td>${esc(i.vendor) || '—'}</td><td>${i.orderStatus}</td><td class="src">${esc(i.gatedBy ?? '—')}</td></tr>`).join('')}
   </tbody></table>
 
-  <h2>Material at site — delivery register (${plan.modules.materials.summary.items} items)</h2>
+  <h2>Material Registry — delivery register (${plan.modules.materials.summary.items} items)</h2>
   <div class="note">One level below the procurement packages: what physically has to land, when, and who brings it.
   ${plan.modules.materials.summary.shortOnSite} item(s) are past their required-on-site date;
   ${plan.modules.materials.summary.clientSupplied} are client free issue and are not on our purchase orders.</div>

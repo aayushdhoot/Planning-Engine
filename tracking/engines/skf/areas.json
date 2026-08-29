@@ -1,0 +1,1635 @@
+{
+ "builtAt": "2026-08-06T16:54:42.037Z",
+ "from": {
+  "pins": "pins.json",
+  "drawing": "C:/Users/Admin/Desktop/DnB_OS_PlanningEngine/projects/skf-pune-7f",
+  "renders": "C:/Users/Admin/Desktop/DnB_OS_PlanningEngine/projects/skf-pune-7f/13 Site Tracking/3d"
+ },
+ "counts": {
+  "areas": 49,
+  "named": 49,
+  "unnamed": 0,
+  "guessed": 24,
+  "sqft": 19181,
+  "unnamedSqft": 0,
+  "seenByMoreThanOnePin": 26,
+  "seenByNoPin": 0
+ },
+ "areas": [
+  {
+   "id": "0",
+   "name": "Reception + Waiting Area",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 455,
+   "pins": [
+    28,
+    29
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "1",
+   "name": "Cabin 07",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 2",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 27 sees gypsum board, a glass partition, a door frame and a cove pelmet in 86 sqft",
+   "guessed": true,
+   "sqft": 86,
+   "pins": [
+    27
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "2",
+   "name": "Boardroom - 20 Pax",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 812,
+   "pins": [
+    5,
+    6
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "3",
+   "name": "Coffee Station + Microwave",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 4",
+   "namedBy": "ASSUMPTION — no evidence",
+   "namedWhy": "pin 37 has no render and the drawing labels nothing inside this outline. 38 sqft. The drawing names a Coffee Station + Microwave that no area carries, and this is the only unassigned space small enough. NOTHING WAS READ TO SUPPORT THIS — it is a placeholder so the floor can be planned, and it should be the first name checked",
+   "guessed": true,
+   "sqft": 38,
+   "pins": [
+    37
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "4",
+   "name": "Tea Bag",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 611,
+   "pins": [
+    34,
+    35,
+    36
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "5",
+   "name": "MR- 8 Pax 01",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 143,
+   "pins": [
+    25,
+    26
+   ],
+   "labels": [],
+   "renderSays": [
+    "8 PAX MR"
+   ]
+  },
+  {
+   "id": "6",
+   "name": "MR - 4 Pax 03",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 7",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 33 sees three acoustic panels, four loose furniture pieces and an AV display in 84 sqft — a small meeting room",
+   "guessed": true,
+   "sqft": 84,
+   "pins": [
+    33
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "7",
+   "name": "Female Wellness Room",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 71,
+   "pins": [
+    31
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "8",
+   "name": "Male Wellness Room",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 71,
+   "pins": [
+    32
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "9",
+   "name": "Low Ht Storage",
+   "named": true,
+   "type": "passage",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 73,
+   "pins": [
+    41,
+    42
+   ],
+   "labels": [],
+   "renderSays": [
+    "POD Seating"
+   ]
+  },
+  {
+   "id": "10",
+   "name": "Dry Pantry",
+   "named": true,
+   "type": "passage",
+   "wasCalled": "Unnamed Space 11",
+   "namedBy": "render filename",
+   "namedWhy": "the design team named the render for pins 43/44 \"Dry Pantry\", and the read confirms a counter, two joinery runs and storage units",
+   "guessed": true,
+   "sqft": 70,
+   "pins": [
+    43,
+    44
+   ],
+   "labels": [],
+   "renderSays": [
+    "Dry Pantry"
+   ]
+  },
+  {
+   "id": "11",
+   "name": "Low Ht Storage 2",
+   "named": true,
+   "type": "passage",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 70,
+   "pins": [
+    51,
+    52
+   ],
+   "labels": [],
+   "renderSays": [
+    "POD Seating"
+   ]
+  },
+  {
+   "id": "12",
+   "name": "Hub",
+   "named": true,
+   "type": "passage",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 163,
+   "pins": [
+    20
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "13",
+   "name": "Collab Area - 1",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 727,
+   "pins": [
+    22,
+    23
+   ],
+   "labels": [],
+   "renderSays": [
+    "Collab 01"
+   ]
+  },
+  {
+   "id": "14",
+   "name": "MR - 4 Pax 02",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 15",
+   "namedBy": "render filename",
+   "namedWhy": "the design team named the render for pin 21 \"4PAX MR\"; the read confirms four glass partitions and three acoustic panels",
+   "guessed": true,
+   "sqft": 89,
+   "pins": [
+    21
+   ],
+   "labels": [],
+   "renderSays": [
+    "4PAX MR"
+   ]
+  },
+  {
+   "id": "15",
+   "name": "Library",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 917,
+   "pins": [
+    70,
+    71
+   ],
+   "labels": [],
+   "renderSays": [
+    "Collab 02"
+   ]
+  },
+  {
+   "id": "16",
+   "name": "MR - 6 Pax 01",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 17",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 73 sees five acoustic panels and five loose furniture pieces in 91 sqft",
+   "guessed": true,
+   "sqft": 91,
+   "pins": [
+    73
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "17",
+   "name": "Collab Area - 2",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 18",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 72 sees wallpaper, a cove pelmet and three loose furniture pieces in 95 sqft — a soft-seating collaboration space, matching the named Collab Area - 1",
+   "guessed": true,
+   "sqft": 95,
+   "pins": [
+    72
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "18",
+   "name": "Cabin 04",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 95,
+   "pins": [
+    69
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "19",
+   "name": "MR - 6 Pax 02",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 20",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 77 sees six loose furniture pieces, a joinery run and an AV display in 91 sqft",
+   "guessed": true,
+   "sqft": 91,
+   "pins": [
+    77
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "20",
+   "name": "Cabin 06",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 95,
+   "pins": [
+    76
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "21",
+   "name": "Compactor Room",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 210,
+   "pins": [
+    74,
+    75
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "22",
+   "name": "MR- 4 Pax 04",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 883,
+   "pins": [
+    78,
+    79
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "23",
+   "name": "Refuge Area",
+   "named": true,
+   "type": "open",
+   "wasCalled": "Unnamed Space 24",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pins 80/81 see almost nothing but paint, lights, sprinkler and two glass partitions across 812 sqft — an open area kept clear. The drawing names a Refuge Area that no area carries",
+   "guessed": true,
+   "sqft": 812,
+   "pins": [
+    80,
+    81
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "24",
+   "name": "Open Workstation Zone 3",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": true,
+   "sqft": 3078,
+   "pins": [
+    53,
+    54,
+    55,
+    56
+   ],
+   "labels": [],
+   "renderSays": [
+    "WS"
+   ]
+  },
+  {
+   "id": "25",
+   "name": "Open Workstation Zone 2",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": true,
+   "sqft": 1958,
+   "pins": [
+    38,
+    39,
+    40
+   ],
+   "labels": [],
+   "renderSays": [
+    "WS"
+   ]
+  },
+  {
+   "id": "26",
+   "name": "Open Workstation Zone 1",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": true,
+   "sqft": 3187,
+   "pins": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "27",
+   "name": "Payroll- 7 Pax",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 309,
+   "pins": [
+    18,
+    19
+   ],
+   "labels": [],
+   "renderSays": [
+    "Payrool"
+   ]
+  },
+  {
+   "id": "28",
+   "name": "Cabin 03",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 29",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 17 sees a glass partition and two light fittings in 100 sqft",
+   "guessed": true,
+   "sqft": 100,
+   "pins": [
+    17
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "29",
+   "name": "Cabin 02",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 30",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 14 sees a glass partition, two joinery runs and a door shutter in 111 sqft — the same signature as the named cabins",
+   "guessed": true,
+   "sqft": 111,
+   "pins": [
+    14
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "30",
+   "name": "Cabin 01",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 257,
+   "pins": [
+    15,
+    16
+   ],
+   "labels": [],
+   "renderSays": [
+    "8 PAX MR"
+   ]
+  },
+  {
+   "id": "31",
+   "name": "Phone Booth 02",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 32",
+   "namedBy": "render filename",
+   "namedWhy": "the design team named the render for pin 24 \"phone Booth\"; 23 sqft with one glass partition, matching the existing Phone Booth exactly",
+   "guessed": true,
+   "sqft": 23,
+   "pins": [
+    24
+   ],
+   "labels": [],
+   "renderSays": [
+    "phone Booth"
+   ]
+  },
+  {
+   "id": "32",
+   "name": "Phone Booth",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 23,
+   "pins": [
+    30
+   ],
+   "labels": [],
+   "renderSays": [
+    "phone Booth"
+   ]
+  },
+  {
+   "id": "33",
+   "name": "MR - 12 Pax 01",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 308,
+   "pins": [
+    45,
+    46
+   ],
+   "labels": [],
+   "renderSays": [
+    "12 PAX MR"
+   ]
+  },
+  {
+   "id": "34",
+   "name": "Server Room",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 133,
+   "pins": [
+    48,
+    49
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "35",
+   "name": "Focus Pod 01",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 36",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 58 sees one glass partition and one door shutter in 51 sqft — too small for a meeting room, larger than a phone booth",
+   "guessed": true,
+   "sqft": 51,
+   "pins": [
+    58
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "36",
+   "name": "Meeting Room 01",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 37",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 57 sees two door frames, three ceiling cutouts and loose furniture in 66 sqft. The drawing names a Meeting Room that no area carries",
+   "guessed": true,
+   "sqft": 66,
+   "pins": [
+    57
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "37",
+   "name": "Washroom 02",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 38",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 61 sees two sanitary fixtures in 58 sqft — a second single-occupancy washroom",
+   "guessed": true,
+   "sqft": 58,
+   "pins": [
+    61
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "38",
+   "name": "Gents Restroom Wash Area",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 39",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pins 66/67 see three sanitary fixtures and two to three cubicles, adjoining space 40",
+   "guessed": true,
+   "sqft": 138,
+   "pins": [
+    66,
+    67
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "39",
+   "name": "Gents Restroom",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 40",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pins 64/65 see sanitaryware, four ceiling cutouts and door shutters. The drawing names a Gents Restroom that no area carries. The ladies/gents split between this block and space 42 is an assumption",
+   "guessed": true,
+   "sqft": 211,
+   "pins": [
+    64,
+    65
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "40",
+   "name": "Accessible Washroom",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 41",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pin 7 sees two sanitary fixtures and one joinery run in 62 sqft — a single-occupancy washroom, too small for a block",
+   "guessed": true,
+   "sqft": 62,
+   "pins": [
+    7
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "41",
+   "name": "Ladies Restroom",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 42",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pins 12/13 see three cubicles, four sanitary fixtures and six door shutters. The drawing names a Ladies Restroom that no area carries. WHICH of the two restroom blocks is ladies and which is gents is NOT established by any read — this half is an assumption",
+   "guessed": true,
+   "sqft": 278,
+   "pins": [
+    12,
+    13
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "42",
+   "name": "Ladies Restroom Wash Area",
+   "named": true,
+   "type": "closed",
+   "wasCalled": "Unnamed Space 43",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pins 10/11 see five cubicles, a cove pelmet and wall finishes, adjoining space 42; read as the second half of the same block",
+   "guessed": true,
+   "sqft": 216,
+   "pins": [
+    10,
+    11
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "43",
+   "name": "UPS And Elec Room",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 125,
+   "pins": [
+    47
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "44",
+   "name": "Battery Room",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 84,
+   "pins": [
+    50
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "45",
+   "name": "Cabin 05",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 88,
+   "pins": [
+    68
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "46",
+   "name": "Dishwash",
+   "named": true,
+   "type": "closed",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 133,
+   "pins": [
+    62,
+    63
+   ],
+   "labels": [],
+   "renderSays": []
+  },
+  {
+   "id": "47",
+   "name": "Cafeteria- 52 Pax",
+   "named": true,
+   "type": "open",
+   "wasCalled": null,
+   "namedBy": null,
+   "namedWhy": null,
+   "guessed": false,
+   "sqft": 1138,
+   "pins": [
+    59,
+    60
+   ],
+   "labels": [],
+   "renderSays": [
+    "Cafe"
+   ]
+  },
+  {
+   "id": "48",
+   "name": "Elevator Lobby",
+   "named": true,
+   "type": "passage",
+   "wasCalled": "Unnamed Space 49",
+   "namedBy": "inferred from the render read",
+   "namedWhy": "pins 8/9 see six ceiling cutouts, six light fittings, a cove pelmet and a door frame, and no fixtures of any trade — a circulation space. The drawing names an Elevator Lobby that no area carries",
+   "guessed": true,
+   "sqft": 194,
+   "pins": [
+    8,
+    9
+   ],
+   "labels": [],
+   "renderSays": []
+  }
+ ],
+ "proposals": [],
+ "witnesses": {
+  "multi": [
+   {
+    "area": "Reception + Waiting Area",
+    "pins": [
+     28,
+     29
+    ],
+    "sqft": 455
+   },
+   {
+    "area": "Boardroom - 20 Pax",
+    "pins": [
+     5,
+     6
+    ],
+    "sqft": 812
+   },
+   {
+    "area": "Tea Bag",
+    "pins": [
+     34,
+     35,
+     36
+    ],
+    "sqft": 611
+   },
+   {
+    "area": "MR- 8 Pax 01",
+    "pins": [
+     25,
+     26
+    ],
+    "sqft": 143
+   },
+   {
+    "area": "Low Ht Storage",
+    "pins": [
+     41,
+     42
+    ],
+    "sqft": 73
+   },
+   {
+    "area": "Dry Pantry",
+    "pins": [
+     43,
+     44
+    ],
+    "sqft": 70
+   },
+   {
+    "area": "Low Ht Storage 2",
+    "pins": [
+     51,
+     52
+    ],
+    "sqft": 70
+   },
+   {
+    "area": "Collab Area - 1",
+    "pins": [
+     22,
+     23
+    ],
+    "sqft": 727
+   },
+   {
+    "area": "Library",
+    "pins": [
+     70,
+     71
+    ],
+    "sqft": 917
+   },
+   {
+    "area": "Compactor Room",
+    "pins": [
+     74,
+     75
+    ],
+    "sqft": 210
+   },
+   {
+    "area": "MR- 4 Pax 04",
+    "pins": [
+     78,
+     79
+    ],
+    "sqft": 883
+   },
+   {
+    "area": "Refuge Area",
+    "pins": [
+     80,
+     81
+    ],
+    "sqft": 812
+   },
+   {
+    "area": "Open Workstation Zone 3",
+    "pins": [
+     53,
+     54,
+     55,
+     56
+    ],
+    "sqft": 3078
+   },
+   {
+    "area": "Open Workstation Zone 2",
+    "pins": [
+     38,
+     39,
+     40
+    ],
+    "sqft": 1958
+   },
+   {
+    "area": "Open Workstation Zone 1",
+    "pins": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "sqft": 3187
+   },
+   {
+    "area": "Payroll- 7 Pax",
+    "pins": [
+     18,
+     19
+    ],
+    "sqft": 309
+   },
+   {
+    "area": "Cabin 01",
+    "pins": [
+     15,
+     16
+    ],
+    "sqft": 257
+   },
+   {
+    "area": "MR - 12 Pax 01",
+    "pins": [
+     45,
+     46
+    ],
+    "sqft": 308
+   },
+   {
+    "area": "Server Room",
+    "pins": [
+     48,
+     49
+    ],
+    "sqft": 133
+   },
+   {
+    "area": "Gents Restroom Wash Area",
+    "pins": [
+     66,
+     67
+    ],
+    "sqft": 138
+   },
+   {
+    "area": "Gents Restroom",
+    "pins": [
+     64,
+     65
+    ],
+    "sqft": 211
+   },
+   {
+    "area": "Ladies Restroom",
+    "pins": [
+     12,
+     13
+    ],
+    "sqft": 278
+   },
+   {
+    "area": "Ladies Restroom Wash Area",
+    "pins": [
+     10,
+     11
+    ],
+    "sqft": 216
+   },
+   {
+    "area": "Dishwash",
+    "pins": [
+     62,
+     63
+    ],
+    "sqft": 133
+   },
+   {
+    "area": "Cafeteria- 52 Pax",
+    "pins": [
+     59,
+     60
+    ],
+    "sqft": 1138
+   },
+   {
+    "area": "Elevator Lobby",
+    "pins": [
+     8,
+     9
+    ],
+    "sqft": 194
+   }
+  ],
+  "blind": [],
+  "why": "26 of 49 areas are seen by more than one pin. Those pins are witnesses to one area, never two — agreeing raises confidence, disagreeing raises a query, and neither ever adds up."
+ },
+ "disagreements": [],
+ "decided": [
+  {
+   "id": "1",
+   "was": "Unnamed Space 2",
+   "now": "Cabin 07",
+   "by": "inferred from the render read",
+   "why": "pin 27 sees gypsum board, a glass partition, a door frame and a cove pelmet in 86 sqft"
+  },
+  {
+   "id": "3",
+   "was": "Unnamed Space 4",
+   "now": "Coffee Station + Microwave",
+   "by": "ASSUMPTION — no evidence",
+   "why": "pin 37 has no render and the drawing labels nothing inside this outline. 38 sqft. The drawing names a Coffee Station + Microwave that no area carries, and this is the only unassigned space small enough. NOTHING WAS READ TO SUPPORT THIS — it is a placeholder so the floor can be planned, and it should be the first name checked"
+  },
+  {
+   "id": "6",
+   "was": "Unnamed Space 7",
+   "now": "MR - 4 Pax 03",
+   "by": "inferred from the render read",
+   "why": "pin 33 sees three acoustic panels, four loose furniture pieces and an AV display in 84 sqft — a small meeting room"
+  },
+  {
+   "id": "10",
+   "was": "Unnamed Space 11",
+   "now": "Dry Pantry",
+   "by": "render filename",
+   "why": "the design team named the render for pins 43/44 \"Dry Pantry\", and the read confirms a counter, two joinery runs and storage units"
+  },
+  {
+   "id": "14",
+   "was": "Unnamed Space 15",
+   "now": "MR - 4 Pax 02",
+   "by": "render filename",
+   "why": "the design team named the render for pin 21 \"4PAX MR\"; the read confirms four glass partitions and three acoustic panels"
+  },
+  {
+   "id": "16",
+   "was": "Unnamed Space 17",
+   "now": "MR - 6 Pax 01",
+   "by": "inferred from the render read",
+   "why": "pin 73 sees five acoustic panels and five loose furniture pieces in 91 sqft"
+  },
+  {
+   "id": "17",
+   "was": "Unnamed Space 18",
+   "now": "Collab Area - 2",
+   "by": "inferred from the render read",
+   "why": "pin 72 sees wallpaper, a cove pelmet and three loose furniture pieces in 95 sqft — a soft-seating collaboration space, matching the named Collab Area - 1"
+  },
+  {
+   "id": "19",
+   "was": "Unnamed Space 20",
+   "now": "MR - 6 Pax 02",
+   "by": "inferred from the render read",
+   "why": "pin 77 sees six loose furniture pieces, a joinery run and an AV display in 91 sqft"
+  },
+  {
+   "id": "23",
+   "was": "Unnamed Space 24",
+   "now": "Refuge Area",
+   "by": "inferred from the render read",
+   "why": "pins 80/81 see almost nothing but paint, lights, sprinkler and two glass partitions across 812 sqft — an open area kept clear. The drawing names a Refuge Area that no area carries"
+  },
+  {
+   "id": "28",
+   "was": "Unnamed Space 29",
+   "now": "Cabin 03",
+   "by": "inferred from the render read",
+   "why": "pin 17 sees a glass partition and two light fittings in 100 sqft"
+  },
+  {
+   "id": "29",
+   "was": "Unnamed Space 30",
+   "now": "Cabin 02",
+   "by": "inferred from the render read",
+   "why": "pin 14 sees a glass partition, two joinery runs and a door shutter in 111 sqft — the same signature as the named cabins"
+  },
+  {
+   "id": "31",
+   "was": "Unnamed Space 32",
+   "now": "Phone Booth 02",
+   "by": "render filename",
+   "why": "the design team named the render for pin 24 \"phone Booth\"; 23 sqft with one glass partition, matching the existing Phone Booth exactly"
+  },
+  {
+   "id": "35",
+   "was": "Unnamed Space 36",
+   "now": "Focus Pod 01",
+   "by": "inferred from the render read",
+   "why": "pin 58 sees one glass partition and one door shutter in 51 sqft — too small for a meeting room, larger than a phone booth"
+  },
+  {
+   "id": "36",
+   "was": "Unnamed Space 37",
+   "now": "Meeting Room 01",
+   "by": "inferred from the render read",
+   "why": "pin 57 sees two door frames, three ceiling cutouts and loose furniture in 66 sqft. The drawing names a Meeting Room that no area carries"
+  },
+  {
+   "id": "37",
+   "was": "Unnamed Space 38",
+   "now": "Washroom 02",
+   "by": "inferred from the render read",
+   "why": "pin 61 sees two sanitary fixtures in 58 sqft — a second single-occupancy washroom"
+  },
+  {
+   "id": "38",
+   "was": "Unnamed Space 39",
+   "now": "Gents Restroom Wash Area",
+   "by": "inferred from the render read",
+   "why": "pins 66/67 see three sanitary fixtures and two to three cubicles, adjoining space 40"
+  },
+  {
+   "id": "39",
+   "was": "Unnamed Space 40",
+   "now": "Gents Restroom",
+   "by": "inferred from the render read",
+   "why": "pins 64/65 see sanitaryware, four ceiling cutouts and door shutters. The drawing names a Gents Restroom that no area carries. The ladies/gents split between this block and space 42 is an assumption"
+  },
+  {
+   "id": "40",
+   "was": "Unnamed Space 41",
+   "now": "Accessible Washroom",
+   "by": "inferred from the render read",
+   "why": "pin 7 sees two sanitary fixtures and one joinery run in 62 sqft — a single-occupancy washroom, too small for a block"
+  },
+  {
+   "id": "41",
+   "was": "Unnamed Space 42",
+   "now": "Ladies Restroom",
+   "by": "inferred from the render read",
+   "why": "pins 12/13 see three cubicles, four sanitary fixtures and six door shutters. The drawing names a Ladies Restroom that no area carries. WHICH of the two restroom blocks is ladies and which is gents is NOT established by any read — this half is an assumption"
+  },
+  {
+   "id": "42",
+   "was": "Unnamed Space 43",
+   "now": "Ladies Restroom Wash Area",
+   "by": "inferred from the render read",
+   "why": "pins 10/11 see five cubicles, a cove pelmet and wall finishes, adjoining space 42; read as the second half of the same block"
+  },
+  {
+   "id": "48",
+   "was": "Unnamed Space 49",
+   "now": "Elevator Lobby",
+   "by": "inferred from the render read",
+   "why": "pins 8/9 see six ceiling cutouts, six light fittings, a cove pelmet and a door frame, and no fixtures of any trade — a circulation space. The drawing names an Elevator Lobby that no area carries"
+  }
+ ],
+ "refusedNames": [],
+ "renders": {
+  "expected": 81,
+  "delivered": 76,
+  "missing": [
+   37,
+   47,
+   48,
+   49,
+   50
+  ],
+  "offProtocol": [
+   {
+    "file": "Camera brief",
+    "why": "the name does not start with a pin number"
+   },
+   {
+    "file": "P01.png",
+    "pin": 1,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P02.png",
+    "pin": 2,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P03.png",
+    "pin": 3,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P04.png",
+    "pin": 4,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P05.png",
+    "pin": 5,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P06.png",
+    "pin": 6,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P07.png",
+    "pin": 7,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P08.png",
+    "pin": 8,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P09.png",
+    "pin": 9,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P10.png",
+    "pin": 10,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P11.png",
+    "pin": 11,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P12.png",
+    "pin": 12,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P13.png",
+    "pin": 13,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P14.png",
+    "pin": 14,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P15 8 PAX MR.png",
+    "pin": 15,
+    "why": "carries the suffix \"8 PAX MR\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P16 8 PAX MR.png",
+    "pin": 16,
+    "why": "carries the suffix \"8 PAX MR\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P17.png",
+    "pin": 17,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P18 Payrool.png",
+    "pin": 18,
+    "why": "carries the suffix \"Payrool\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P19 Payrool.png",
+    "pin": 19,
+    "why": "carries the suffix \"Payrool\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P20.png",
+    "pin": 20,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P21 4PAX MR.png",
+    "pin": 21,
+    "why": "carries the suffix \"4PAX MR\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P22 Collab 01.png",
+    "pin": 22,
+    "why": "carries the suffix \"Collab 01\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P23 Collab 01.png",
+    "pin": 23,
+    "why": "carries the suffix \"Collab 01\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P24 phone Booth.png",
+    "pin": 24,
+    "why": "carries the suffix \"phone Booth\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P25 8 PAX MR.png",
+    "pin": 25,
+    "why": "carries the suffix \"8 PAX MR\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P26 8 PAX MR.png",
+    "pin": 26,
+    "why": "carries the suffix \"8 PAX MR\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P27.png",
+    "pin": 27,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P28.png",
+    "pin": 28,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P29.png",
+    "pin": 29,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P30 phone Booth.png",
+    "pin": 30,
+    "why": "carries the suffix \"phone Booth\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P31.png",
+    "pin": 31,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P32.png",
+    "pin": 32,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P33.png",
+    "pin": 33,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P34.png",
+    "pin": 34,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P35.png",
+    "pin": 35,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P36.png",
+    "pin": 36,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P38 WS.png",
+    "pin": 38,
+    "why": "carries the suffix \"WS\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P39 WS.png",
+    "pin": 39,
+    "why": "carries the suffix \"WS\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P40 WS.png",
+    "pin": 40,
+    "why": "carries the suffix \"WS\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P41 POD Seating.png",
+    "pin": 41,
+    "why": "carries the suffix \"POD Seating\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P42 POD Seating.png",
+    "pin": 42,
+    "why": "carries the suffix \"POD Seating\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P43 Dry Pantry.png",
+    "pin": 43,
+    "why": "carries the suffix \"Dry Pantry\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P44 Dry Pantry.png",
+    "pin": 44,
+    "why": "carries the suffix \"Dry Pantry\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P45 12 PAX MR.png",
+    "pin": 45,
+    "why": "carries the suffix \"12 PAX MR\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P46 12 PAX MR.png",
+    "pin": 46,
+    "why": "carries the suffix \"12 PAX MR\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P51 POD Seating.png",
+    "pin": 51,
+    "why": "carries the suffix \"POD Seating\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P52 POD Seating.png",
+    "pin": 52,
+    "why": "carries the suffix \"POD Seating\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P53 WS.png",
+    "pin": 53,
+    "why": "carries the suffix \"WS\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P54 WS.png",
+    "pin": 54,
+    "why": "carries the suffix \"WS\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P55 WS.png",
+    "pin": 55,
+    "why": "carries the suffix \"WS\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P56 WS.png",
+    "pin": 56,
+    "why": "carries the suffix \"WS\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P57.png",
+    "pin": 57,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P58.png",
+    "pin": 58,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P59 Cafe.png",
+    "pin": 59,
+    "why": "carries the suffix \"Cafe\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P60 Cafe.png",
+    "pin": 60,
+    "why": "carries the suffix \"Cafe\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P61.png",
+    "pin": 61,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P62.png",
+    "pin": 62,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P63.png",
+    "pin": 63,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P64.png",
+    "pin": 64,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P65.png",
+    "pin": 65,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P66.png",
+    "pin": 66,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P67.png",
+    "pin": 67,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P68.png",
+    "pin": 68,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P69.png",
+    "pin": 69,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P70 Collab 02.png",
+    "pin": 70,
+    "why": "carries the suffix \"Collab 02\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P71 Collab 02.png",
+    "pin": 71,
+    "why": "carries the suffix \"Collab 02\" and is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P72.png",
+    "pin": 72,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P73.png",
+    "pin": 73,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P74.png",
+    "pin": 74,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P75.png",
+    "pin": 75,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P76.png",
+    "pin": 76,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P77.png",
+    "pin": 77,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P78.png",
+    "pin": 78,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P79.png",
+    "pin": 79,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P80.png",
+    "pin": 80,
+    "why": "is a .png where the brief asked for .jpg"
+   },
+   {
+    "file": "P81.png",
+    "pin": 81,
+    "why": "is a .png where the brief asked for .jpg"
+   }
+  ]
+ }
+}

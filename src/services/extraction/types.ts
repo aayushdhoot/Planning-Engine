@@ -51,6 +51,36 @@ export interface ExtractedDesignRef {
   locator?: string;
 }
 
+/**
+ * The twelve things engine/intake.ts asks the project head before it will build a plan.
+ *
+ * They were asked as blank fields on a screen that had just read 178 documents, several of
+ * which state the answer outright — the contract names the working hours, the fit-out guideline
+ * names the week-offs, the payment annexure names the RA milestones. Retyping a figure the
+ * engine has already seen is both wasted work and a chance to mistype it, so the reader now
+ * looks for these while it has the page open and the person confirms rather than composes.
+ *
+ * Confirmation is not a formality. Nothing here is treated as an answer until someone says so
+ * — an extracted value is a well-sourced proposal, and the screen exists because a confident
+ * plan built on a guessed date is worse than no plan.
+ */
+export type PlanningQueryKey =
+  | 'start' | 'duration' | 'area' | 'workmode' | 'weekoff' | 'phasing'
+  | 'scope' | 'longlead' | 'approvals' | 'milestones' | 'team' | 'constraints';
+
+export const PLANNING_QUERY_KEYS: PlanningQueryKey[] = [
+  'start', 'duration', 'area', 'workmode', 'weekoff', 'phasing',
+  'scope', 'longlead', 'approvals', 'milestones', 'team', 'constraints',
+];
+
+export interface ExtractedPlanningAnswer {
+  key: PlanningQueryKey;
+  /** the answer in the document's own words — never the model's paraphrase of a policy */
+  value: string;
+  /** page/clause it was read from, so the person confirming can check it in seconds */
+  locator?: string;
+}
+
 /** What the model returns for one file. Every array/object is optional — absence means
  * "nothing of this kind found in this file", not an extraction failure. */
 export interface ExtractionResult {
@@ -60,6 +90,8 @@ export interface ExtractionResult {
   materialItems?: ExtractedMaterialItem[];
   scopeNotes?: ExtractedScopeNote[];
   designRefs?: ExtractedDesignRef[];
+  /** direct answers to the intake questions, when the document states one outright */
+  planningAnswers?: ExtractedPlanningAnswer[];
   /** model's own confidence flags — things it saw but could not read confidently.
    * Surfaced as assumptions[], same as wbs.ts' notes[] convention. */
   lowConfidenceNotes: string[];
@@ -158,6 +190,19 @@ export const EXTRACTION_JSON_SCHEMA = {
             packageCodeHint: { type: ['string', 'null'] },
             trade: { type: 'string' },
             description: { type: 'string' },
+            locator: { type: ['string', 'null'] },
+          },
+        },
+      },
+      planningAnswers: {
+        type: 'array',
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['key', 'value'],
+          properties: {
+            key: { type: 'string', enum: PLANNING_QUERY_KEYS },
+            value: { type: 'string' },
             locator: { type: ['string', 'null'] },
           },
         },
