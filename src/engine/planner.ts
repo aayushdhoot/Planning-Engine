@@ -49,7 +49,23 @@ export interface Plan {
     varianceDays: number | null;
   } | null;
   external: { start: string; end: string; milestones: { code: string; date: string; percent: number; description: string }[] } | null;
-  ieInvariant: { externalEnd: string | null; internalEnd: string | null; bufferCalendarDays: number | null; holds: boolean };
+  /**
+   * Is the internal finish inside the client date, and is the gap a sane size?
+   *
+   * `holds` answers only the first, and answering only the first is how a six-day programme
+   * against a ninety-day contract reported "invariant holds": it does hold, and it means
+   * nothing. `state` carries the reading a person needs — a buffer can be wrong at both ends.
+   */
+  ieInvariant: {
+    externalEnd: string | null;
+    internalEnd: string | null;
+    bufferCalendarDays: number | null;
+    holds: boolean;
+    /** breach: past the client date · tight: under the policy minimum · ok: inside policy ·
+     *  implausible: further inside the contract than the policy maximum, which on a derived
+     *  programme almost always means the BOQ did not drive the durations */
+    state: 'breach' | 'tight' | 'ok' | 'implausible';
+  };
   modules: {
     timeline: { activities: ScheduledActivity[]; criticalPath: string[]; phases: { name: string; start: string; end: string; critical: boolean }[] };
     manpower: ManpowerPlan;
@@ -107,11 +123,49 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, ex
 
   // A BOQ without a supplied schedule is still plannable: derive the WBS from scope.
   let sourceActivities = p.scheduleActivities;
+  // null when the schedule came in ready-made: an ingested programme carries its own durations,
+  // and this question is only ever about the ones the engine derived from a BOQ.
+  let wbsValueDriven: boolean | null = null;
   if (!sourceActivities.length && prov.boq && p.boqPackages.length && p.contractStart) {
     const wbs = deriveWbs(p.boqPackages, p.contractDurationCalDays?.value ?? null, p.siteConditions);
     sourceActivities = wbs.activities;
+    wbsValueDriven = wbs.valueDriven;
     for (const n of wbs.notes) assumptions.push({ area: 'wbs', text: n, internalOnly: false });
   }
+  /**
+   * Does the BOQ describe the contract it is filed against?
+   *
+   * The check that would have caught Keppel (Pune) at the door. Its BOQ came through as
+   * ₹4.46 lakh of packages against a contract worth ₹8.75 crore — half a percent of the job —
+   * because the priced BOQ never actually read and what survived was a handful of stray rows.
+   * Everything downstream then behaved correctly on those numbers and produced a six-day
+   * programme for a ninety-day contract.
+   *
+   * Two figures the engine already had, never compared. A BOQ is the priced description of the
+   * contract; when the two totals are an order of magnitude apart, one of them is wrong, and it
+   * is not a question the schedule can answer for itself further down.
+   */
+  const boqTotal = p.boqPackages.reduce((s, x) => s + x.clientAmount.value, 0);
+  const contractVal = p.contractValue?.value ?? null;
+  const boqCoverage = contractVal && contractVal > 0 && boqTotal > 0 ? boqTotal / contractVal : null;
+  const boqUnderstatesContract = boqCoverage != null && boqCoverage < 0.5;
+  if (boqCoverage != null && (boqCoverage < 0.5 || boqCoverage > 2)) {
+    // Below par reads best as a percentage ("only 0.5% of the job"); above par as a multiple
+    // ("2.3× the job"). The same number either way, said the way a person would say it.
+    const size = boqCoverage < 1
+      ? `only ${Math.round(boqCoverage * 1000) / 10}% of the job`
+      : `${Math.round(boqCoverage * 10) / 10}× the job`;
+    assumptions.push({
+      area: 'inputs',
+      text:
+        `The BOQ totals ₹${Math.round(boqTotal).toLocaleString('en-IN')} against a contract value of ₹${Math.round(contractVal!).toLocaleString('en-IN')} — ${size}. ` +
+        (boqCoverage < 0.5
+          ? 'Durations, manpower and procurement are all computed from package value, so a BOQ this far short of the contract produces a programme far shorter than the work. Read the priced BOQ properly before using this plan.'
+          : 'A BOQ larger than the contract usually means totals or roll-up rows were counted twice. Check the package list before using this plan.'),
+      internalOnly: false,
+    });
+  }
+
   const mandatoryMissing = !prov.boq || !prov.contract || sourceActivities.length === 0;
 
   const base: Plan = {
@@ -126,7 +180,7 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, ex
     buffer: cfg.buffer,
     internal: null,
     external: null,
-    ieInvariant: { externalEnd: null, internalEnd: null, bufferCalendarDays: null, holds: true },
+    ieInvariant: { externalEnd: null, internalEnd: null, bufferCalendarDays: null, holds: true, state: 'ok' },
     modules: {
       timeline: { activities: [], criticalPath: [], phases: [] },
       manpower: { days: [], peak: 0, peakDate: null, averageDaily: 0, totalManDays: 0, trades: [], smoothness: 1, warnings: [] },
@@ -173,6 +227,215 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, ex
       text: `Internal baseline re-anchored to the actual start ${d.internalStart} (contract says ${contractStart}); every internal date is computed from it.`,
       internalOnly: false,
     });
+  /**
+   * ---- FIT THE PROGRAMME TO THE CONTRACT ----
+   *
+   * The contract duration used to do exactly one thing: set the client's end date. It never
+   * touched the programme. So a project head who typed 60 days got a 131-day CPM and a
+   * 71-day breach, and one who typed 90 got a 5-day CPM and 85 days of buffer — in both cases
+   * the engine had been told the answer and computed straight past it.
+   *
+   * The work-content CPM is the honest answer to "how long is this job", and it is not thrown
+   * away here. What happens is what a planner does with it: the network keeps its shape, its
+   * logic and its relative trade weights, and every duration is scaled by one factor until the
+   * finish lands on the contract. That is the arithmetic of putting proportionally more people
+   * on each trade, and it is bounded — `norms.scheduleFit.maxCompression` is where "add
+   * manpower" stops being a plan and starts being a wish. When the bound binds, the residual
+   * gap is reported rather than absorbed: the date moves, or the scope does.
+   *
+   * THIS RUNS BEFORE THE WORK-MODE FACTOR, and that ordering is the whole of its honesty.
+   * Fitting afterwards would let compression quietly cancel a site constraint the user had just
+   * declared: restricted daytime working would stretch the programme and the fit would pull it
+   * straight back, so the setting looked inert and a real risk vanished. Fit answers "how do we
+   * staff this to hit the contract"; the work mode is then applied to that answer, and if it
+   * pushes the finish past the client date, that breach is exactly what should be shown.
+   *
+   * The two directions are not symmetric, deliberately:
+   *   - Compressing an over-run is always attempted. That is real planning.
+   *   - STRETCHING an under-run happens only when the durations are already known to be
+   *     meaningless — a BOQ that never read, every trade sitting on the floor. Padding a sound
+   *     programme to fill its contract would be inventing work, and a job that genuinely
+   *     finishes early is allowed to finish early.
+   */
+  const fitPolicy = norms.scheduleFit as { maxCompression: number; maxExpansion: number; maxIterations: number };
+  const calDays = (from: string, to: string) => Math.round((parseIso(to).getTime() - parseIso(from).getTime()) / 86400000);
+  const contractEndFromDuration = p.contractDurationCalDays ? addCalendarDays(clientStart, p.contractDurationCalDays.value) : null;
+  const externalTarget = d.clientEnd || contractEndFromDuration;
+  // The internal programme aims to land the buffer short of the client date, not on it.
+  const internalTargetEnd = externalTarget ? addCalendarDays(externalTarget, -Math.max(0, cfg.buffer.internalBufferDays)) : null;
+  const durationsAreMeaningless = wbsValueDriven === false || boqUnderstatesContract;
+  // Set by the fit below: the factor it settled on, and whether its bound stopped it short of
+  // the target. A large buffer that the fit could not close is a different thing from one a
+  // declared work-mode change deliberately bought.
+  let fitApplied: number | null = null;
+  let fitBounded = false;
+
+  if (internalTargetEnd && sourceActivities.length && !mandatoryMissing) {
+    const bare = computeCpm(sourceActivities, start, { ...cfg.calendar, workModeFactor: 1 });
+    const bareEnd = bare.activities.reduce((m, a) => (a.endDate > m ? a.endDate : m), start);
+    const targetSpan = Math.max(1, calDays(start, internalTargetEnd));
+    const achievedSpan = Math.max(1, calDays(start, bareEnd));
+    const wanted = targetSpan / achievedSpan;
+    /**
+     * Both directions, unconditionally.
+     *
+     * Stretching used to require the durations to be known-meaningless, on the reasoning that
+     * padding a sound programme would be inventing work. That reasoning was wrong, and Snitch
+     * (Bengaluru) is why: a perfectly good BOQ produced 22 working days against a 90-day
+     * contract, and the engine left it there with 69 days of buffer and "invariant holds" — a
+     * plan that finishes in a quarter of its window and then stands idle for the rest.
+     *
+     * Stretching invents nothing, because the crew below moves inversely to the duration: the
+     * same man-days, spread over more days, with smaller gangs. That is not padding, it is
+     * levelling into the window the contract actually gives — and it is the cheaper, more
+     * staffable plan. The work-content CPM at norm crew sizes says how fast the job COULD be
+     * done with as many people as the norms assume; it was never a reason to promise that date.
+     */
+    if (Math.abs(wanted - 1) > 0.05) {
+      // Iterated rather than solved: overlap lags and the working calendar both make the finish
+      // a non-linear function of the durations, so one multiply lands near the target and a few
+      // cheap re-runs land on it. Never below one day — an activity that exists takes a day.
+      const clamp = (x: number) => Math.min(fitPolicy.maxExpansion, Math.max(fitPolicy.maxCompression, x));
+      let factor = clamp(wanted);
+      let fitted = sourceActivities;
+      let fittedEnd = bareEnd;
+      /**
+       * The closest attempt seen, not the last one tried.
+       *
+       * The loop used to keep whatever the final iteration produced, which is only the best
+       * answer if the search happens to converge monotonically — and it does not. Every duration
+       * has a one-working-day floor, so a programme of many short tasks barely moves for a while
+       * and then jumps, and dividing by the error overshoots straight past the target. A 90-day
+       * contract came back at 96 working days that way, reported as a breach, when an earlier
+       * iteration had already landed within a day of it.
+       */
+      let best: { factor: number; fitted: typeof sourceActivities; end: string; err: number } | null = null;
+      for (let i = 0; i < fitPolicy.maxIterations; i++) {
+        const f2 = factor;
+        /**
+         * Rounding is spread across the tasks, not applied to each one on its own.
+         *
+         * Durations are whole days, so rounding each task independently makes the whole
+         * programme a step function: with a template of one- and two-day tasks, ×1.5 and ×2.0
+         * round identically and the finish jumps 31 → 63 → 95 calendar days with nothing in
+         * between. A 90-day contract then has no factor that fits it, and the closest attempt
+         * lands twelve days out and reports a breach.
+         *
+         * Carrying the remainder forward is the same largest-remainder idea an apportionment
+         * uses: at ×1.5 half the one-day tasks become two days and half stay at one, so the
+         * TOTAL scales smoothly even though every individual duration is still a whole number.
+         */
+        let durCarry = 0;
+        let lagCarry = 0;
+        const scaleDays = (d: number): number => {
+          const exact = d * f2 + durCarry;
+          const whole = Math.max(1, Math.round(exact));
+          durCarry = exact - whole;
+          return whole;
+        };
+        /**
+         * The lags get the same treatment, and they are what actually mattered.
+         *
+         * Carrying only the durations was not enough: the finish still moved in plateaus of
+         * 31 → 63 → 95 calendar days, because the critical path runs through the start-to-start
+         * lags between trades and those were still being rounded one at a time. Carrying them
+         * too turns the same search into 31 → 37 → 46 → 58 → 63 → 74 → 83, which is a curve a
+         * contract date can actually be met on.
+         */
+        const scaleLag = (l: number): number => {
+          const exact = l * f2 + lagCarry;
+          const whole = Math.max(0, Math.round(exact));
+          lagCarry = exact - whole;
+          return whole;
+        };
+        fitted = sourceActivities.map((a) =>
+          a.isMilestone || a.duration.value === 0
+            ? a
+            : {
+                ...a,
+                // Still 'computed' — it is, from the contract duration — because Provenance has
+                // no weaker word and inventing one would ripple through the schema and the audit
+                // trace. The source carries the distinction instead, and says which of the two
+                // things each duration was computed FROM, which is the part a reader needs.
+                duration: comp(
+                  scaleDays(a.duration.value),
+                  durationsAreMeaningless
+                    ? `shaped to the ${p.contractDurationCalDays?.value ?? '—'}-day contract (×${f2.toFixed(3)}), NOT measured from the BOQ — ${a.duration.source}`
+                    : `${a.duration.source} × schedule fit ${f2.toFixed(3)} to hit the contract finish`,
+                ),
+                /**
+                 * The crew moves inversely, and this is not a detail.
+                 *
+                 * Scaling duration alone would have quietly deleted work: manpower and the
+                 * S-curve both weight an activity by duration × crew, so halving a programme
+                 * without touching its gangs halves the man-days the job is supposed to contain.
+                 * The plan would then claim a shorter schedule AND less labour — free time, which
+                 * is not a thing. Holding duration × crew constant is what makes the compression
+                 * mean what its own note says it means: the same work, more people, less time.
+                 *
+                 * The invariant is per ACTIVITY, and only to the nearest whole worker — a gang
+                 * cannot be 3.4 people and never drops below one. Site man-days, which is a
+                 * different number, are levelled separately and do move: manpower.ts holds a
+                 * minimum viable gang across each trade window, so a stretched programme really
+                 * does cost more labour. That is true of real sites too, and is said out loud in
+                 * the assumption rather than papered over here.
+                 *
+                 * Whether those people can actually be found is a separate question, and the
+                 * manpower module answers it — its gang caps turn an over-aggressive fit into
+                 * levelling warnings rather than into a silently impossible plan.
+                 */
+                crew: comp(
+                  Math.max(1, Math.round(a.crew.value / f2)),
+                  `${a.crew.source} ÷ schedule fit ${f2.toFixed(3)} — duration x crew held constant to the nearest whole worker while the programme was ${f2 < 1 ? 'compressed' : 'stretched'}`,
+                ),
+                deps: a.deps.map((dep) => ({ ...dep, lag: scaleLag(dep.lag) })),
+              },
+        );
+        const trial = computeCpm(fitted, start, { ...cfg.calendar, workModeFactor: 1 });
+        fittedEnd = trial.activities.reduce((m, a) => (a.endDate > m ? a.endDate : m), start);
+        const err = calDays(start, fittedEnd) / targetSpan;
+        if (!best || Math.abs(err - 1) < Math.abs(best.err - 1)) best = { factor: f2, fitted, end: fittedEnd, err };
+        if (Math.abs(err - 1) <= 0.02) break;
+        // Damped, not a straight division. The finish is a step function of the factor once
+        // durations hit their one-day floor, so correcting by the full error oscillates around
+        // the target instead of settling on it.
+        const next = clamp(factor * Math.pow(1 / err, 0.6));
+        if (Math.abs(next - factor) < 1e-9) break; // the bound is binding; stop pretending
+        factor = next;
+      }
+      if (best) { factor = best.factor; fitted = best.fitted; fittedEnd = best.end; }
+      sourceActivities = fitted;
+      fitApplied = factor;
+
+      const contractDays = p.contractDurationCalDays?.value ?? calDays(start, externalTarget!);
+      const gap = calDays(start, fittedEnd) - targetSpan;
+      // The gap is only "bounded out" if the bound is the reason for it — a couple of days of
+      // rounding against the working calendar is the iteration converging, not a failure.
+      fitBounded = Math.abs(gap) > 2;
+
+      assumptions.push({
+        area: 'schedule',
+        text:
+          wanted < 1
+            ? `The work content gives ${achievedSpan} calendar days; the contract allows ${contractDays}. Every duration and lag was compressed by ×${factor.toFixed(2)}, with crews raised in proportion — the arithmetic of putting proportionally more people on each trade, so the work content per activity is unchanged. Check the manpower module before committing: this plan is only real if those crews can be staffed.`
+            : durationsAreMeaningless
+              ? `The BOQ did not give durations worth scheduling, so the programme was shaped to the ${contractDays}-day contract instead (×${factor.toFixed(2)}). Every duration below is that shape, not a measurement of this job — read the priced BOQ and re-plan to replace them.`
+              : `At norm crew sizes the work content would finish in ${achievedSpan} calendar days, but the contract allows ${contractDays}. Rather than promise a date deep inside its own window and then stand idle, every duration and lag was stretched by ×${factor.toFixed(2)} with crews reduced in proportion, so the same work is spread across the period the contract actually gives at smaller and more staffable gangs. Note this is not free: manpower holds a minimum viable gang per trade across its window, so a longer programme carries more man-days on site for the same work content. If the shorter programme is genuinely wanted, shorten the contract duration — do not read this one as the cheaper plan.`,
+        internalOnly: false,
+      });
+
+      if (fitBounded)
+        assumptions.push({
+          area: 'schedule',
+          text:
+            gap > 0
+              ? `Compression stopped at the ×${fitPolicy.maxCompression} floor and the programme still finishes ${gap} calendar days past the internal target (${internalTargetEnd}). Past that point more manpower stops shortening the job. The date moves or the scope does — that decision is not the engine's to make.`
+              : `Stretching stopped at the ×${fitPolicy.maxExpansion} ceiling and the programme still finishes ${-gap} calendar days short of the internal target (${internalTargetEnd}). A gap that large after the fit means the work content is a tiny fraction of the contract period — check the BOQ covers the whole scope.`,
+          internalOnly: false,
+        });
+    }
+  }
+
   // ----- Module 1: timeline (internal = CPM) -----
   // Site work-mode changes productivity, so both activity durations AND the overlap
   // lags between them stretch — otherwise the network shape would freeze and a slower
@@ -224,15 +487,43 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, ex
 
   const contractEnd = p.contractDurationCalDays ? addCalendarDays(clientStart, p.contractDurationCalDays.value) : internalEnd;
   const externalEnd = d.clientEnd || contractEnd;
+
   if (d.clientEnd && d.clientEnd !== contractEnd)
     assumptions.push({
       area: 'schedule',
       text: `Client baseline finish set to ${d.clientEnd} rather than the contract's ${contractEnd}.`,
       internalOnly: false,
     });
+  const workingSpanCal = Math.max(1, Math.round((parseIso(internalEnd).getTime() - parseIso(start).getTime()) / 86400000));
   const bufferCal = Math.round((parseIso(externalEnd).getTime() - parseIso(internalEnd).getTime()) / 86400000);
   if (bufferCal < cfg.buffer.min)
     assumptions.push({ area: 'schedule', text: `Internal CPM finish (${internalEnd}) leaves only ${bufferCal}d buffer vs contract end (${externalEnd}) — below configured minimum ${cfg.buffer.min}d. Crash critical-path trades or renegotiate.`, internalOnly: true });
+
+  /**
+   * A buffer can be wrong at BOTH ends, and only one end was ever checked.
+   *
+   * Too little buffer is a squeeze and was reported. Too much is not good news — it is the
+   * shape a programme takes when the inputs did not drive it. A ninety-day contract came back
+   * with a six-day internal baseline and eighty-five days of buffer, and the screen said the
+   * invariant held, because it does hold: the internal end really is before the external one.
+   * What it does not mean is that the programme is credible.
+   *
+   * So the size is checked against the policy's own maximum, and the diagnosis leads with the
+   * likeliest cause rather than the symptom — a plan whose durations all came off the floor is
+   * a plan whose BOQ never arrived.
+   */
+  if (bufferCal > cfg.buffer.max) {
+    const share = Math.round((bufferCal / Math.max(1, bufferCal + workingSpanCal)) * 100);
+    assumptions.push({
+      area: 'schedule',
+      text:
+        `Internal CPM finish (${internalEnd}) is ${bufferCal}d before the contract end (${externalEnd}) — ${share}% of the whole contract period sitting as buffer, against a configured maximum of ${cfg.buffer.max}d. ` +
+        (boqUnderstatesContract || wbsValueDriven === false
+          ? 'The BOQ did not drive these durations: every trade fell back to the minimum-share floor, so each activity is one day because there was no value to compute from, not because the work takes one day. Read the priced BOQ and re-plan before using any date here.'
+          : 'A programme this far inside its contract period usually means the BOQ under-states the work rather than that the job is genuinely this short. Check the package values against the scope before committing to it.'),
+      internalOnly: false,
+    });
+  }
 
   const phaseNames = [...new Set(cpm.activities.map((a) => a.phase))];
   const phases = phaseNames.map((ph) => {
@@ -261,7 +552,21 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, ex
     end: externalEnd,
     milestones: p.milestones.map((m) => ({ code: m.code, date: addCalendarDays(clientStart, m.dayOffset), percent: m.percent, description: m.description })),
   };
-  base.ieInvariant = { externalEnd, internalEnd, bufferCalendarDays: bufferCal, holds: externalEnd >= internalEnd };
+  const holds = externalEnd >= internalEnd;
+  base.ieInvariant = {
+    externalEnd, internalEnd, bufferCalendarDays: bufferCal, holds,
+    // A large buffer is only NOT CREDIBLE when there is a reason to distrust the durations.
+    // Flagging it on size alone cried wolf on the honest case: a faster work mode legitimately
+    // bought seventeen days on a project whose BOQ covered 99% of its contract, and the card
+    // called that plan not credible. Finishing early is allowed to just be finishing early.
+    state: !holds
+      ? 'breach'
+      : bufferCal < cfg.buffer.min
+        ? 'tight'
+        : bufferCal > cfg.buffer.max && (fitBounded || fitApplied === null)
+          ? 'implausible'
+          : 'ok',
+  };
   base.modules.timeline = { activities: cpm.activities, criticalPath: cpm.criticalPath, phases };
 
   // ----- Module 2: manpower (levelled, not a naive sum of nominal crews) -----
@@ -350,8 +655,19 @@ export function buildPlan(p: ProjectInputs, cfg: EngineConfig, today: string, ex
   // ----- confidence -----
   const providedCount = Object.values(prov).filter(Boolean).length;
   const unmapped = base.modules.procurement.filter((x) => !x.feeds).length;
-  const score = Math.round(100 * (0.5 * (providedCount / 9) + 0.3 * (1 - unmapped / Math.max(1, p.boqPackages.length)) + 0.2 * (base.ieInvariant.holds && bufferCal >= cfg.buffer.min ? 1 : 0.3))) / 100;
-  base.confidence = { score, basis: `${providedCount}/9 inputs provided; ${unmapped}/${p.boqPackages.length} packages unmapped; buffer ${bufferCal}d.` };
+  // A schedule the BOQ never drove is not a 0.8-confidence plan with a footnote against it. It
+  // is the norm sequence with one floored duration repeated through it, and the headline number
+  // has to say so rather than average the fault away against nine present inputs.
+  const scheduleScore = base.ieInvariant.state === 'ok' ? 1 : base.ieInvariant.state === 'tight' ? 0.5 : 0.3;
+  const raw = 0.5 * (providedCount / 9) + 0.3 * (1 - unmapped / Math.max(1, p.boqPackages.length)) + 0.2 * scheduleScore;
+  const notDriven = wbsValueDriven === false || boqUnderstatesContract;
+  const score = Math.round(100 * (notDriven ? Math.min(raw, 0.35) : raw)) / 100;
+  base.confidence = {
+    score,
+    basis:
+      `${providedCount}/9 inputs provided; ${unmapped}/${p.boqPackages.length} packages unmapped; buffer ${bufferCal}d (${base.ieInvariant.state})` +
+      (boqUnderstatesContract ? '; BOQ covers only ' + Math.round((boqCoverage ?? 0) * 1000) / 10 + '% of the contract value' : wbsValueDriven === false ? '; durations not driven by the BOQ' : '') + '.',
+  };
 
   return base;
 }
@@ -391,7 +707,12 @@ export function clientView(plan: Plan, today: string = new Date().toISOString().
     .map((m) => ({ ...m, vendor: '', poNumber: '', remarks: '', basis: '', storage: '', issues: [] }));
   clone.modules.materials = { rows: freeIssue, summary: summariseMaterials(freeIssue, today) };
   clone.buffer = { ...clone.buffer, internalBufferDays: 0 };
-  clone.ieInvariant = { externalEnd: clone.ieInvariant.externalEnd, internalEnd: null, bufferCalendarDays: null, holds: clone.ieInvariant.holds };
+  // The client sees whether the date is met, never how comfortably — "implausible" is a
+  // judgement about our own inputs and belongs in the internal view only.
+  clone.ieInvariant = {
+    externalEnd: clone.ieInvariant.externalEnd, internalEnd: null, bufferCalendarDays: null,
+    holds: clone.ieInvariant.holds, state: clone.ieInvariant.holds ? 'ok' : 'breach',
+  };
   clone.internal = null;
   // float, late dates, critical-path flags, crew loading and cost shares are internal planning
   // artefacts — the client baseline shows committed dates only.

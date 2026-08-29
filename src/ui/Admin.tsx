@@ -124,8 +124,17 @@ export function Admin({
                 <td>
                   <div className="row" style={{ gap: 6, justifyContent: 'flex-end' }}>
                     <button onClick={() => toggleArchive(p.id)}>{archived ? 'Restore' : 'Archive'}</button>
+                    {/* The confirm is asked because there is nowhere to get it back from: a
+                        project's inputs live only in the workspace file, and the tracking engine
+                        keeps rendered modules, not inputs. This used to delete on one click. */}
                     {!builtInIds.includes(p.id) && (
-                      <button title="Remove this project entirely" onClick={() => onDeleteProject(p.id)}>Delete</button>
+                      <button
+                        title="Remove this project entirely"
+                        onClick={() => {
+                          if (confirm(`Delete “${p.name}”?\n\nThis removes the project and everything set up for it — the Drive link, the answered intake questions and the BOQ figures the plan is computed from. It cannot be undone.`))
+                            onDeleteProject(p.id);
+                        }}
+                      >Delete</button>
                     )}
                   </div>
                 </td>

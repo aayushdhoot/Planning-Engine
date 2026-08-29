@@ -8,6 +8,7 @@
 // do with the patch (this keeps a manual "review before apply" step possible later, and matches
 // the approve-before-save pattern already agreed for the replanning agent).
 import { extractProjectDocuments, type SourceFile } from '../../src/services/extraction/extraction-service';
+import { lanesFromEnv } from '../../src/services/extraction/vision-client';
 
 export const config = { runtime: 'edge' };
 
@@ -19,9 +20,12 @@ export default async function handler(req: Request): Promise<Response> {
   // Deliberately a separate key/model from GEMINI_API_KEY (used by the AI planning assistant
   // elsewhere in the app) — keeping extraction's read volume on its own key means a heavy
   // folder scan never eats into the assistant's quota, and vice versa.
-  const apiKey = process.env.GEMINI_EXTRACTION_API_KEY;
+  // An ordered chain, not one key: when a model reports its DAILY allowance spent the run
+  // moves to the next rather than leaving the rest of the folder unread. See lanesFromEnv.
+  const lanes = lanesFromEnv(process.env as Record<string, string | undefined>, 'speed');
+  const apiKey = lanes[0]?.apiKey;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'GEMINI_EXTRACTION_API_KEY is not configured on the server' }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'No extraction model is configured on the server — set GEMINI_EXTRACTION_API_KEY, GROQ_API_KEY, or both.' }), { status: 500 });
   }
 
   let body: { files?: SourceFile[] };
@@ -46,7 +50,7 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   try {
-    const patch = await extractProjectDocuments(files, { apiKey, model: process.env.GEMINI_EXTRACTION_MODEL ?? 'gemini-3.5-flash-lite' });
+    const patch = await extractProjectDocuments(files, { apiKey, lanes });
     return new Response(JSON.stringify(patch), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

@@ -5,10 +5,10 @@
 // "nothing usable was found" for 129 photographs the model never actually saw is worse than one
 // that reports nothing at all, because the number on the coverage screen then says the engine
 // looked when it did not.
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mapPool } from '../src/services/extraction/pool';
 import { pagePlan, scaleFor, PDF_MAX_PAGES } from '../src/services/extraction/rasterize';
-import { parseRetryWaitMs, rateLimitScopeOf } from '../src/services/extraction/vision-client';
+import { parseRetryWaitMs, rateLimitScopeOf, resetSpentLanes } from '../src/services/extraction/vision-client';
 import { extractProjectDocuments, type SourceFile } from '../src/services/extraction/extraction-service';
 
 describe('mapPool', () => {
@@ -17,11 +17,50 @@ describe('mapPool', () => {
       await new Promise((r) => setTimeout(r, ms / 10));
       return ms;
     }, { concurrency: 3 });
+    // `attempts` rides on every settled result now — a file that only came back on its third
+    // try is worth knowing about when a scan is explained afterwards.
     expect(out).toEqual([
-      { status: 'done', value: 30 },
-      { status: 'done', value: 10 },
-      { status: 'done', value: 20 },
+      { status: 'done', value: 30, attempts: 1 },
+      { status: 'done', value: 10, attempts: 1 },
+      { status: 'done', value: 20, attempts: 1 },
     ]);
+  });
+
+  it('puts a retryable failure back on the queue instead of abandoning it', async () => {
+    // The behaviour a folder scan needs: a file refused on a rate limit has not failed, it has
+    // been told to come back. It used to be recorded as failed and never tried again, which is
+    // how a scan finished with most of the folder still unread.
+    let tries = 0;
+    const out = await mapPool([1], async () => {
+      tries++;
+      if (tries < 3) throw new Error('429 rate limit');
+      return 'read';
+    }, {
+      concurrency: 1,
+      retryAfter: (err) => (String((err as Error).message).includes('429') ? 0 : null),
+    });
+    expect(tries).toBe(3);
+    expect(out[0]).toEqual({ status: 'done', value: 'read', attempts: 3 });
+  });
+
+  it('stops retrying at maxAttempts rather than looping for ever', async () => {
+    let tries = 0;
+    const out = await mapPool([1], async () => { tries++; throw new Error('429 rate limit'); }, {
+      concurrency: 1, maxAttempts: 3, retryAfter: () => 0,
+    });
+    expect(tries).toBe(3);
+    expect(out[0].status).toBe('failed');
+  });
+
+  it('accepts a non-retryable failure first time, without burning attempts on it', async () => {
+    // an unreadable file fails identically however many times it is tried
+    let tries = 0;
+    const out = await mapPool([1], async () => { tries++; throw new Error('corrupt file'); }, {
+      concurrency: 1,
+      retryAfter: (err) => (String((err as Error).message).includes('429') ? 0 : null),
+    });
+    expect(tries).toBe(1);
+    expect(out[0].status).toBe('failed');
   });
 
   it('never exceeds its concurrency', async () => {
@@ -53,7 +92,7 @@ describe('mapPool', () => {
       return n;
     }, { concurrency: 2 });
     expect(out[0].status).toBe('failed');
-    expect(out[1]).toEqual({ status: 'done', value: 2 });
+    expect(out[1]).toEqual({ status: 'done', value: 2, attempts: 1 });
   });
 });
 
@@ -93,6 +132,11 @@ describe('page rendering decisions', () => {
 
 // ------------------------------------------------------------ extraction service
 
+/** A batch response: one entry per image, labelled img-1..img-n, as the batch prompt asks.
+ * Pages travel several to a request now (DEFAULT_BATCH), so a single-object body would be a
+ * response the service correctly reports as "no result for this image". */
+const okBatch = (payload: object, n: number) =>
+  okBody({ results: Array.from({ length: n }, (_, i) => ({ label: `img-${i + 1}`, ...payload })) });
 const okBody = (payload: unknown) =>
   new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(payload) }] } }] }), { status: 200 });
 const TPD_BODY =
@@ -104,9 +148,14 @@ const file = (fileName: string, labels: string[]): SourceFile => ({ fileName, fi
 afterEach(() => vi.unstubAllGlobals());
 
 describe('extractProjectDocuments', () => {
+  // The client remembers which models reported their day spent, so one case that trips a
+  // daily limit would otherwise refuse the lane for every case after it.
+  beforeEach(resetSpentLanes);
+
   it('merges every page of every file, in input order', async () => {
+    // three pages, one call — they fit inside a batch
     vi.stubGlobal('fetch', vi.fn(async () =>
-      okBody({ kind: 'site_image', siteConditions: [{ trade: 'civil', status: 'in_progress', note: 'shell floor, no partitions' }] }),
+      okBatch({ kind: 'site_image', siteConditions: [{ trade: 'civil', status: 'in_progress', note: 'shell floor, no partitions' }] }, 3),
     ));
     const patch = await extractProjectDocuments([file('a.jpeg', ['image']), file('b.pdf', ['page 1 of 2', 'page 2 of 2'])], { apiKey: 'k' });
     expect(patch.siteConditions).toHaveLength(3);
@@ -120,15 +169,38 @@ describe('extractProjectDocuments', () => {
     const fetchMock = vi.fn(async () => new Response(TPD_BODY, { status: 429 }));
     vi.stubGlobal('fetch', fetchMock);
 
-    const files = Array.from({ length: 12 }, (_, i) => file(`photo-${i}.jpeg`, ['image']));
-    const patch = await extractProjectDocuments(files, { apiKey: 'k' }, { concurrency: 2 });
+    // 24 pages in batches of one, so the pool has plenty of groups left to abandon
+    const files = Array.from({ length: 24 }, (_, i) => file(`photo-${i}.jpeg`, ['image']));
+    const patch = await extractProjectDocuments(files, { apiKey: 'k' }, { concurrency: 2, batchSize: 1 });
 
     // every page is accounted for, and the ones never attempted say so
-    expect(patch.failures).toHaveLength(12);
+    expect(patch.failures).toHaveLength(24);
     expect(patch.failures.filter((f) => f.skipped)).not.toHaveLength(0);
     expect(patch.failures.every((f) => f.rateLimit === 'day')).toBe(true);
-    // the whole point: the provider was not asked 12 times for an answer it had already refused
-    expect(fetchMock.mock.calls.length).toBeLessThan(12);
+    // the whole point: the provider was not asked 24 times for an answer it had already refused
+    expect(fetchMock.mock.calls.length).toBeLessThan(24);
+  });
+
+  it('a batch that comes back short reports the missing images, never shifts the others', async () => {
+    // The failure this guards is silent and unrecoverable: five entries for six images, every
+    // later result filed against the wrong photograph. Entries are keyed by label, so the one
+    // the model dropped comes back as an unread page and the rest stay where they belong.
+    vi.stubGlobal('fetch', vi.fn(async () =>
+      okBody({ results: [
+        { label: 'img-1', kind: 'site_image', siteConditions: [{ trade: 'civil', status: 'in_progress', note: 'first' }] },
+        { label: 'img-3', kind: 'site_image', siteConditions: [{ trade: 'hvac', status: 'in_progress', note: 'third' }] },
+      ] }),
+    ));
+    const patch = await extractProjectDocuments(
+      [file('a.jpeg', ['image']), file('b.jpeg', ['image']), file('c.jpeg', ['image'])],
+      { apiKey: 'k' },
+    );
+    expect(patch.siteConditions.map((s) => s.note)).toEqual(['first', 'third']);
+    expect(patch.siteConditions[1].source).toContain('c.jpeg');
+    expect(patch.failures).toHaveLength(1);
+    expect(patch.failures[0].fileName).toBe('b.jpeg');
+    expect(patch.failures[0].message).toMatch(/returned no result for this image/);
+    expect(patch.emptyFiles).toEqual([]);
   });
 
   it('does not call a file empty when it was the read that failed, not the document', async () => {
@@ -140,6 +212,7 @@ describe('extractProjectDocuments', () => {
   });
 
   it('still reports a genuinely empty read as empty', async () => {
+    // one page is one image, and a batch of one takes the single-image path unchanged
     vi.stubGlobal('fetch', vi.fn(async () => okBody({ kind: 'site_image', siteConditions: [] })));
     const patch = await extractProjectDocuments([file('blank.jpeg', ['image'])], { apiKey: 'k' });
     expect(patch.emptyFiles).toEqual(['blank.jpeg']);

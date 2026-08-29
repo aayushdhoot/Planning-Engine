@@ -12,6 +12,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import net from 'node:net';
+import { setTimeout as after } from 'node:timers/promises';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
@@ -28,7 +29,7 @@ function portBusy(port) {
     const s = net.createConnection({ port, host: '127.0.0.1' });
     s.on('connect', () => { s.destroy(); res(true); });
     s.on('error', () => res(false));
-    setTimeout(() => { s.destroy(); res(false); }, 800);
+    void after(800).then(() => { s.destroy(); res(false); });
   });
 }
 
@@ -56,7 +57,7 @@ function start(name, cmd, args, opts, colour, shell = false) {
 
 // one Ctrl+C stops both; without this the tracking server is orphaned and the
 // next `npm run dev` finds its port taken by a process nobody can see
-const stopAll = () => { for (const c of children) { try { c.kill(); } catch {} } process.exit(0); };
+const stopAll = () => { for (const c of children) { try { c.kill(); } catch { /* already gone */ } } process.exit(0); };
 process.on('SIGINT', stopAll);
 process.on('SIGTERM', stopAll);
 

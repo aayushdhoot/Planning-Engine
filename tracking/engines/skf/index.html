@@ -125,8 +125,17 @@ body{margin:0;color:var(--ink);-webkit-font-smoothing:antialiased;
 /* ---- WHAT HAS NOT BEEN SENT YET ----
    Sits above everything, because the one thing worse than an unpushed change is
    an unpushed change nobody can see. It is deliberately not a toast: it stays
-   until the changes are dealt with one way or the other. */
-.pendbar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:70;
+   until the changes are dealt with one way or the other.
+
+   It sat at the bottom of the window, centred. That put the one control that moves
+   work between the two engines as far from the header as the screen allows, and — on
+   the long screens, which is most of them — directly on top of the last rows of the
+   table being read. Top right, under the header and the step strip, is where the eye
+   already goes for the actions on a page, and it covers nothing. `top` is set at
+   runtime from the real height of whatever is sticky above it (see renderPendingBar),
+   because the header wraps its status chips on a narrow window and the strip is only
+   there in horizontal nav mode. */
+.pendbar{position:fixed;right:20px;top:120px;z-index:70;
   display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--acc);
   border-radius:12px;padding:11px 15px;box-shadow:0 8px 28px rgba(16,24,40,.16);font-size:12.8px;
   max-width:calc(100vw - 40px)}
@@ -387,6 +396,31 @@ table.pert td{padding:8px 11px;border-bottom:1px solid var(--line2);vertical-ali
 table.pert td.n{text-align:right;font-variant-numeric:tabular-nums}
 table.pert th.n{text-align:right}
 table.pert tbody tr:hover>td{background:var(--card2)}
+/* ---- THE ORDINARY DATA TABLES ----
+   Twenty-two of these carried the same inline style, no header row element and no
+   scroll box. A column that did not fit was dealt with in the markup, by cutting the
+   string: .slice(0,90) on a reason, .slice(0,70) on a description, no ellipsis, and the
+   rest of the sentence simply gone. A reader could not tell a short reason from a
+   truncated one — and the change register, which exists to say WHY a line was parked,
+   was cutting the why off mid-word.
+
+   So: the cells keep their text, the columns are given a floor width so they line up
+   instead of crushing, and the box scrolls sideways underneath when the sum of them
+   does not fit. Rows are centred vertically, because a one-line cell beside a
+   three-line one reads as two separate rows when everything hugs the top edge. */
+.tscroll{overflow-x:auto;overflow-y:hidden;max-width:100%;
+  scrollbar-width:thin;scrollbar-color:#c4ccd8 var(--card2)}
+.tscroll::-webkit-scrollbar{height:11px}
+.tscroll::-webkit-scrollbar-thumb{background:#c4ccd8;border-radius:6px;border:2px solid var(--card)}
+.tscroll::-webkit-scrollbar-thumb:hover{background:#a6b1c2}
+.tscroll::-webkit-scrollbar-track{background:var(--card2);border-radius:6px}
+table.dtbl{width:100%;min-width:680px;border-collapse:collapse;font-size:12px}
+table.dtbl td,table.dtbl th{vertical-align:middle}
+table.dtbl td.n,table.dtbl th.n{text-align:right;font-variant-numeric:tabular-nums}
+/* a cell holding a sentence wraps; it never gets cut, and it is bounded so the
+   columns beside it stay where the eye left them */
+table.dtbl td.wrap{white-space:normal;min-width:220px;max-width:620px}
+table.dtbl tbody tr:hover>td{background:var(--card2)}
 /* the same three levels the planning engine draws: accent tint, panel tint, plain */
 table.pert tr.pel0>td{font-weight:700;background:var(--acc-soft)}
 table.pert tr.pel1>td{font-weight:600;background:var(--card2)}
@@ -2088,9 +2122,9 @@ function areaRegister(G){
    <p>Nothing can be looked for in a place with no name, so each of these is a blocker with a square footage on it.
    Where the drawing or a delivered render names it, that is filled in below with what it was read off — the engine proposes, you decide.</p></div>
    <div class="r">${withCand.length} of ${q.length} have a candidate</div></div>
-   <div class="pb"><table><thead><tr><th style="width:24%">Area</th><th class="n" style="width:90px">Size</th>
+   <div class="pb"><div class="tscroll"><table class="dtbl"><thead><tr><th style="width:24%">Area</th><th class="n" style="width:90px">Size</th>
      <th style="width:38%">What the engine can see</th><th>Name it</th></tr></thead>
-   <tbody>${q.map(row).join("")}</tbody></table>
+   <tbody>${q.map(row).join("")}</tbody></table></div>
    <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
      <button id="saveNames" style="background:var(--acc);border:0;color:#fff;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:650;cursor:pointer">
        ${state.savingNames?"saving…":"Save these names"}</button>
@@ -2099,9 +2133,9 @@ function areaRegister(G){
 
  <div class="p"><div class="ph"><div><h3>Nothing is counted twice</h3>
    <p>${esc(w.why||"")}</p></div><div class="r">${(w.multi||[]).length} areas</div></div>
-   <div class="pb"><table><thead><tr><th style="width:44%">Area</th><th class="n" style="width:90px">Size</th><th>Pins that see it</th></tr></thead>
+   <div class="pb"><div class="tscroll"><table class="dtbl"><thead><tr><th style="width:44%">Area</th><th class="n" style="width:90px">Size</th><th>Pins that see it</th></tr></thead>
    <tbody>${(w.multi||[]).slice(0,12).map(m=>`<tr><td>${esc(m.area)}</td><td class="n">${N(m.sqft)} sqft</td>
-     <td class="m">${m.pins.join(", ")}</td></tr>`).join("")}</tbody></table>
+     <td class="m">${m.pins.join(", ")}</td></tr>`).join("")}</tbody></table></div>
    ${(w.multi||[]).length>12?`<div class="src" style="margin-top:8px">and ${(w.multi||[]).length-12} more</div>`:""}</div></div>
 
  <div class="p"><div class="ph"><div><h3>The 3D renders</h3>
@@ -2190,24 +2224,24 @@ function vMap(){
    <p>One room said three ways is one room — “BOARD ROOM”, “BOARDROOM - 20 PAX” and “BOARD ROOM- 20 PAX” collapse to one place.
    But two different <i>areas</i> for it is a conflict, and it is raised rather than averaged.</p></div>
    <div class="r">${N(r.total)} sqft</div></div>
-   <div class="pb"><table><thead><tr><th style="width:32%">Room</th><th class="n" style="width:130px">Area</th>
+   <div class="pb"><div class="tscroll"><table class="dtbl"><thead><tr><th style="width:32%">Room</th><th class="n" style="width:130px">Area</th>
      <th style="width:120px">Basis</th><th>Where it came from</th></tr></thead>
-   <tbody>${r.rooms.map(row).join("")}</tbody></table></div></div>
+   <tbody>${r.rooms.map(row).join("")}</tbody></table></div></div></div>
 
  <div class="p"><div class="ph"><div><h3>What was ruled out, and why</h3>
    <p>Ruling out beats ruling in. “PHONE BOOTH TABLE” contains PHONE BOOTH and is furniture — inventing a room costs a whole trade’s quantities against a place that does not exist.</p></div>
    <div class="r">${N(r.rejected.length)} labels</div></div>
-   <div class="pb"><table><thead><tr><th class="n" style="width:70px">Labels</th><th>Ruled out as</th></tr></thead><tbody>
+   <div class="pb"><div class="tscroll"><table class="dtbl"><thead><tr><th class="n" style="width:70px">Labels</th><th>Ruled out as</th></tr></thead><tbody>
    ${Object.entries(byWhy).sort((a,b)=>b[1]-a[1]).map(([w,n])=>`<tr><td class="n">${N(n)}</td><td class="m">${esc(w)}</td></tr>`).join("")}
-   </tbody></table></div></div>
+   </tbody></table></div></div></div>
 
  ${unk.length?`<div class="p"><div class="ph"><div><h3>Words the vocabulary does not know</h3>
    <p>Not guessed into a room, not dropped. Decide once and the word joins the vocabulary for every project after this one.</p></div>
    <div class="r">${unk.length} to name</div></div>
-   <div class="pb"><table><thead><tr><th style="width:36%">Label on the drawing</th><th class="n" style="width:110px">Measured</th><th>Where</th></tr></thead><tbody>
+   <div class="pb"><div class="tscroll"><table class="dtbl"><thead><tr><th style="width:36%">Label on the drawing</th><th class="n" style="width:110px">Measured</th><th>Where</th></tr></thead><tbody>
    ${unk.map(u=>`<tr><td><b>${esc(u.label)}</b></td><td class="n">${N(u.sqft)} sqft</td>
      <td class="f"><div class="src">${esc(u.source.where)}</div></td></tr>`).join("")}
-   </tbody></table></div></div>`:""}`;
+   </tbody></table></div></div></div>`:""}`;
 }
 
 
@@ -2680,6 +2714,36 @@ function peSCurve(M, today){
   const grid=[0,25,50,75,100].map(g=>`<line x1="${PAD.l}" y1="${Y(g)}" x2="${W-PAD.r}" y2="${Y(g)}" stroke="var(--line)"/>
     <text x="${PAD.l-8}" y="${Y(g)+3}" text-anchor="end" fill="var(--fnt)" font-size="10">${g}%</text>`).join("");
 
+  /* ---- WHERE THE RECORD STOPS ----
+     The actual line ends at the last date anything was recorded for, and that end is the
+     single most important reading on the chart — it is the number the project is actually at.
+     A full-height "today" rule said where today was and nothing about the gap; this says both,
+     because the dotted line IS the gap: it runs from the recorded figure up to what the
+     programme wanted on the same day, and carries the two numbers on it.
+
+     Drawn from the last point that HAS an actual rather than from `today`, so a record that
+     stops short of today shows that it stopped short instead of being quietly extended to meet
+     the date — the same rule the curve itself follows in leaving the future blank. */
+  const lastActual=[...pts].reverse().find(p=>p.actual!==null&&p.actual!==undefined);
+  let gap="";
+  if(lastActual){
+    const gx=X(lastActual.date), ay=Y(lastActual.actual), py=Y(lastActual.planned);
+    const behind=Math.round((lastActual.actual-lastActual.planned)*10)/10;
+    const mid=(ay+py)/2, right=gx<W-PAD.r-120;
+    gap=`<line x1="${gx.toFixed(1)}" y1="${py.toFixed(1)}" x2="${gx.toFixed(1)}" y2="${ay.toFixed(1)}"
+        stroke="var(--bad)" stroke-width="1.6" stroke-dasharray="5 3 1 3"/>
+      <circle cx="${gx.toFixed(1)}" cy="${py.toFixed(1)}" r="3" fill="var(--acc)"/>
+      <circle cx="${gx.toFixed(1)}" cy="${ay.toFixed(1)}" r="4" fill="var(--ok)"/>
+      <text x="${(gx+(right?9:-9)).toFixed(1)}" y="${(ay+4).toFixed(1)}" text-anchor="${right?"start":"end"}"
+        fill="var(--ok)" font-size="11.5" font-weight="700">${lastActual.actual}% recorded</text>
+      <text x="${(gx+(right?9:-9)).toFixed(1)}" y="${(ay+18).toFixed(1)}" text-anchor="${right?"start":"end"}"
+        fill="var(--fnt)" font-size="10">${esc(lastActual.date)}${lastActual.date===today?" · today":""}</text>
+      <text x="${(gx+(right?9:-9)).toFixed(1)}" y="${(mid+3).toFixed(1)}" text-anchor="${right?"start":"end"}"
+        fill="var(--bad)" font-size="10.5" font-weight="600">${behind>0?"+":""}${behind}% vs plan</text>
+      <text x="${(gx+(right?9:-9)).toFixed(1)}" y="${(py+3).toFixed(1)}" text-anchor="${right?"start":"end"}"
+        fill="var(--acc)" font-size="10.5">${lastActual.planned}% planned</text>`;
+  }
+
   return `<div class="grid" style="margin-bottom:12px">
       <div class="g"><div class="k">PLANNED TODAY</div><div class="v">${c.plannedToday}%</div></div>
       <div class="g"><div class="k">ACTUAL TODAY</div><div class="v">${c.actualToday}%</div></div>
@@ -2695,7 +2759,7 @@ function peSCurve(M, today){
       <path d="${area()}" fill="var(--acc)" opacity="0.09"/>
       <path d="${path(p=>p.planned)}" fill="none" stroke="var(--acc)" stroke-width="2"/>
       <path d="${path(p=>p.actual)}" fill="none" stroke="var(--ok)" stroke-width="2.5"/>
-      ${X(today)>=PAD.l&&X(today)<=W-PAD.r?`<line x1="${X(today)}" y1="${PAD.t}" x2="${X(today)}" y2="${H-PAD.b}" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="3 3"/><text x="${X(today)+4}" y="${PAD.t+10}" fill="var(--bad)" font-size="10" font-weight="600">today</text>`:""}
+      ${gap}
       <g transform="translate(${PAD.l+8},${PAD.t+6})">
         <rect x="0" y="0" width="10" height="3" fill="var(--acc)"/><text x="16" y="4" font-size="10" fill="#9aa0b0">planned</text>
         <rect x="70" y="0" width="10" height="3" fill="var(--ok)"/><text x="86" y="4" font-size="10" fill="#9aa0b0">actual (recorded)</text>
@@ -3835,7 +3899,7 @@ function vCrew(){
   <div class="p"><div class="ph"><div><h3>Which trade, and when</h3>
     <p>Peak is the most of that trade the programme needs on any one day.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.6px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">trade</td><td class="n">peak</td><td class="n">man-days</td>
           <td style="padding-left:14px">on the floor</td>
@@ -3850,7 +3914,7 @@ function vCrew(){
           ${M.actual.any?`<td class="n" style="padding-left:14px;color:${
             got===null?"var(--mut)":got>=t.peak?"var(--ok)":got?"var(--warn)":"var(--bad)"}">${
             got===null?"—":got}</td>`:""}</tr>`;}).join("")}
-      </table>
+      </table></div>
     </div>
   </div>`;
 }
@@ -3937,12 +4001,12 @@ function vAssess(){
 
     <div class="p"><div class="pb" style="padding:0">
       ${P.framed?"":`<div class="e" style="border:0;padding:0 0 8px;color:var(--warn)">${esc(P.why)}</div>`}
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.6px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:4px">item</td><td>the finished room</td>
           <td>the walk, ${fmt(day)}</td><td>what was seen</td></tr>
         ${rows}
-      </table>
+      </table></div>
     </div></div>
   </div>`;
 }
@@ -4044,8 +4108,8 @@ function settlePanel(F){
      ${byDoc[k].map(c=>`<tr><td><b>${esc(c.col)}</b></td>
        <td class="m">${esc(c.header||"— none —")}</td>
        <td class="f">${esc(c.dataIs||"")}</td>
-       <td class="f">${esc((c.values||[]).slice(0,3).join("  |  ")).slice(0,70)}
-         <div style="font-size:10.6px;margin-top:2px;color:var(--fnt)">${esc(String(c.why||"").slice(0,110))}</div></td>
+       <td class="f">${esc((c.values||[]).slice(0,3).join("  |  "))}
+         <div style="font-size:10.6px;margin-top:2px;color:var(--fnt)">${esc(String(c.why||""))}</div></td>
        <td>${opt(c)}</td></tr>`).join("")}
      </tbody></table></div>`).join("")}
    ${Object.keys(byDoc).length>12?`<div class="pb"><div class="src">and ${Object.keys(byDoc).length-12} more sheets — settle these first and the list shortens</div></div>`:""}
@@ -4381,7 +4445,7 @@ function vRes(){
     <div style="white-space:nowrap">${tab("open","Open",T.stillOpen)}${tab("ordered","On order",T.ordered+T.overdue)}${
       tab("here","Here",T.here)}${tab("you","You set",T.settled)}${tab("all","All",T.packages)}</div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">package</td><td class="n">qty</td><td class="n">value</td>
           <td class="n">lead</td><td class="n">needed</td>
@@ -4395,14 +4459,14 @@ function vRes(){
           <td class="n">${r.leadKnown?r.leadWeeks+"w":"—"}</td>
           <td class="n" style="white-space:nowrap">${fmtD(r.neededOn)}</td>
           <td style="padding-left:12px;white-space:nowrap" class="f">${
-            r.bought&&r.bought.pos.length?esc(r.bought.pos[0].vendor.slice(0,20)):"—"}</td>
+            r.bought&&r.bought.pos.length?esc(r.bought.pos[0].vendor):"—"}</td>
           <td class="n" style="white-space:nowrap;color:${
             r.state==="overdue"?"var(--bad)":"var(--fnt)"}">${
             r.bought&&r.bought.pos[0]&&r.bought.pos[0].promisedOn?fmtD(r.bought.pos[0].promisedOn)
             :r.state==="pending"?`<span style="color:var(--bad)">no PO</span>`:"—"}</td>
           <td style="padding-left:12px;white-space:nowrap"><a data-order="${esc(r.code)}"
             style="cursor:pointer">${chip(r)}</a></td></tr>`).join("")}
-      </table>
+      </table></div>
       ${rows.length?"":`<div class="pb"><div class="f">Nothing in this list.</div></div>`}
     </div>
   </div>
@@ -4500,23 +4564,23 @@ function vBuy(){
       tab("heads","Budget",P?P.heads.length:0)}${tab("grn","Received",P?P.totals.grns:0)}${
       tab("chain","Chain",open.length)}</div></div>
     <div class="pb" style="padding:0">${
-      view==="orders"&&P?`<table style="width:100%;border-collapse:collapse;font-size:12px">
+      view==="orders"&&P?`<div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">order</td><td>vendor</td><td class="n">value</td>
           <td class="n">promised</td><td style="padding-left:12px">covers</td></tr>
         ${P.orders.slice().sort((x,y)=>y.value-x.value).map(o=>`<tr style="border-top:1px solid var(--line)">
           <td style="padding:5px 8px 5px 0;white-space:nowrap">${esc(o.po.slice(-4))}
             <span class="f">${esc(o.head)}</span></td>
-          <td>${esc(o.vendor.slice(0,26))}<div class="f" style="font-size:10.6px">${esc(o.scope.slice(0,54))}</div></td>
+          <td>${esc(o.vendor)}<div class="f" style="font-size:10.6px">${esc(o.scope)}</div></td>
           <td class="n">${cr(o.value)}</td>
           <td class="n" style="white-space:nowrap;color:${
             o.promisedOn&&o.promisedOn<B.asOf?"var(--bad)":"var(--fnt)"}">${fmtD(o.promisedOn)}</td>
           <td style="padding-left:12px" class="f">${o.packages.length?esc(o.packages.slice(0,3).join(", "))
-            :`<span style="color:var(--mut)">${esc(o.why.slice(0,44))}</span>`}${
+            :`<span style="color:var(--mut)">${esc(o.why)}</span>`}${
             o.how==="head"?` <span style="color:var(--warn)">whole head</span>`:""}${
             o.unscheduled.length?` <span style="color:var(--warn)">+ ${esc(o.unscheduled.join(", "))}, not scheduled</span>`:""}</td></tr>`).join("")}
-      </table>`
-      :view==="heads"&&P?`<table style="width:100%;border-collapse:collapse;font-size:12px">
+      </table></div>`
+      :view==="heads"&&P?`<div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">head</td><td class="n">orders</td><td class="n">internal cost</td>
           <td class="n">committed</td><td class="n">gap</td></tr>
@@ -4526,19 +4590,19 @@ function vBuy(){
           <td class="n">${cr(h.committed)}</td>
           <td class="n" style="color:${h.over?"var(--bad)":"var(--ok)"}">${
             h.gap==null?"—":cr(h.gap)}</td></tr>`).join("")}
-      </table>`
-      :view==="grn"&&P?`<table style="width:100%;border-collapse:collapse;font-size:12px">
+      </table></div>`
+      :view==="grn"&&P?`<div class="tscroll"><table class="dtbl">
         ${P.grns.map(g=>`<tr style="border-top:1px solid var(--line)">
           <td style="padding:6px 10px 6px 0;white-space:nowrap"><b>${fmtD(g.day)}</b></td>
           <td>${esc(g.material)}<div class="f" style="font-size:10.6px">${esc(g.packages.join(", "))}</div></td>
           <td class="f">${esc(g.vendor||"vendor not named")}</td>
           <td class="f">no quantity counted</td>
           ${g.issue?`<td style="color:var(--warn)">${esc(g.issue)}</td>`:"<td></td>"}</tr>`).join("")}
-      </table>
+      </table></div>
       <div class="pb" style="border-top:1px solid var(--line)"><div class="f" style="font-size:11.4px">
         All four are read out of a daily report, not off a signed goods-received note. None carries a
         quantity, so each says the material came and none says how much.</div></div>`
-      :`<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:820px">
+      :`<div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">package</td><td class="n">value</td>
           ${(B.stages||[]).map(x=>`<td class="n" style="padding-left:10px">${esc(x.name)}</td>`).join("")}
@@ -4550,7 +4614,7 @@ function vBuy(){
             return `<td class="n" style="padding-left:10px;color:${x?st(x):"var(--mut)"};white-space:nowrap">${
               x?fmtD(x.EF):"—"}</td>`;}).join("")}
           <td class="n" style="padding-left:12px;white-space:nowrap">${fmtD(c.neededOn)}</td></tr>`).join("")}
-      </table>`}
+      </table></div>`}
     </div>
   </div>
 
@@ -4591,7 +4655,7 @@ function vDesign(){
     drawings are complete on our side and <b style="color:var(--bad)">${D.counts.approvedByClient}</b>
     have been approved by the client — so ${D.counts.usable} are usable to buy against.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">drawing</td><td>set</td>
           <td style="padding-left:12px">our status</td><td style="padding-left:12px">client</td>
@@ -4604,7 +4668,7 @@ function vDesign(){
           <td style="padding-left:12px;color:${d.approvedByClient?"var(--ok)":"var(--bad)"}">${esc(d.client)}</td>
           <td class="n" style="white-space:nowrap;color:${d.overdue?"var(--bad)":"var(--fnt)"}">${
             fmtD(d.end)}${d.overdue?` <span class="f">${d.lateBy}d</span>`:""}</td></tr>`).join("")}
-      </table></div>
+      </table></div></div>
     <div class="pb" style="border-top:1px solid var(--line)"><a id="dgDraw" class="f"
       style="cursor:pointer;font-size:12px">${state.dgDraw?"show the first 16":"show all "+D.counts.total}</a></div>
     </div>`;})():""}
@@ -4615,7 +4679,7 @@ function vDesign(){
     <div><a id="dgAll" class="f" style="cursor:pointer;font-size:12px">${
       state.dgAll?"show the open ones":"show all "+c.register}</a></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">item</td><td style="padding-left:10px">status</td>
           <td style="padding-left:12px">package</td><td class="n">order-by</td>
@@ -4630,7 +4694,7 @@ function vDesign(){
           <td class="n" style="white-space:nowrap">${fmtD(r.neededOn)}</td>
           <td class="n f" style="max-width:180px;overflow:hidden;text-overflow:ellipsis">${
             r.makes.length?esc(r.makes.slice(0,3).join(", ")):"—"}</td></tr>`).join("")}
-      </table></div>
+      </table></div></div>
     <div class="pb" style="border-top:1px solid var(--line)"><div class="f" style="font-size:11.4px">
       A further ${c.specOnly} materials name an approved make and carry no status at all. That is a
       specification, not a workflow, and counting them as "not started" would invent ${c.specOnly}
@@ -4706,7 +4770,7 @@ function vClosedDecisions(T){
           <div style="font-size:12.8px"><b>${esc(c.what)}</b></div>
           <div class="f" style="font-size:11.6px;margin-top:3px">${esc(c.why||"")}</div>
           ${c.against?`<div class="f" style="font-size:11.2px;margin-top:3px;opacity:.8">
-            against — ${esc(String(c.against).slice(0,220))}</div>`:""}
+            against — ${esc(String(c.against))}</div>`:""}
           ${c.proposedBy?`<div class="f" style="font-size:11.2px;margin-top:3px;opacity:.8">
             raised by ${esc(c.proposedBy)}${c.cost?" · "+esc(c.cost):""}</div>`:""}
           ${c.stillOpen?`<div style="font-size:11.4px;margin-top:5px;color:var(--warn)">
@@ -4767,17 +4831,16 @@ function vChg(){
       <div class="k">read, and deliberately not scheduled</div></div>
   </div></div></div>
   <div class="p"><div class="pb" style="padding:0">
-    <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
-        <td style="padding-bottom:5px">kind</td><td>what</td><td class="n">value</td>
-        <td style="padding-left:12px">why</td></tr>
-      ${G.rows.slice(0,state.cgAll?999:40).map(r=>`<tr style="border-top:1px solid var(--line)">
+    <div class="tscroll"><table class="dtbl">
+      <thead><tr><th style="width:90px">kind</th><th>what</th><th class="n" style="width:90px">value</th>
+        <th style="padding-left:12px">why</th></tr></thead>
+      <tbody>${G.rows.slice(0,state.cgAll?999:40).map(r=>`<tr style="border-top:1px solid var(--line)">
         <td style="padding:5px 10px 5px 0;white-space:nowrap;color:${
           r.kind==="unpriced"?"var(--bad)":"var(--warn)"}">${esc(r.kind)}</td>
-        <td style="padding-right:10px">${esc(String(r.what||"").slice(0,70))}</td>
+        <td class="wrap" style="padding-right:10px">${esc(String(r.what||""))}</td>
         <td class="n">${r.value?cr(r.value):"—"}</td>
-        <td style="padding-left:12px" class="f">${esc(String(r.detail||"").slice(0,90))}</td></tr>`).join("")}
-    </table></div>
+        <td style="padding-left:12px" class="f wrap">${esc(String(r.detail||""))}</td></tr>`).join("")}</tbody>
+    </table></div></div>
     ${G.rows.length>40?`<div class="pb" style="border-top:1px solid var(--line)"><a id="cgAll" class="f"
       style="cursor:pointer;font-size:12px">${state.cgAll?"show the first 40":"show all "+G.rows.length}</a></div>`:""}
   </div>`;
@@ -4834,7 +4897,7 @@ function vCash(){
     </div>
   </div>
   <div class="p"><div class="pb" style="padding:0">
-    <table style="width:100%;border-collapse:collapse;font-size:12px">
+    <div class="tscroll"><table class="dtbl">
       <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
         <td style="padding-bottom:5px">month</td><td class="n">planned</td><td class="n">earned</td>
         <td class="n">cumulative plan</td><td class="n">cumulative earned</td></tr>
@@ -4844,7 +4907,7 @@ function vCash(){
         <td class="n">${m.past?cr(m.earned):"—"}</td>
         <td class="n">${cr(m.cumPlanned)}</td>
         <td class="n">${m.past?cr(m.cumEarned):"—"}</td></tr>`).join("")}
-    </table></div></div>`;
+    </table></div></div></div>`;
 }
 
 // ---------- STEP 12 : THE FLOOR PLATE ----------
@@ -4891,7 +4954,7 @@ function vPins(){
   <div class="p"><div class="ph"><div><h3>By space</h3>
     <p>The average of the pins standing in it. A space with one pin is one camera's opinion.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">space</td><td class="n">pins</td><td class="n">sqft</td>
           <td class="n">read</td></tr>
@@ -4901,7 +4964,7 @@ function vPins(){
           <td class="n">${s.sqft?Math.round(s.sqft).toLocaleString("en-IN"):"—"}</td>
           <td class="n" style="color:${s.pct==null?"var(--mut)":s.pct>=70?"var(--ok)":s.pct>=45?"var(--warn)":"var(--bad)"}">${
             s.pct==null?"—":s.pct+"%"}</td></tr>`).join("")}
-      </table></div></div>`;
+      </table></div></div></div>`;
 }
 
 // ---------- STEP 14 : THE THINGS PEOPLE ACTUALLY SEND ----------
@@ -5353,7 +5416,7 @@ function vHse(){
     <p>PPE is a rate because a yes means equipment was in use. The others carry counts, because
     what a no means on them is not written down anywhere on this project.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">walk</td><td class="n">frames</td><td class="n">showing people</td>
           ${H.items.map(i=>`<td class="n">${esc(i.name)}</td>`).join("")}</tr>
@@ -5363,7 +5426,7 @@ function vHse(){
           ${H.items.map(i=>{const x=d.items[i.id];
             return `<td class="n" style="color:${x.rate!=null&&x.rate<60?"var(--bad)":"var(--fnt)"}">${
               x.rate!=null?x.rate+"%":x.seen+"/"+x.of}</td>`;}).join("")}</tr>`).join("")}
-      </table></div>
+      </table></div></div>
     <div class="pb" style="border-top:1px solid var(--line)"><div class="f" style="font-size:11.4px">
       ${esc(H.ppe.why)}</div></div>
   </div>
@@ -5409,7 +5472,7 @@ function vClose(){
     <p>Required against built. Where nobody has counted, the built column stays blank — the
     required figure is never copied across to fill it.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">room type</td><td>group</td>
           <td class="n">required</td><td class="n">built</td><td style="padding-left:12px">where the number comes from</td></tr>
@@ -5419,8 +5482,8 @@ function vClose(){
           <td class="n">${r.required==null?"—":r.required+" "+esc(r.unit||"")}</td>
           <td class="n" style="color:${r.counted?"var(--fg)":"var(--mut)"}">${
             r.counted?r.built:"nobody has counted"}</td>
-          <td class="f" style="padding-left:12px">${esc(String(r.reqSource||"").slice(0,60))}</td></tr>`).join("")}
-      </table></div></div>`;
+          <td class="f" style="padding-left:12px">${esc(String(r.reqSource||""))}</td></tr>`).join("")}
+      </table></div></div></div>`;
 }
 
 // ---------- STEP 17 : THE DEFECT REGISTER ----------
@@ -5456,7 +5519,7 @@ function vSnag(){
       there is none.</p>`:`<p>${N.burn.why}</p>`}</div>
     <div><a id="snagNew" class="f" style="cursor:pointer;font-size:12px">raise one</a></div></div>
     <div class="pb" style="padding:0">${N.rows.length?`
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">what</td><td>where</td><td class="n">sev</td>
           <td>owner</td><td class="n">raised</td><td class="n">due</td><td class="n">age</td>
@@ -5474,7 +5537,7 @@ function vSnag(){
           <td class="n">${r.age==null?"—":r.age+"d"}</td>
           <td style="padding-left:12px"><a data-snag="${esc(r.id)}" style="cursor:pointer;color:${
             ST[r.state]}">${esc(r.state)}</a></td></tr>`).join("")}
-      </table>`:`<div class="f" style="padding:4px 0">Nothing raised yet.</div>`}
+      </table></div>`:`<div class="f" style="padding:4px 0">Nothing raised yet.</div>`}
     </div>
   </div>
 
@@ -5482,7 +5545,7 @@ function vSnag(){
     <p>${N.where.ready} of ${N.where.total} spaces are past 70%. A space below that is not a space
     with defects in it, it is a space that is not built yet.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         ${N.where.spaces.slice(0,state.snagAll?999:12).map(s=>`<tr style="border-top:1px solid var(--line)">
           <td style="padding:5px 0">${esc(s.name)}</td>
           <td class="n f">${s.pins} pins</td>
@@ -5490,7 +5553,7 @@ function vSnag(){
           <td class="n" style="color:${s.ready?"var(--ok)":"var(--mut)"}">${s.pct}%</td>
           <td style="padding-left:12px">${s.ready?`<a data-snagat="${esc(s.name)}"
             style="cursor:pointer">raise one here</a>`:""}</td></tr>`).join("")}
-      </table></div>
+      </table></div></div>
     <div class="pb" style="border-top:1px solid var(--line)"><a id="snagAll" class="f"
       style="cursor:pointer;font-size:12px">${state.snagAll?"show the top 12":"show all "+N.where.total}</a></div>
   </div>
@@ -5595,7 +5658,7 @@ function vBill(){
     <p>Work seen is the walk's own reading of the packages each milestone names, weighted by what
     they are worth. Click a stage to record a bill against it.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">stage</td><td class="n">day</td><td class="n">due on</td>
           <td class="n">%</td><td class="n">value</td><td class="n">work seen</td>
@@ -5617,7 +5680,7 @@ function vBill(){
           <td class="n">${s.collected?cr(s.collected.amount):"—"}</td>
           <td style="padding-left:12px"><a data-bill="${esc(s.key)}" style="cursor:pointer;color:${
             ST[s.state]||"var(--fg)"}">${esc(s.state)}</a></td></tr>`).join("")}
-      </table></div>
+      </table></div></div>
   </div>
 
   <div class="p"><div class="ph"><div><h3>What each stage asks for</h3>
@@ -5862,14 +5925,14 @@ function vPair(){
   <div class="p"><div class="ph"><div><h3>Furthest from what was approved</h3>
     <p>Counted by how many things the render asks for that the camera could not find.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         ${X.worst.map(w=>`<tr style="border-top:1px solid var(--line)">
           <td style="padding:5px 0"><a data-pairgo="${w.pin}" style="cursor:pointer">Pin ${w.pin}</a></td>
           <td>${esc(w.area||"")}</td>
           <td class="n" style="color:var(--bad)">${w.missing} not built</td>
           <td class="n">${w.pct==null?"—":w.pct+"%"}</td>
           <td class="f" style="padding-left:12px">${esc(w.what.slice(0,3).join(", "))}</td></tr>`).join("")}
-      </table></div></div>`;
+      </table></div></div></div>`;
 }
 
 // ---------- STEP 21 : THE MEETING REGISTER ----------
@@ -5926,13 +5989,13 @@ function vMin(){
   <div class="p"><div class="ph"><div><h3>Who owns something open</h3>
     <p>Read off the registers, so the invitation list is not a memory test.</p></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         ${M.room.map(r=>`<tr style="border-top:1px solid var(--line)">
           <td style="padding:5px 0">${esc(r.who)}</td>
           <td class="n">${r.items} open</td>
           <td class="n" style="color:${r.blocking?"var(--bad)":"var(--mut)"}">${
             r.blocking?r.blocking+" blocking":"—"}</td></tr>`).join("")}
-      </table></div></div>
+      </table></div></div></div>
 
   ${M.meetings.length?`<div class="p"><div class="ph"><div><h3>Meetings held</h3></div></div>
     <div class="pb" style="padding:0">${M.meetings.slice().reverse().map(mt=>`
@@ -6130,7 +6193,7 @@ function vDelay(){
       tab("client","Client",C.client)}${tab("shared","Shared",C.shared)}${
       tab("unattributed","No cause on the engine",C.unattributed)}</div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         <tr class="f" style="font-size:10.4px;letter-spacing:.04em;text-transform:uppercase">
           <td style="padding-bottom:5px">package</td><td class="n">built</td><td class="n">window gone</td>
           <td class="n">gap</td><td class="n">value</td>
@@ -6146,7 +6209,7 @@ function vDelay(){
             ?r.causes.map(c=>esc(c.what)).join("; ")
             :`<span style="color:var(--mut)">no cause specific to this package on the engine</span>`}</td>
           <td class="n" style="color:${SIDE[r.side]}">${esc(r.side)}</td></tr>`).join("")}
-      </table></div>
+      </table></div></div>
     ${show.length>24?`<div class="pb" style="border-top:1px solid var(--line)"><a id="dlAll" class="f"
       style="cursor:pointer;font-size:12px">${state.dlAll?"show the first 24":"show all "+show.length}</a></div>`:""}
   </div>
@@ -6241,14 +6304,14 @@ function vDigest(){
 
   ${D.moved.length?`<div class="p"><div class="ph"><div><h3>Every package that moved</h3></div></div>
     <div class="pb" style="padding:0">
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <div class="tscroll"><table class="dtbl">
         ${D.moved.map(m=>`<tr style="border-top:1px solid var(--line)">
           <td style="padding:5px 0">${esc(m.name)}</td>
           <td class="f">${esc(m.trade)}</td>
           <td class="n">${m.from}% → ${m.to}%</td>
           <td class="n" style="color:${m.by>0?"var(--ok)":"var(--bad)"}">${m.by>0?"+":""}${m.by}</td>
           <td class="f" style="padding-left:12px">${m.pins.length?m.pins.length+" pins":"—"}</td></tr>`).join("")}
-      </table></div></div>`:""}`;
+      </table></div></div></div>`:""}`;
 }
 
 function vSoon(s){
@@ -6282,6 +6345,12 @@ function renderPendingBar(){
   const pushed=Object.keys((state.SYNC&&state.SYNC.edits)||{}).length;
   if(!n&&!pushed){ if(el) el.remove(); return; }
   if(!el){ el=document.createElement("div"); el.className="pendbar"; el.id="pendbar"; document.body.appendChild(el); }
+  // Sit just under whatever is sticky at the top of this window. Measured rather than
+  // assumed: the header wraps its status chips on a narrow window, and the step strip is
+  // only above the page in horizontal nav mode. A fixed 120px would tuck the bar behind
+  // the header on one and leave it floating in the page on the other.
+  const above=document.querySelector(".railwrap")||document.querySelector(".top");
+  if(above){ const r=above.getBoundingClientRect(); if(r.bottom>0) el.style.top=Math.round(r.bottom+12)+"px"; }
   const busy=!!state.pushing;
   el.innerHTML = n
     ? `<span><b>${n}</b> change${n>1?"s":""} not pushed</span>
@@ -6648,7 +6717,7 @@ function render(){
  document.querySelectorAll(".peinp[data-perow]").forEach(el=>{
    const row=el.dataset.perow, field=el.dataset.pefield;
    if(pePendingAt(row,field)){ el.classList.add("pepend");
-     el.title="changed here, not pushed yet — use Push to planning at the foot of the screen"; }
+     el.title="changed here, not pushed yet — use Push to planning at the top right of the screen"; }
    else if(peEdited(row,field)){ el.classList.add("peon");
      el.title="pushed to the shared store · also shows in the planning engine"; }
    // The value as rendered, so blur can tell a real change from a mere visit.
@@ -6659,7 +6728,7 @@ function render(){
    const stage=()=>{
      if(el.value===initial) return;
      el.classList.remove("peon"); el.classList.add("pepend");
-     el.title="changed here, not pushed yet — use Push to planning at the foot of the screen";
+     el.title="changed here, not pushed yet — use Push to planning at the top right of the screen";
      peStage(row, field, el.value);
    };
    if(el.tagName==="SELECT"||el.type==="date") el.onchange=stage; else el.onblur=stage;

@@ -13,6 +13,16 @@ const STATE_TAG: Record<ReadState, { label: string; cls: string }> = {
   dropped: { label: 'DROPPED', cls: '' },
 };
 
+/** "4m 20s" / "45s". Rounded to something a person would say out loud, not to the millisecond —
+ *  the figure is an estimate from throughput and precision would be a false claim about it. */
+function fmtEta(ms: number): string {
+  const s = Math.max(1, Math.round(ms / 1000));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return s % 60 >= 5 ? `${m}m ${s % 60}s` : `${m}m`;
+  return `${Math.floor(m / 60)}h ${m % 60}m`;
+}
+
 export function DriveCoverage({
   scan,
   states,
@@ -31,8 +41,17 @@ export function DriveCoverage({
   states: DocStates;
   busy: string | null;
   /** how far a multi-document read has got — a 130-photo folder takes long enough that a
-   * button stuck on "Reading…" with no count reads as a hang */
-  progress?: { done: number; total: number } | null;
+   * button stuck on "Reading…" with no count reads as a hang.
+   *
+   * `etaMs` is measured throughput, not a guess: the pace changes across a run, because the
+   * rate gate slows when the provider refuses and speeds up when it stops. `gate` is surfaced
+   * when it has been throttled, because a run that has visibly paused has to say it is pacing
+   * rather than look stuck. */
+  progress?: {
+    done: number; total: number;
+    running?: number; requeued?: number; etaMs?: number | null;
+    gate?: { rpm: number; pausedFor: number; refusals: number; waiting: number };
+  } | null;
   onStop?: () => void;
   onRead: (files: DriveFile[]) => void;
   onPrepareByHand: (file: DriveFile) => void;
@@ -86,8 +105,19 @@ export function DriveCoverage({
             </button>
           )}
           {busy && progress && (
-            <span className="muted mono" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
-              {progress.done} / {progress.total} read
+            <span className="muted" style={{ fontSize: 12, lineHeight: 1.4 }}>
+              <span className="mono" style={{ whiteSpace: 'nowrap' }}>
+                {progress.done} / {progress.total} read
+                {progress.etaMs != null && ` · about ${fmtEta(progress.etaMs)} left`}
+              </span>
+              {(progress.requeued ? progress.requeued > 0 : false) || (progress.gate?.pausedFor ?? 0) > 0 ? (
+                <div style={{ fontSize: 11, color: 'var(--warn)' }}>
+                  {(progress.gate?.pausedFor ?? 0) > 0
+                    ? `rate limited — pausing ${Math.ceil((progress.gate!.pausedFor) / 1000)}s`
+                    : `${progress.requeued} waiting to retry`}
+                  {progress.gate && progress.gate.refusals > 0 && ` · pacing at ${progress.gate.rpm}/min`}
+                </div>
+              ) : null}
             </span>
           )}
           {busy && onStop && <button onClick={onStop} title="Finish the reads already in flight and stop there">Stop reading</button>}

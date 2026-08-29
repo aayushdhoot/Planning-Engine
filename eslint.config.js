@@ -4,7 +4,12 @@ import tseslint from 'typescript-eslint';
 const NODE_GLOBALS = { console: 'readonly', process: 'readonly', URL: 'readonly', Blob: 'readonly', document: 'readonly', window: 'readonly', structuredClone: 'readonly', fetch: 'readonly', Buffer: 'readonly' };
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'sample-output'] },
+  // `tracking/` is the DnB-OS engine, vendored whole. It is CommonJS with its own
+  // conventions and its own mutation suites, and linting it under these rules
+  // reported 2,127 "console is not defined" against code that runs in Node and
+  // is guarded elsewhere. A gate that fails on a subproject's house style is a
+  // gate people learn to ignore, which is worse than not having one.
+  { ignores: ['dist', 'node_modules', 'sample-output', 'tracking'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   { files: ['scripts/**/*.{mjs,ts}', 'src/**/*.{ts,tsx}', 'tests/**/*.ts'], languageOptions: { globals: NODE_GLOBALS } },

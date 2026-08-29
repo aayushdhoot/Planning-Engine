@@ -442,6 +442,11 @@
     "min": 0,
     "max": 15
   },
+  "scheduleFit": {
+    "maxCompression": 0.5,
+    "maxExpansion": 40,
+    "maxIterations": 10
+  },
   "procurementOrderBufferDays": 3,
   "defaultCalendar": {
     "weeklyOffDays": [],

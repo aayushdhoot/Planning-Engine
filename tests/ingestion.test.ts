@@ -131,11 +131,19 @@ describe('Per-unit norms — quantities drive durations when the BOQ carries the
     const partition = wbs.activities.find((a) => a.trade === 'partition')!;
     expect(partition.duration.source).toContain('physicalProductivity');
     expect(partition.duration.source).toContain('sqm');
-    // 2,100 sqm / (crew 10 x 4.5 sqm/man-day) = 46.7 -> 47 days
-    expect(partition.duration.value).toBe(47);
-    const flooring = wbs.activities.find((a) => a.trade === 'flooring')!;
-    // 2,300 sqm / (crew 6 x 14) = 27.4 -> 28 days
-    expect(flooring.duration.value).toBe(28);
+    // The quantity is split across the trade's tasks by template weight, the same way value is —
+    // otherwise each of partition's three rows would carry the whole 2,100 sqm and the trade
+    // would take three times as long for being described in more detail. Summed back up the
+    // trade still carries its whole quantity, and that is the invariant worth pinning here
+    // rather than any single row.
+    const daysFor = (trade: string) =>
+      wbs.activities.filter((a) => a.trade === trade).reduce((s, a) => s + a.duration.value, 0);
+    // 2,100 sqm / (crew 10 x 4.5 sqm/man-day) = 46.7 days of work, now spread across three rows
+    expect(daysFor('partition')).toBeGreaterThanOrEqual(46);
+    expect(daysFor('partition')).toBeLessThanOrEqual(51);
+    // 2,300 sqm / (crew 6 x 14) = 27.4 days of work across flooring's rows
+    expect(daysFor('flooring')).toBeGreaterThanOrEqual(27);
+    expect(daysFor('flooring')).toBeLessThanOrEqual(33);
   });
 
   it('falls back to value-based norms for trades without quantities, and labels the fallback', () => {
@@ -161,7 +169,8 @@ describe('Scope -> WBS -> plan, from BOQ alone (no supplied schedule)', () => {
 
   it('derives durations from norms x value, with provenance', () => {
     const wbs = deriveWbs(skf.boqPackages, 75);
-    expect(wbs.activities.length).toBe(16);
+    // one row per trade became the full fit-out task template — see SEQUENCE in engine/wbs.ts
+    expect(wbs.activities.length).toBe(69);
     for (const a of wbs.activities) {
       expect(a.duration.provenance).toBe('computed');
       expect(a.duration.source).toContain('productivityInrPerManDay');
@@ -176,7 +185,7 @@ describe('Scope -> WBS -> plan, from BOQ alone (no supplied schedule)', () => {
     expect(plan.project.status).toBe('planned');
     expect(validatePlan(plan).errors).toEqual([]);
     expect(auditTrace(plan).ok).toBe(true);
-    expect(plan.modules.timeline.activities.length).toBe(16);
+    expect(plan.modules.timeline.activities.length).toBe(69);
     expect(plan.modules.raMilestones.length).toBeGreaterThanOrEqual(0);
     expect(plan.assumptions.some((a) => a.area === 'wbs')).toBe(true);
   });

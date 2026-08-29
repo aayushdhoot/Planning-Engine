@@ -16,11 +16,20 @@ export function ProjectDashboard({
   org,
   onSelect,
   onNewProject,
+  onDelete,
+  onArchive,
+  builtInIds,
 }: {
   projects: ProjectInputs[];
   org: OrgState;
   onSelect: (id: string) => void;
   onNewProject: () => void;
+  /** remove a project made in this app, permanently */
+  onDelete: (id: string) => void;
+  /** hide a project that ships with the app. The seed data is re-created on every load, so a
+   * built-in cannot be deleted — only put away, which is what the control offers instead. */
+  onArchive: (id: string) => void;
+  builtInIds: string[];
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { requestAnimationFrame(() => setMounted(true)); }, []);
@@ -39,13 +48,45 @@ export function ProjectDashboard({
           const teamCount = teamFor(org, p.id).filter((m) => m.employeeCode).length;
           const pending = !p.provided.boq || !p.provided.contract;
 
+          const builtIn = builtInIds.includes(p.id);
           return (
-            <button
+            // A div, not a button. The delete control is a real button and one cannot nest
+            // inside another — so the card carries the role and the keyboard handling itself,
+            // and the control inside it stops the click from also opening the project.
+            <div
               key={p.id}
               className="dash-card"
+              role="button"
+              tabIndex={0}
               style={{ animationDelay: `${i * 60}ms` }}
               onClick={() => onSelect(p.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(p.id); }
+              }}
             >
+              <button
+                className="dash-card-del"
+                title={builtIn
+                  ? 'Archive — this project ships with the app, so it cannot be deleted'
+                  : 'Delete this project'}
+                aria-label={`${builtIn ? 'Archive' : 'Delete'} ${p.name}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (builtIn) { onArchive(p.id); return; }
+                  // Asked, because there is nowhere to get it back from. The inputs live only in
+                  // the workspace file; the tracking engine keeps rendered modules, not inputs.
+                  const sure = confirm(
+                    `Delete “${p.name}”?\n\nThis removes the project and everything set up for it — the Drive link, the answered intake questions and the BOQ figures the plan is computed from. It cannot be undone.`,
+                  );
+                  if (sure) onDelete(p.id);
+                }}
+              >
+                {builtIn ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="5" rx="1"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M10 13h4"/></svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                )}
+              </button>
               <div className="dash-card-inner">
                 <div className="dash-card-top">
                   <span className={`tag ${LIFECYCLE_CLASS[lifecycle]}`}>{lifecycle}</span>
@@ -61,7 +102,7 @@ export function ProjectDashboard({
                   <span>{teamCount} team</span>
                 </div>
               </div>
-            </button>
+            </div>
           );
         })}
 

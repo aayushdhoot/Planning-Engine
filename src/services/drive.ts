@@ -199,6 +199,14 @@ export class GoogleDriveService implements DriveService {
  */
 const PROXY = '/gdrive';
 const DOCS_PROXY = '/gdocs';
+/** Server-side download (api/drive/download.ts) — same origin, so no CORS and no lost redirect. */
+const DOWNLOAD_API = '/api/drive/download';
+
+/** True when a response is Vite's SPA shell, i.e. nothing is serving that path. */
+export function isSpaShell(buf: ArrayBuffer): boolean {
+  const head = new TextDecoder().decode(buf.slice(0, 1000));
+  return head.includes('<div id="root">') || head.includes('/src/main.tsx');
+}
 const ENTRY_RE = /<div class="flip-entry" id="entry-([^"]+)".*?<a href="([^"]+)".*?<div class="flip-entry-title">(.*?)<\/div>/gs;
 
 /**
@@ -334,8 +342,57 @@ export class PublicLinkDriveService implements DriveService {
     return { folderId: rootId, folderName: rootName, scannedAt: new Date().toISOString(), files, skipped, notes };
   }
 
+  /**
+   * Bytes for one file, downloaded by the server rather than by the browser.
+   *
+   * The browser used to fetch `/gdrive/uc?export=download` itself and hand the redirect chain
+   * to the dev-server proxy. That works for a site photograph and fails for exactly the two
+   * kinds of document a project folder cares most about — a large PDF and a native Google
+   * Sheet — because both end at a cross-origin host or an HTML confirmation form that a
+   * `fetch()` can only report as `TypeError: Failed to fetch`, with no status and no reason.
+   * `api/drive/download.ts` does the whole walk in Node and answers on this origin, so a
+   * failure now arrives as a sentence someone can act on.
+   *
+   * The old proxy path stays as the fallback for a build with no API route behind it.
+   */
   async readFile(file: DriveFile): Promise<ArrayBuffer> {
-    const res = await fetch(`${PROXY}/uc?export=download&id=${encodeURIComponent(file.id)}`);
+    let res: Response;
+    try {
+      res = await fetch(`${DOWNLOAD_API}?id=${encodeURIComponent(file.id)}&name=${encodeURIComponent(file.name)}`);
+    } catch {
+      return this.readViaProxy(file);
+    }
+
+    // Vite answers an unknown path with the SPA shell rather than a 404, so "route missing" is
+    // established from the body, the same way listing() establishes "proxy missing".
+    const buf = await res.arrayBuffer();
+    if (isSpaShell(buf)) return this.readViaProxy(file);
+
+    if (!res.ok) {
+      let why = `Drive download failed (${res.status}).`;
+      try {
+        const body = JSON.parse(new TextDecoder().decode(buf)) as { error?: string };
+        if (body.error) why = body.error;
+      } catch {
+        /* not JSON — keep the status line */
+      }
+      throw new Error(why);
+    }
+    if (!buf.byteLength) throw new Error(`Drive returned no bytes for "${file.name}".`);
+    return buf;
+  }
+
+  /** The pre-API route: browser -> dev-server proxy -> Drive. Kept for the static build. */
+  private async readViaProxy(file: DriveFile): Promise<ArrayBuffer> {
+    let res: Response;
+    try {
+      res = await fetch(`${PROXY}/uc?export=download&id=${encodeURIComponent(file.id)}`);
+    } catch (e) {
+      throw new Error(
+        `"${file.name}" could not be downloaded from Drive — the request never completed (${e instanceof Error ? e.message : String(e)}). ` +
+          'Run the app through `npm run dev` so the server can fetch it, or use "Prepare by hand" to upload the file.',
+      );
+    }
     if (!res.ok) throw new Error(`Could not download "${file.name}" (${res.status}).`);
     const buf = await res.arrayBuffer();
     // Drive answers very large files with an HTML interstitial instead of the bytes. A native

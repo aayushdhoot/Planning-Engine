@@ -1,12 +1,17 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { CalendarConfig, EngineConfig, ProjectInputs, ScheduleDates, Traced } from './domain/types';
-import type { DesignRow, MaterialInspection, MaterialRow, MaterialStatus, MaterialSupply, TodoRow, TrackStatus, TradeWeeklySchedule } from './domain/trackers';
+import type { DesignRow, MaterialInspection, MaterialRow, MaterialStatus, MaterialSupply, TodoRow, TrackStatus } from './domain/trackers';
 import {
   MATERIAL_INSPECTIONS, MATERIAL_STATUSES, MATERIAL_SUPPLIES, SUPPLY_LABEL, TRACK_STATUSES, delayDays, summariseMaterials, buildWeeklyMaterialSchedule,
 } from './domain/trackers';
 import { buildPlan, clientView, type ExternalDelay, type Plan } from './engine/planner';
 import { auditTrace, canonicalJson, validatePlan } from './engine/schema';
 import { buildPertFromPlan } from './engine/pert-build';
+import { readVerdict, slidePending, workingDaysIn } from './engine/progress-replan';
+import {
+  applyScheduleEdits, countEdits, pinsToDelays, newActivityId, wouldCycle,
+  type ScheduleEdits, type ActivityEdit,
+} from './engine/schedule-edits';
 import { skf } from './data/skf';
 import { skfPhase2 } from './data/skf-phase2';
 import { emirates } from './data/emirates';
@@ -18,7 +23,7 @@ import { Gantt } from './ui/Gantt';
 import { SCurveChart } from './ui/SCurve';
 import { Cockpit } from './ui/Cockpit';
 import { buildSCurve } from './engine/scurve';
-import { Pert } from './ui/Pert';
+import { Pert, type PertEditing } from './ui/Pert';
 import type { PertTree } from './domain/pert';
 import { ProjectSettings } from './ui/ProjectSettings';
 import { Assistant, EMPTY_CHAT_STATE, type ChatState } from './ui/Assistant';
@@ -34,13 +39,14 @@ import {
   TRACKING_ENGINE_URL, buildBridgeModules, dnbosProjectId, pushPlan, pullState, pushEdits, type EditOverlay,
 } from './services/dnbos-bridge';
 import { ProjectDashboard } from './ui/ProjectDashboard';
+import { loadWorkspace, saveWorkspace } from './services/workspace-store';
 
 const BASE_PROJECTS: ProjectInputs[] = [skf, skfPhase2, emirates, kohler, pendingKohler];
 const ingestion = new BoqIngestionService();
 const persistence = new FilePersistence();
 const PROJECT_TABS = ['Cockpit', 'Overview', 'PERT', 'Manpower', 'Design', 'Procurement', 'Material Registry', 'To-do', 'Dependencies', 'RA Milestones', 'AI Assistant'] as const;
 type Tab = (typeof PROJECT_TABS)[number];
-type Screen = 'dashboard' | 'project' | 'admin' | 'settings' | 'new-project';
+type Screen = 'dashboard' | 'project' | 'admin' | 'settings' | 'new-project' | 'project-settings';
 
 const inr = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 const P = ({ t }: { t: Traced<number> | null }) =>
@@ -49,9 +55,32 @@ const P = ({ t }: { t: Traced<number> | null }) =>
 const statusClass = (s: TrackStatus): string =>
   s === 'Completed' ? 'ok' : s === 'Delayed' ? 'crit' : s === 'WIP' ? 'info' : s === 'Hold' ? 'warn' : '';
 
+const BUFFER_LABEL: Record<string, string> = {
+  ok: 'invariant holds',
+  tight: 'TIGHT — below the policy minimum',
+  breach: 'BREACH — internal finish is past the client date',
+  // Not good news. This is the shape a programme takes when its durations came off the floor
+  // rather than out of the BOQ, and calling it "holds" is what let a six-day plan pass for a
+  // ninety-day one.
+  implausible: 'NOT CREDIBLE — see the schedule assumptions',
+};
+const BUFFER_COLOUR: Record<string, string | undefined> = {
+  ok: undefined, tight: 'var(--warn)', breach: 'var(--crit)', implausible: 'var(--warn)',
+};
+
 export default function App() {
   const [extraProjects, setExtraProjects] = useState<ProjectInputs[]>([]);
   const [overrides, setOverrides] = useState<Record<string, ProjectInputs>>({});
+  /**
+   * Whether the workspace on disk has been read yet, and what went wrong if it could not be.
+   *
+   * The gate matters as much as the load. Saving is driven by a change to `extraProjects`, so
+   * writing before the first read would fire once with the empty initial state and truncate the
+   * file the read was about to bring back — losing every saved project on any reload where the
+   * server was momentarily slow.
+   */
+  const [workspaceLoaded, setWorkspaceLoaded] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
   const [ingestResult, setIngestResult] = useState<{ boq: IngestedBoq; file: string } | null>(null);
   const [projectId, setProjectId] = useState(BASE_PROJECTS[0].id);
   const [view, setView] = useState<'internal' | 'external'>('internal');
@@ -87,6 +116,37 @@ export default function App() {
   // switching tabs away and back, and correctly starts fresh / resumes when the project changes.
   const [chatByProject, setChatByProject] = useState<Record<string, ChatState>>({});
   const today = new Date().toISOString().slice(0, 10);
+
+  // Read the workspace once, on mount. A failure is kept and shown rather than swallowed: an
+  // empty dashboard because the store was unreachable looks exactly like an empty dashboard
+  // because nothing has been made yet, and the second is the reading a person will take.
+  useEffect(() => {
+    let live = true;
+    void loadWorkspace().then(({ workspace, error }) => {
+      if (!live) return;
+      if (workspace) {
+        setExtraProjects(workspace.projects);
+        setOverrides(workspace.overrides);
+      }
+      setWorkspaceError(error);
+      // Only a SUCCESSFUL read opens the gate. If the store could not be reached, the app is
+      // sitting on empty state that is not the truth, and letting the save effect fire on it
+      // would overwrite a perfectly good file with nothing — losing every saved project because
+      // the server happened to be restarting. A failed load means read-only until a reload.
+      if (workspace) setWorkspaceLoaded(true);
+    });
+    return () => { live = false; };
+  }, []);
+
+  // Write it back whenever a project is added, edited or deleted — but never before the first
+  // read has landed, or the empty initial state would overwrite the file it is about to replace.
+  useEffect(() => {
+    if (!workspaceLoaded) return;
+    void saveWorkspace({ normsVersion: normsData.version, projects: extraProjects, overrides }).then((err) => {
+      if (err) setWorkspaceError(err);
+    });
+  }, [workspaceLoaded, extraProjects, overrides]);
+
   const ALL_PROJECTS = [...BASE_PROJECTS.map((p) => overrides[p.id] ?? p), ...extraProjects];
   const PROJECTS = ALL_PROJECTS.filter((p) => !org.archived.includes(p.id));
   const project = PROJECTS.find((p) => p.id === projectId) ?? PROJECTS[0] ?? ALL_PROJECTS[0];
@@ -117,10 +177,28 @@ export default function App() {
       ? { ...project, areaSft: { value: area, provenance: 'input' as const, source: 'project settings · site details (carpet area)' } }
       : project;
   }, [project, org.sites]);
-  const full = useMemo(
-    () => buildPlan(sited, cfg, today, appliedDelays[project.id] ?? []),
-    [sited, cfg, today, appliedDelays, project.id],
-  );
+  // Hand edits to the programme, per project. They are folded into the INPUTS
+  // and the plan is recomputed from those — see engine/schedule-edits.ts for why
+  // an edit cannot just be written onto a computed date.
+  const [schedEdits, setSchedEdits] = useState<Record<string, ScheduleEdits>>({});
+  const myEdits = schedEdits[project.id] ?? {};
+  // tracker-cell corrections made here and not yet pushed, per project
+  const [overlayDirty, setOverlayDirty] = useState<Record<string, EditOverlay>>({});
+  const myOverlayDirty = overlayDirty[project.id] ?? {};
+
+  const edited = useMemo(() => applyScheduleEdits(sited, myEdits), [sited, myEdits]);
+
+  // Two passes. A pinned start is expressed as a working-day index, and the
+  // index depends on the project start, which is only known once a plan exists —
+  // so the plan is built once to learn the calendar and the start, then rebuilt
+  // with the pins turned into constraints. The first pass is thrown away.
+  const full = useMemo(() => {
+    const base = buildPlan(edited, cfg, today, appliedDelays[project.id] ?? []);
+    const start = base.internal?.start;
+    const pins = start ? pinsToDelays(base, myEdits, start) : [];
+    if (!pins.length) return base;
+    return buildPlan(edited, cfg, today, [...(appliedDelays[project.id] ?? []), ...pins]);
+  }, [edited, cfg, today, appliedDelays, project.id, myEdits]);
   const plan: Plan = view === 'external' ? clientView(full) : full;
   const validation = validatePlan(plan);
   const trace = auditTrace(plan);
@@ -178,17 +256,71 @@ export default function App() {
     });
   };
 
+  /**
+   * A HAND EDIT DOES NOT REACH SITE UNTIL IT IS PUSHED.
+   *
+   * This pushed on every change to the plan, which is right for a recomputation
+   * nobody asked for and wrong for a person editing. Half-finished edits — a
+   * duration typed before its dependency is corrected — would land on the site's
+   * screen and be read as the new programme. So the push is manual whenever
+   * there is anything of the person's own in the plan.
+   *
+   * A project with NO hand edits still pushes on its own: opening a project the
+   * site has never seen should not require somebody to remember a button.
+   */
+  const pushSig = useMemo(() => {
+    if (full.project.status !== 'planned') return '';
+    return JSON.stringify({
+      end: full.internal?.end, ext: full.external?.end,
+      acts: full.modules.timeline.activities.map((a) => [a.id, a.startDate, a.endDate, a.duration.value, a.percentComplete?.value ?? 0]),
+    });
+  }, [full]);
+  const lastPushedSig = useRef<string>('');
+  const [pushingPlan, setPushingPlan] = useState(false);
+
+  /**
+   * ONE BUTTON SENDS EVERYTHING.
+   *
+   * The two halves go in a fixed order — modules first, then the overlay —
+   * because the store keeps them apart on purpose (a plan push replaces the
+   * computed programme and leaves corrections alone; an edit push merges
+   * corrections and leaves the programme alone). Sending the programme first
+   * means the tracking engine never sees a correction pointing at a row that
+   * its copy of the plan does not have yet.
+   */
+  const doPushPlan = async () => {
+    if (full.project.status === 'pending_inputs') return;
+    setPushingPlan(true);
+    const pertForPush = project.id === 'emirates' ? buildEmiratesPert(today) : buildPertFromPlan(full, today);
+    let r = await pushPlan(project.id, sited, buildBridgeModules(full, pertForPush, scurveAll));
+    if (Object.keys(myOverlayDirty).length) {
+      r = (await pushEdits(project.id, myOverlayDirty)) ?? r;
+      setOverlayDirty((p) => ({ ...p, [project.id]: {} }));
+    }
+    lastPushedSig.current = pushSig;
+    setPushingPlan(false);
+    applyRemote(r);
+    return r;
+  };
+
+  // "of the person's own": a hand edit to the programme, or an applied re-plan
+  // or date shift. Both are decisions, and neither should travel unreviewed.
+  const handEdited = Object.keys(myEdits).length > 0 || (appliedDelays[project.id] ?? []).length > 0;
   useEffect(() => {
     if (full.project.status === 'pending_inputs') return;
+    if (handEdited) return;                 // never auto-push over unreviewed work
+    if (pushSig === lastPushedSig.current) return;
+    let alive = true;
     const pertForPush =
       project.id === 'emirates' ? buildEmiratesPert(today) : buildPertFromPlan(full, today);
-    let alive = true;
     void pushPlan(project.id, sited, buildBridgeModules(full, pertForPush, scurveAll)).then((r) => {
-      if (alive) applyRemote(r);
+      if (!alive) return;
+      lastPushedSig.current = pushSig;
+      applyRemote(r);
     });
     return () => { alive = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [project.id, sited, full, scurveAll, today]);
+  }, [project.id, sited, full, scurveAll, today, pushSig, handEdited]);
+
 
   // Corrections made in the tracking engine come back here.
   useEffect(() => {
@@ -200,19 +332,117 @@ export default function App() {
     void tick();
     const h = setInterval(() => void tick(), 4000);
     return () => { alive = false; clearInterval(h); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project.id]);
 
+  // Where the programme stands, read off the same curve the S-curve draws so the
+  // banner and the chart can never disagree about the same day.
+  const verdict = useMemo(
+    () => (full.project.status === 'planned' ? readVerdict(full, scurveAll, today) : null),
+    [full, scurveAll, today],
+  );
+  /**
+   * Push unfinished work out by `calDays`. Finished work keeps its dates.
+   *
+   * `moveCommittedEnd` is what separates two acts that share this machinery:
+   *
+   *   RE-PLAN (from recorded progress) leaves the client date alone. The work
+   *   running past the date IS the finding — the buffer goes negative and the
+   *   invariant reads BREACH, which is the whole point of measuring the slip.
+   *   Moving the date to match would erase the problem instead of reporting it.
+   *
+   *   SHIFT END DATE is a decision somebody has taken. The committed finish
+   *   moves with the work, so the buffer survives and nothing reads as breached
+   *   — because nothing is.
+   */
+  const applySlide = (calDays: number, why: string, moveCommittedEnd = false) => {
+    const wd = workingDaysIn(full, calDays);
+    setAppliedDelays((p) => ({ ...p, [project.id]: slidePending(full, wd, why) }));
+    setLastAppliedSummary((p) => ({ ...p, [project.id]: why }));
+    if (moveCommittedEnd) {
+      const base = full.external?.end ?? null;
+      if (base) {
+        const next = new Date(Date.parse(`${base}T00:00:00Z`) + calDays * 86400000).toISOString().slice(0, 10);
+        setOrg({ ...org, dates: { ...(org.dates ?? {}), [project.id]: { ...(org.dates?.[project.id] ?? {}), clientEnd: next } } });
+      }
+    }
+  };
+  const clearSlide = () => {
+    setAppliedDelays((p) => ({ ...p, [project.id]: [] }));
+    setLastAppliedSummary((p) => ({ ...p, [project.id]: '' }));
+    const d = { ...(org.dates ?? {}) };
+    if (d[project.id]) { const next = { ...d[project.id] }; delete next.clientEnd; d[project.id] = next; }
+    setOrg({ ...org, dates: d });
+  };
+  const slideActive = (appliedDelays[project.id] ?? []).length > 0;
+  /** How much is waiting to go: schedule edits, tracker corrections, or a slide. */
+  const unpushedCount =
+    countEdits(myEdits) + Object.keys(myOverlayDirty).length + (slideActive ? 1 : 0);
+
+  // ---- the schedule editor's hooks --------------------------------------
+  const setSchedEdit = (id: string, patch: Partial<ActivityEdit>) =>
+    setSchedEdits((p) => {
+      const mine = { ...(p[project.id] ?? {}) };
+      mine[id] = { ...(mine[id] ?? {}), ...patch };
+      return { ...p, [project.id]: mine };
+    });
+  const clearSchedEdits = () => setSchedEdits((p) => ({ ...p, [project.id]: {} }));
+  const addActivity = () => {
+    const n = Object.keys(myEdits).filter((k) => myEdits[k].added).length + 1;
+    const id = newActivityId(Date.now() % 100000 + n);
+    setSchedEdit(id, { added: { phase: 'Execution', trade: 'general' }, name: 'New activity', durationDays: 1, deps: [] });
+    return id;
+  };
+  /** Refuses an edge that would close a loop, rather than hanging the CPM on it. */
+  const linkActivity = (id: string, predId: string): string | null => {
+    const acts = full.modules.timeline.activities;
+    if (wouldCycle(acts, id, predId)) return 'that link would make a loop — the two would each wait for the other';
+    const cur = acts.find((a) => a.id === id);
+    const deps = [...(myEdits[id]?.deps ?? cur?.deps ?? [])];
+    if (deps.some((d) => d.pred === predId)) return 'already linked';
+    deps.push({ pred: predId, type: 'FS', lag: 0 });
+    setSchedEdit(id, { deps });
+    return null;
+  };
+  const unlinkActivity = (id: string, predId: string) => {
+    const cur = full.modules.timeline.activities.find((a) => a.id === id);
+    const deps = (myEdits[id]?.deps ?? cur?.deps ?? []).filter((d) => d.pred !== predId);
+    setSchedEdit(id, { deps });
+  };
+  const schedEditCount = countEdits(myEdits);
+  /**
+   * The editor's handles. Withheld in the client view: that document is what was
+   * committed to the client, and letting somebody re-date it from the same
+   * screen they show a client is how a redacted view becomes an editable one.
+   */
+  const pertEditing: PertEditing | undefined = view === 'external' || pending ? undefined : {
+    edits: myEdits as PertEditing['edits'],
+    set: (id, patch) => setSchedEdit(id, patch as Partial<ActivityEdit>),
+    add: addActivity,
+    link: linkActivity,
+    unlink: unlinkActivity,
+    clear: clearSchedEdits,
+    count: schedEditCount,
+    activities: full.modules.timeline.activities as unknown as PertEditing['activities'],
+  };
+
+  /**
+   * A tracker cell edit — a status, a vendor, a revised date.
+   *
+   * These used to go to the shared store the instant they were typed, while a
+   * schedule edit waited for the push button. That split made no sense from the
+   * outside: two changes on the same screen, one of them already on site's
+   * display and the other not, with nothing saying which was which. Everything
+   * now waits for the same button.
+   */
   const edit = (rowId: string, field: string, value: string) => {
-    // applied locally first so the field answers the keystroke, then confirmed by
-    // whatever the store says the merged overlay actually is
     setEdits((prev) => ({
       ...prev,
       [project.id]: { ...(prev[project.id] ?? {}), [rowId]: { ...(prev[project.id]?.[rowId] ?? {}), [field]: value } },
     }));
-    // pushed as a single-row overlay, so two people editing different rows at the
-    // same time do not overwrite each other with a whole-table snapshot
-    void pushEdits(project.id, { [rowId]: { [field]: value } } as EditOverlay).then(applyRemote);
+    setOverlayDirty((p) => ({
+      ...p,
+      [project.id]: { ...(p[project.id] ?? {}), [rowId]: { ...(p[project.id]?.[rowId] ?? {}), [field]: value } },
+    }));
   };
   const val = <T,>(rowId: string, field: string, fallback: T): T | string =>
     edits[project.id]?.[rowId]?.[field] ?? fallback;
@@ -226,6 +456,25 @@ export default function App() {
   const goHome = () => setScreen('dashboard');
 
   const openNewProject = () => setScreen('new-project');
+
+  // Site details, schedule dates and the project team used to be reachable ONLY through the New
+  // Project screen, where they silently edited whichever project was selected at the time. They
+  // need a project to belong to, so they live here instead — on the project itself.
+  const openProjectSettings = () => setScreen('project-settings');
+
+  /**
+   * Remove a project made in this app. One implementation, used by both the dashboard card and
+   * the Admin table, because two would eventually disagree about what deleting means.
+   *
+   * Dropping it from  is the whole of it: the save effect writes the shorter list
+   * to the workspace file, and any org metadata keyed by the id goes with it. There is nowhere
+   * to undo from, which is why both callers ask first.
+   */
+  const deleteProject = (id: string) => {
+    setExtraProjects((prev) => prev.filter((x) => x.id !== id));
+    setOverrides((prev) => { const next = { ...prev }; delete next[id]; return next; });
+    if (projectId === id) setProjectId(BASE_PROJECTS[0].id);
+  };
 
   if (screen === 'dashboard') {
     return (
@@ -241,11 +490,22 @@ export default function App() {
             Settings
           </button>
         </header>
+        {workspaceError && (
+          // Said out loud, on the screen the projects are missing from. A store that cannot be
+          // reached is why the dashboard looks empty, and the person looking at it has no other
+          // way to tell that apart from having made nothing yet.
+          <div className="banner" style={{ margin: '16px 22px 0', borderColor: 'var(--warn)', background: 'var(--warn-soft)' }}>
+            <strong>Projects are not being saved.</strong> {workspaceError} Anything created now will disappear when this page reloads.
+          </div>
+        )}
         <ProjectDashboard
           projects={PROJECTS}
           org={org}
           onSelect={openProject}
           onNewProject={openNewProject}
+          builtInIds={BASE_PROJECTS.map((bp) => bp.id)}
+          onDelete={deleteProject}
+          onArchive={(id) => setOrg({ ...org, archived: [...org.archived, id] })}
         />
       </div>
     );
@@ -266,10 +526,7 @@ export default function App() {
             setOrg={setOrg}
             projects={ALL_PROJECTS.map((p) => ({ id: p.id, name: p.name, client: p.client }))}
             builtInIds={BASE_PROJECTS.map((p) => p.id)}
-            onDeleteProject={(id) => {
-              setExtraProjects((prev) => prev.filter((p) => p.id !== id));
-              if (projectId === id) setProjectId(BASE_PROJECTS[0].id);
-            }}
+            onDeleteProject={deleteProject}
           />
         </main>
       </div>
@@ -319,6 +576,35 @@ export default function App() {
         </header>
         <main className="fade-in">
           <ProjectSettings
+            creating
+            project={project}
+            org={org}
+            setOrg={setOrg}
+            clientId={clientId}
+            existingIds={PROJECTS.map((p) => p.id)}
+            onCreate={(p) => {
+              setExtraProjects((prev) => [...prev, p]);
+              setProjectId(p.id);
+              setTab('Cockpit');
+              setScreen('project');
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  if (screen === 'project-settings') {
+    return (
+      <div className="app">
+        <header className="top standalone-header">
+          <button className="ghost home-btn" onClick={() => setScreen('project')} title="Back to the project">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </button>
+          <div className="brand">Project settings<small>{project.name}</small></div>
+        </header>
+        <main className="fade-in">
+          <ProjectSettings
             project={project}
             org={org}
             setOrg={setOrg}
@@ -361,7 +647,23 @@ export default function App() {
         <button onClick={() => download(`${plan.project.id}-${view}.json`, canonicalJson(plan))}>JSON</button>
         <button onClick={() => openReport(renderReport(plan, view === 'external' ? 'client' : 'internal'))}>PDF report</button>
         <button className="primary" onClick={() => void buildDeck(plan, view === 'external' ? 'client' : 'internal').writeFile({ fileName: `${plan.project.id}-${view}-deck.pptx` })}>Deck</button>
-        {bridgeAt && <span className="tag ok" title={`programme pushed to the tracking engine at ${bridgeAt}`}>tracking synced</span>}
+        {/* Manual push, for the same reason the tracking engine has one: a
+            programme half-edited is not a programme, and site should not be
+            reading one. Only offered when there is something of yours to send. */}
+        {unpushedCount > 0 ? (
+          <button className="primary" disabled={pushingPlan} onClick={() => void doPushPlan()}
+            title={`send this programme and ${unpushedCount} change${unpushedCount > 1 ? 's' : ''} to the tracking engine`}>
+            {pushingPlan ? 'Pushing…' : `Push ${unpushedCount} to tracking →`}
+          </button>
+        ) : bridgeAt ? (
+          <span className="tag ok" title={`programme pushed to the tracking engine at ${bridgeAt}`}>tracking synced</span>
+        ) : null}
+        {/* The way in to site details, schedule dates and the project team. They were only ever
+            reachable from the New Project screen, where they edited whichever project happened
+            to be selected — so they now hang off the project they actually belong to. */}
+        <button className="ghost" title="Site details, schedule dates and project team" onClick={openProjectSettings}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-2px' }}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
         {/* Opens the DnB-OS tracking engine on this same project. The push above has
             already run, so what opens is this programme and not a stale copy. The old
             button pointed at /tracking/index.html — a build of the retired shell bundled
@@ -385,6 +687,8 @@ export default function App() {
         {PROJECT_TABS.map((t) => <button key={t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}
       </nav>
 
+      {/* Every control below is disabled on the client tab — see ReadOnly above. */}
+      <ReadOnly.Provider value={view === 'external'}>
       <main className="fade-in">
         {pending && (
           <div className="banner">
@@ -394,6 +698,44 @@ export default function App() {
         )}
         {view === 'external' && !pending && (
           <div className="banner info">Client view — anchored to contract dates. Buffer, cost, margin, float and manpower are withheld.</div>
+        )}
+
+        {/* WHERE THE PROGRAMME STANDS, AND WHAT TO DO ABOUT IT.
+            The engine states the gap; it does not close it on its own. The
+            re-plan below pushes unfinished work out by the measured slip and
+            leaves finished work where it is — but only when pressed, because a
+            programme that re-dates itself the moment site reports a bad week is
+            a programme nobody can hold anyone to. */}
+        {!pending && verdict && verdict.state !== 'not_started' && (
+          <div className={'banner ' + (verdict.state === 'behind' ? '' : 'ok')}>
+            <div className="row" style={{ alignItems: 'center', gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 280 }}>
+                <strong>
+                  {verdict.state === 'behind' ? 'Behind plan' : verdict.state === 'ahead' ? 'Ahead of plan' : 'On plan'}
+                </strong>{' '}
+                — {verdict.line}
+                <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>
+                  {verdict.activitiesComplete} of {verdict.activitiesTotal} activities recorded complete
+                  {verdict.overdue > 0 && `, ${verdict.overdue} past their window with nothing signed off`}
+                  {' · '}recorded progress only, never inferred from the date
+                </div>
+              </div>
+              {slideActive ? (
+                <>
+                  <span className="tag info" title={lastAppliedSummary[project.id]}>re-plan applied</span>
+                  <button onClick={clearSlide}>Undo re-plan</button>
+                </>
+              ) : verdict.state === 'behind' && verdict.daysBehind > 0 ? (
+                <button
+                  className="primary"
+                  title={`push every unfinished activity out by ${verdict.daysBehind} days; finished work keeps its dates`}
+                  onClick={() => applySlide(verdict.daysBehind, `slipped ${verdict.daysBehind}d against recorded progress`)}
+                >
+                  Re-plan · slide {verdict.daysBehind}d
+                </button>
+              ) : null}
+            </div>
+          </div>
         )}
 
         {tab === 'Cockpit' && (
@@ -413,7 +755,11 @@ export default function App() {
           />
         )}
         {tab === 'Overview' && <Overview plan={plan} view={view} />}
-        {tab === 'PERT' && <PertSection tree={pert} today={today} plan={plan} view={view} />}
+        {tab === 'PERT' && (
+          <PertSection tree={pert} today={today} plan={plan} view={view} editing={pertEditing}
+            onShift={applySlide} onReset={clearSlide}
+            slideActive={slideActive} slideSummary={lastAppliedSummary[project.id] ?? ''} />
+        )}
         {tab === 'Manpower' && <Manpower plan={plan} />}
         {tab === 'Design' && <Design plan={plan} edit={edit} val={val} />}
         {tab === 'Procurement' && <Procurement plan={plan} view={view} edit={edit} val={val} />}
@@ -470,6 +816,7 @@ export default function App() {
           />
         )}
       </main>
+      </ReadOnly.Provider>
     </div>
   );
 }
@@ -495,11 +842,30 @@ function openReport(html: string) {
 type EditFn = (rowId: string, field: string, value: string) => void;
 type ValFn = <T>(rowId: string, field: string, fallback: T) => T | string;
 
+/**
+ * THE CLIENT VIEW IS A DOCUMENT, NOT A WORKSPACE.
+ *
+ * It is the programme as committed to the client, with buffer, float, cost and
+ * margin stripped. Editing from it makes no sense and is dangerous in two ways:
+ * a change made on the client tab silently becomes the internal plan, and a
+ * screen you show a client should not have live controls on it.
+ *
+ * Ambient rather than threaded: there are three cell components and a dozen
+ * inline selects across six trackers, and passing a flag to every one of them
+ * is how one gets missed. A control that looks editable and quietly does
+ * nothing is worse than either a working one or a disabled one.
+ */
+const ReadOnly = createContext(false);
+const useReadOnly = () => useContext(ReadOnly);
+const RO_TITLE = 'Client view is read only — switch to Internal to change this.';
+
 function StatusCell({ id, field, current, edit, val }: { id: string; field: string; current: TrackStatus; edit: EditFn; val: ValFn }) {
   const v = val(id, field, current) as TrackStatus;
+  const ro = useReadOnly();
   return (
     <td className="edit">
-      <select value={v} onChange={(e) => edit(id, field, e.target.value)} className={`tag ${statusClass(v)}`}>
+      <select value={v} disabled={ro} title={ro ? RO_TITLE : undefined}
+        onChange={(e) => edit(id, field, e.target.value)} className={`tag ${statusClass(v)}`}>
         {TRACK_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
       </select>
     </td>
@@ -507,17 +873,21 @@ function StatusCell({ id, field, current, edit, val }: { id: string; field: stri
 }
 
 function TextCell({ id, field, current, edit, val, placeholder }: { id: string; field: string; current: string; edit: EditFn; val: ValFn; placeholder?: string }) {
+  const ro = useReadOnly();
   return (
     <td className="edit">
-      <input value={val(id, field, current) as string} placeholder={placeholder ?? '—'} onChange={(e) => edit(id, field, e.target.value)} />
+      <input value={val(id, field, current) as string} placeholder={placeholder ?? '—'} disabled={ro}
+        title={ro ? RO_TITLE : undefined} onChange={(e) => edit(id, field, e.target.value)} />
     </td>
   );
 }
 
 function DateCell({ id, field, current, edit, val }: { id: string; field: string; current: string | null; edit: EditFn; val: ValFn }) {
+  const ro = useReadOnly();
   return (
     <td className="edit">
-      <input type="date" value={(val(id, field, current ?? '') as string) || ''} onChange={(e) => edit(id, field, e.target.value)} />
+      <input type="date" value={(val(id, field, current ?? '') as string) || ''} disabled={ro}
+        title={ro ? RO_TITLE : undefined} onChange={(e) => edit(id, field, e.target.value)} />
     </td>
   );
 }
@@ -531,7 +901,7 @@ function Overview({ plan, view }: { plan: Plan; view: string }) {
         <div className="card"><div className="k">Area</div><div className="v">{plan.project.areaSft ? plan.project.areaSft.value.toLocaleString('en-IN') + ' sft' : '—'}</div><P t={plan.project.areaSft} /></div>
         <div className="card"><div className="k">Contract value</div><div className="v">{plan.project.contractValue ? inr(plan.project.contractValue.value) : '—'}</div><P t={plan.project.contractValue} /></div>
         <div className="card"><div className="k">{view === 'external' ? 'Contract finish' : 'Internal finish'}</div><div className="v">{view === 'external' ? plan.external?.end ?? '—' : plan.internal?.end ?? '—'}</div><div className="s">{view === 'external' ? 'contract baseline' : `${plan.internal?.durationWorkingDays ?? 0} working days (CPM)`}</div></div>
-        {view === 'internal' && <div className="card"><div className="k">Buffer</div><div className="v">{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div><div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH'}</div></div>}
+        {view === 'internal' && <div className="card"><div className="k">Buffer</div><div className="v" style={{ color: BUFFER_COLOUR[plan.ieInvariant.state] }}>{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div><div className="s" style={{ color: BUFFER_COLOUR[plan.ieInvariant.state] }}>{BUFFER_LABEL[plan.ieInvariant.state]}</div></div>}
         <div className="card"><div className="k">Critical activities</div><div className="v">{m.timeline.criticalPath.length} / {m.timeline.activities.length}</div><div className="s">zero total float</div></div>
         {view === 'internal' && <div className="card"><div className="k">Peak manpower</div><div className="v">{m.manpower.peak}</div><div className="s">avg {m.manpower.averageDaily} · smoothness {m.manpower.smoothness}</div></div>}
         <div className="card"><div className="k">Design approved</div><div className="v">{m.design.summary.percentComplete}%</div><div className="s">{m.design.summary.approved} of {m.design.summary.drawings} drawings</div></div>
@@ -546,7 +916,70 @@ function Overview({ plan, view }: { plan: Plan; view: string }) {
  * PERT is the schedule section; the Gantt is a way of looking at the same programme rather than
  * a separate module, so it lives here behind a toggle instead of on its own tab.
  */
-function PertSection({ tree, today, plan, view }: { tree: PertTree; today: string; plan: Plan; view: string }) {
+/**
+ * Move the committed finish, and let the work that has not happened follow it.
+ *
+ * Shifting the end date on its own would change nothing about the programme —
+ * it would only widen the buffer, because CPM dates come from durations and
+ * dependencies, never from the finish. So a shift here slides every UNFINISHED
+ * activity by the same amount and leaves finished work on its recorded dates.
+ * Completed work cannot move; pretending otherwise rewrites history to make a
+ * date look reachable.
+ */
+function ShiftEnd({ plan, onShift, onReset, active, summary }: {
+  plan: Plan; onShift: (days: number, why: string, moveCommittedEnd?: boolean) => void; onReset: () => void;
+  active: boolean; summary: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [custom, setCustom] = useState('');
+  const end = plan.external?.end ?? plan.internal?.end ?? null;
+  const moved = (d: number) =>
+    (end ? new Date(Date.parse(`${end}T00:00:00Z`) + d * 86400000).toISOString().slice(0, 10) : '');
+  const go = (d: number) => {
+    if (!d) return;
+    // true: this is a decision, so the committed finish moves with the work
+    onShift(d, `end date moved ${d > 0 ? '+' : ''}${d}d${end ? ` to ${moved(d)}` : ''}`, true);
+    setOpen(false);
+    setCustom('');
+  };
+  return (
+    <span style={{ position: 'relative', display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+      <button onClick={() => setOpen((v) => !v)} title="move the committed finish and slide unfinished work with it">
+        Shift end date{end ? ` · ${end}` : ''}
+      </button>
+      {active && <button onClick={onReset} title={summary}>Undo shift</button>}
+      {open && (
+        <div style={{ position: 'absolute', top: '112%', left: 0, zIndex: 40, background: 'var(--panel)',
+          border: '1px solid var(--line)', borderRadius: 10, padding: 12, boxShadow: 'var(--shadow)', minWidth: 280 }}>
+          <div className="muted" style={{ fontSize: 11.5, marginBottom: 8, lineHeight: 1.45 }}>
+            Every activity not yet recorded complete moves by this much, and its successors follow.
+            Finished work keeps its dates.
+          </div>
+          <div className="row" style={{ gap: 6, marginBottom: 8 }}>
+            {[7, 15, 30].map((d) => (
+              <button key={d} onClick={() => go(d)} title={end ? `finish moves to ${moved(d)}` : undefined}>+{d}d</button>
+            ))}
+            {[-7, -15].map((d) => (
+              <button key={d} onClick={() => go(d)} title={end ? `finish moves to ${moved(d)}` : undefined}>{d}d</button>
+            ))}
+          </div>
+          <div className="row" style={{ gap: 6 }}>
+            <input type="number" value={custom} placeholder="days" style={{ width: 92 }}
+              onChange={(e) => setCustom(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') go(Number(custom)); }} />
+            <button className="primary" disabled={!Number(custom)} onClick={() => go(Number(custom))}>Apply</button>
+          </div>
+        </div>
+      )}
+    </span>
+  );
+}
+
+function PertSection({ tree, today, plan, view, onShift, onReset, slideActive, slideSummary, editing }: {
+  tree: PertTree; today: string; plan: Plan; view: string;
+  onShift: (days: number, why: string, moveCommittedEnd?: boolean) => void; onReset: () => void;
+  slideActive: boolean; slideSummary: string; editing?: PertEditing;
+}) {
   const [mode, setMode] = useState<'pert' | 'gantt' | 'scurve'>('pert');
   const acts = plan.modules.timeline.activities;
   const curve = useMemo(() => buildSCurve(acts, today), [acts, today]);
@@ -562,10 +995,18 @@ function PertSection({ tree, today, plan, view }: { tree: PertTree; today: strin
           <button className={mode === 'gantt' ? 'on' : ''} onClick={() => setMode('gantt')} disabled={!acts.length}>Gantt chart</button>
           <button className={mode === 'scurve' ? 'on' : ''} onClick={() => setMode('scurve')} disabled={!acts.length}>S-curve</button>
         </div>
-        <span className="muted" style={{ fontSize: 12 }}>{blurb}</span>
+        {/* Moving the committed finish is the largest change anybody can make to
+            a programme, so it is withheld from the client view along with every
+            other edit. `editing` is already undefined there — one rule for both
+            the row editor and this, rather than two that can drift apart. */}
+        {editing && (
+          <ShiftEnd plan={plan} onShift={onShift} onReset={onReset} active={slideActive} summary={slideSummary} />
+        )}
+        <div className="spacer" />
+        <span className="muted" style={{ fontSize: 12, maxWidth: 440, textAlign: 'right' }}>{blurb}</span>
       </div>
       <ScheduleSummary plan={plan} view={view} today={today} />
-      {mode === 'pert' && <Pert tree={tree} today={today} />}
+      {mode === 'pert' && <Pert tree={tree} today={today} editing={editing} />}
       {mode === 'gantt' && <GanttView plan={plan} view={view} today={today} />}
       {mode === 'scurve' && <SCurveView curve={curve} today={today} />}
     </>
@@ -604,7 +1045,17 @@ function SCurveView({ curve, today }: { curve: ReturnType<typeof buildSCurve>; t
  * says what is due next and what is outstanding, without float, buffer or critical path.
  */
 function ScheduleSummary({ plan, view, today }: { plan: Plan; view: string; today: string }) {
-  const acts = plan.modules.timeline.activities;
+  /**
+   * Milestones are not activities, and neither is the replan anchor.
+   *
+   * This counted the raw list, so applying a re-plan moved "activities complete"
+   * from 10/69 to 10/70 — the extra row being `__replan_anchor__`, a
+   * zero-duration node the planner inserts to hang delay floors off. Nobody can
+   * complete it and nobody put it there, so counting it made the denominator
+   * change for no reason a reader could account for. The verdict banner already
+   * filtered these; this now agrees with it.
+   */
+  const acts = plan.modules.timeline.activities.filter((a) => !a.isMilestone);
   if (!acts.length) return null;
   const client = view === 'external';
   const baseStart = client ? plan.external?.start : plan.internal?.start;
@@ -648,8 +1099,8 @@ function ScheduleSummary({ plan, view, today }: { plan: Plan; view: string; toda
       {!client && (
         <div className="card">
           <div className="k">Buffer to client date</div>
-          <div className="v">{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div>
-          <div className="s">{plan.ieInvariant.holds ? 'invariant holds' : 'BREACH — internal finish is past the client date'}</div>
+          <div className="v" style={{ color: BUFFER_COLOUR[plan.ieInvariant.state] }}>{plan.ieInvariant.bufferCalendarDays ?? '—'} d</div>
+          <div className="s" style={{ color: BUFFER_COLOUR[plan.ieInvariant.state] }}>{BUFFER_LABEL[plan.ieInvariant.state]}</div>
         </div>
       )}
       {!client && plan.internal?.target && (
@@ -874,6 +1325,7 @@ function Design({ plan, edit, val }: { plan: Plan; edit: EditFn; val: ValFn }) {
 }
 
 function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit: EditFn; val: ValFn }) {
+  const ro = useReadOnly();
   const all = plan.modules.procurement;
   const [longLeadOnly, setLongLeadOnly] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
@@ -957,12 +1409,12 @@ function Procurement({ plan, view, edit, val }: { plan: Plan; view: string; edit
               <DateCell id={i.id} field="revised" current={i.revisedDate} edit={edit} val={val} />
               {view === 'internal' && <TextCell id={i.id} field="vendor" current={i.vendor} edit={edit} val={val} placeholder="vendor" />}
               <td className="edit">
-                <select value={val(i.id, 'orderStatus', i.orderStatus) as string} onChange={(e) => edit(i.id, 'orderStatus', e.target.value)}>
+                <select value={val(i.id, 'orderStatus', i.orderStatus) as string} disabled={ro} title={ro ? RO_TITLE : undefined} onChange={(e) => edit(i.id, 'orderStatus', e.target.value)}>
                   {['Open', 'Closed', 'Hold', 'Partially Ordered'].map((s) => <option key={s}>{s}</option>)}
                 </select>
               </td>
               <td className="edit">
-                <select value={val(i.id, 'deliveryStatus', i.deliveryStatus) as string} onChange={(e) => edit(i.id, 'deliveryStatus', e.target.value)}>
+                <select value={val(i.id, 'deliveryStatus', i.deliveryStatus) as string} disabled={ro} title={ro ? RO_TITLE : undefined} onChange={(e) => edit(i.id, 'deliveryStatus', e.target.value)}>
                   {['Not Started', 'In Transit', 'Partially Delivered', 'Delivered'].map((s) => <option key={s}>{s}</option>)}
                 </select>
               </td>
@@ -1015,7 +1467,13 @@ function Materials({
   }));
   const summary = summariseMaterials(live, today);
 
-  const projectStart = plan.internal.start;
+  /**
+   * `plan.internal` is null in the client view — clientView() strips it, along
+   * with buffer, float and cost. Reading `.start` off it threw the whole
+   * Material Registry tab for a client, so the external baseline stands in: it
+   * is the same project start, just the one a client is allowed to see.
+   */
+  const projectStart = plan.internal?.start ?? plan.external?.start ?? today;
   const weeklySchedule = useMemo(
     () => buildWeeklyMaterialSchedule(live, projectStart),
     [live, projectStart],

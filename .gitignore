@@ -30,3 +30,9 @@ tracking/engines/skf/sync/
 # PUBLIC, for the same reason the employee master above is excluded. Point
 # DNBOS_PROJECT_DIR at it locally instead — see README.
 tracking/projects/
+# ---- projects made in this app ----------------------------------------
+# The workspace store (api/workspace/projects.ts): every project created through
+# the intake screen, with its BOQ package values and contract figures in it. Our
+# own cost sits beside the client price in those, and THIS REPOSITORY IS PUBLIC
+# — same reason the org master and the tracking sync store are excluded above.
+workspace/

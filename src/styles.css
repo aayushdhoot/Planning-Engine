@@ -136,6 +136,25 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
   vertical-align: middle; line-height: 1;
 }
 .twist:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---- the schedule toolbar ----
+   Grouped rather than one long row of eleven controls. The gap BETWEEN groups is
+   wider than the gap inside one, which is what makes the grouping read without
+   having to draw a line. The editing tools sit on their own tinted row, so
+   turning editing on does not reflow the controls above it. */
+.pert-bar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 12px; }
+.pert-group { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.pert-count { font-size: 11.5px; line-height: 1.45; text-align: right; }
+.pert-editbar {
+  background: var(--accent-soft); border: 1px solid #b6d4ff; border-radius: 10px;
+  padding: 9px 12px; margin: -4px 0 12px; gap: 10px;
+}
+.pert-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+.pert-sep { width: 1px; align-self: stretch; background: #b6d4ff; margin: 0 2px; }
+/* a disabled control must still be readable — it says what is off, not nothing */
+button:disabled { opacity: 1; color: var(--faint); border-style: dashed; cursor: not-allowed; box-shadow: none; }
+input:disabled, select:disabled { background: var(--panel2); color: var(--muted); cursor: not-allowed; }
+
 .pert tr.lvl1 > td { background: var(--accent-soft); font-weight: 700; }
 .pert tr.lvl2 > td { background: var(--panel2); font-weight: 600; }
 .pert tr.lvl3 > td { font-weight: 500; }
@@ -150,6 +169,12 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
 .qcard .q { font-weight: 600; margin-bottom: 4px; }
 .qcard .why { color: var(--muted); font-size: 12px; margin-bottom: 9px; }
 .qcard.answered { border-left-color: var(--ok); }
+/* Read from the documents and waiting on a person: not yet an answer, so not green. */
+.qcard.proposed { border-left-color: var(--warn); }
+.qcard .read-from { color: var(--muted); font-size: 12px; margin: 8px 0 4px; }
+.qcard .read-from em { color: var(--ext); font-style: normal; }
+.qcard .confirm { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 12px; color: var(--muted); }
+.qcard .confirm input { width: auto; margin: 0; }
 
 .filebar { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); margin-bottom: 7px; box-shadow: var(--shadow); }
 .filebar .nm { flex: 1; font-size: 13px; }
@@ -207,6 +232,23 @@ td.edit select:focus, td.edit input:focus { border-color: var(--accent); backgro
   border-color: var(--accent);
 }
 .dash-card:active { transform: translateY(-1px); transition-duration: .08s; }
+
+/* The delete control on a project card.
+   Hidden until the card is hovered or something inside it has focus: it is a destructive
+   action on a card whose whole surface is a click target, so it should not sit there inviting
+   a mis-click. Always reachable by keyboard, though — :focus-within is why it appears on tab
+   as well as on hover. */
+.dash-card { position: relative; }
+.dash-card-del {
+  all: unset; position: absolute; top: 10px; right: 10px; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px; cursor: pointer;
+  color: var(--muted); background: var(--panel2);
+  opacity: 0; transition: opacity .15s, color .15s, background .15s;
+}
+.dash-card:hover .dash-card-del, .dash-card:focus-within .dash-card-del { opacity: 1; }
+.dash-card-del:hover { color: var(--crit); background: var(--crit-soft); }
+.dash-card-del:focus-visible { opacity: 1; outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .dash-card-inner { padding: 22px 24px; display: flex; flex-direction: column; gap: 6px; width: 100%; }
 
